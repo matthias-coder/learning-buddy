@@ -43,3 +43,19 @@ def test_upcoming_events_for_menu_excludes_past(conn, uid):
     events_repo.create(conn, uid, "Mathe", "klassenarbeit", "2026-04-01", topics=[])
     result = cockpit.upcoming_events_for_menu(conn, uid, today=date(2026, 5, 12))
     assert result == []
+
+
+def test_upcoming_events_dedupes_when_event_has_multiple_assessments(conn, uid):
+    # Edge case: same event has both schriftlich and muendlich assessment.
+    # The LEFT-JOIN approach would multiply rows and corrupt LIMIT.
+    eid = events_repo.create(conn, uid, "Mathe", "klassenarbeit", "2026-05-20", topics=[])
+    events_repo.create(conn, uid, "Englisch", "klassenarbeit", "2026-05-21", topics=[])
+    events_repo.create(conn, uid, "Bio", "klassenarbeit", "2026-05-22", topics=[])
+    assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-05-20", grade=2.0, scheduled_event_id=eid)
+    assessments_repo.create(conn, uid, "Mathe", "muendlich", "2026-05-20", grade=1.5, scheduled_event_id=eid)
+    result = cockpit.upcoming_events_for_menu(conn, uid, today=date(2026, 5, 12), limit=3)
+    # Should be 3 distinct events: Mathe, Englisch, Bio
+    assert len(result) == 3
+    assert [r.subject for r in result] == ["Mathe", "Englisch", "Bio"]
+    # First (Mathe) has linked_assessment_id pointing to one of the two assessments
+    assert result[0].linked_assessment_id is not None

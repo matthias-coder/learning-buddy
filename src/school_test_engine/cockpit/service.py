@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date
 
 
 @dataclass(frozen=True)
@@ -24,9 +24,13 @@ def upcoming_events_for_menu(
     today_iso = today.isoformat()
     cur = conn.execute(
         """
-        SELECT e.*, a.id AS assessment_id
+        SELECT e.*,
+               (SELECT a.id
+                FROM assessments a
+                WHERE a.scheduled_event_id = e.id
+                ORDER BY a.created_at ASC, a.id ASC
+                LIMIT 1) AS assessment_id
         FROM scheduled_events e
-        LEFT JOIN assessments a ON a.scheduled_event_id = e.id
         WHERE e.user_id = ? AND e.event_date >= ?
         ORDER BY e.event_date ASC, e.created_at ASC
         LIMIT ?
@@ -35,7 +39,7 @@ def upcoming_events_for_menu(
     )
     out: list[EventCardData] = []
     for row in cur.fetchall():
-        event_d = datetime.fromisoformat(row["event_date"]).date()
+        event_d = date.fromisoformat(row["event_date"])
         days = (event_d - today).days
         out.append(EventCardData(
             event_id=row["id"],
