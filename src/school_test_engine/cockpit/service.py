@@ -155,3 +155,70 @@ def comparison_for_assessment(
         delta=delta,
         delta_label=_delta_label(delta),
     )
+
+
+@dataclass(frozen=True)
+class SubjectAverage:
+    subject: str
+    schriftlich_avg: float | None
+    muendlich_avg: float | None
+    zeugnis_estimate: float | None
+
+
+def subject_grade_average(
+    conn: sqlite3.Connection, user_id: int, subject: str
+) -> SubjectAverage:
+    def _avg(category: str) -> float | None:
+        row = conn.execute(
+            "SELECT AVG(grade) AS a, COUNT(*) AS n FROM assessments "
+            "WHERE user_id = ? AND subject = ? AND category = ?",
+            (user_id, subject, category),
+        ).fetchone()
+        if not row or (row["n"] or 0) == 0:
+            return None
+        return round(float(row["a"]), 2)
+
+    s = _avg("schriftlich")
+    m = _avg("muendlich")
+    if s is not None and m is not None:
+        z = round(0.5 * s + 0.5 * m, 2)
+    elif s is not None:
+        z = s
+    elif m is not None:
+        z = m
+    else:
+        z = None
+    return SubjectAverage(subject=subject, schriftlich_avg=s, muendlich_avg=m, zeugnis_estimate=z)
+
+
+@dataclass(frozen=True)
+class AggregateComparison:
+    count: int
+    avg_delta: float
+    label: str
+
+
+def aggregate_comparison(
+    conn: sqlite3.Connection, user_id: int
+) -> AggregateComparison | None:
+    rows = conn.execute(
+        "SELECT id FROM assessments "
+        "WHERE user_id = ? AND scheduled_event_id IS NOT NULL",
+        (user_id,),
+    ).fetchall()
+    deltas: list[float] = []
+    for r in rows:
+        cmp = comparison_for_assessment(conn, r["id"])
+        if cmp is not None:
+            deltas.append(cmp.delta)
+    if len(deltas) < 3:
+        return None
+    mean = sum(deltas) / len(deltas)
+    avg_delta = round(mean, 2)
+    if avg_delta < -0.05:
+        label = f"Bei deinen letzten {len(deltas)} Klassenarbeiten lag dein App-Übungs-Schnitt im Schnitt {abs(avg_delta):.1f} Noten schlechter als die echte Note."
+    elif avg_delta > 0.05:
+        label = f"Bei deinen letzten {len(deltas)} Klassenarbeiten lag dein App-Übungs-Schnitt im Schnitt {abs(avg_delta):.1f} Noten besser als die echte Note."
+    else:
+        label = f"Bei deinen letzten {len(deltas)} Klassenarbeiten lag dein App-Übungs-Schnitt sehr nah an der echten Note."
+    return AggregateComparison(count=len(deltas), avg_delta=avg_delta, label=label)

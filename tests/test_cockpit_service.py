@@ -141,3 +141,49 @@ def test_comparison_app_better_label(conn, uid):
     aid = assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-05-15", grade=2.0, scheduled_event_id=eid)
     cmp = cockpit.comparison_for_assessment(conn, aid)
     assert cmp.delta_label.startswith("Du warst in der KA besser")
+
+
+def test_subject_grade_average_both_categories(conn, uid):
+    assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-04-01", grade=2.0)
+    assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-05-01", grade=3.0)
+    assessments_repo.create(conn, uid, "Mathe", "muendlich", "2026-04-15", grade=2.0)
+    avg = cockpit.subject_grade_average(conn, uid, "Mathe")
+    assert avg.schriftlich_avg == 2.5
+    assert avg.muendlich_avg == 2.0
+    assert avg.zeugnis_estimate == pytest.approx(2.25)
+
+
+def test_subject_grade_average_only_schriftlich(conn, uid):
+    assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-04-01", grade=2.0)
+    avg = cockpit.subject_grade_average(conn, uid, "Mathe")
+    assert avg.schriftlich_avg == 2.0
+    assert avg.muendlich_avg is None
+    assert avg.zeugnis_estimate == 2.0
+
+
+def test_subject_grade_average_empty(conn, uid):
+    avg = cockpit.subject_grade_average(conn, uid, "Mathe")
+    assert avg.schriftlich_avg is None
+    assert avg.muendlich_avg is None
+    assert avg.zeugnis_estimate is None
+
+
+def test_aggregate_comparison_needs_three_or_more(conn, uid):
+    # only 2 comparable assessments → None
+    for i, d in enumerate(["2026-03-15", "2026-04-15"]):
+        _seed_test_and_attempt(conn, uid, "Mathe", f"2026-0{2+i}-25T10:00:00Z", note_value=2)
+        eid = events_repo.create(conn, uid, "Mathe", "klassenarbeit", d, topics=[])
+        assessments_repo.create(conn, uid, "Mathe", "schriftlich", d, grade=2.0, scheduled_event_id=eid)
+    assert cockpit.aggregate_comparison(conn, uid) is None
+
+
+def test_aggregate_comparison_returns_mean_delta(conn, uid):
+    dates = ["2026-02-15", "2026-03-15", "2026-04-15"]
+    for i, d in enumerate(dates):
+        _seed_test_and_attempt(conn, uid, "Mathe", f"2026-0{1+i}-25T10:00:00Z", note_value=3)
+        eid = events_repo.create(conn, uid, "Mathe", "klassenarbeit", d, topics=[])
+        assessments_repo.create(conn, uid, "Mathe", "schriftlich", d, grade=2.0, scheduled_event_id=eid)
+    agg = cockpit.aggregate_comparison(conn, uid)
+    assert agg is not None
+    assert agg.count == 3
+    assert agg.avg_delta == pytest.approx(-1.0)  # real 2 - app 3 = -1
