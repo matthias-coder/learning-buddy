@@ -52,3 +52,106 @@ def upcoming_events_for_menu(
             linked_assessment_id=row["assessment_id"],
         ))
     return out
+
+
+@dataclass(frozen=True)
+class ComparisonData:
+    assessment_id: int
+    subject: str
+    attempts_count: int
+    attempts_grade_avg: float
+    real_grade: float
+    delta: float          # real - app_avg (positive = app was easier, KA worse)
+    delta_label: str
+
+
+_LABEL_BETTER = "Du warst in der KA besser als in App-Übungen ↑"
+_LABEL_WORSE = "Du warst in der KA schlechter als in App-Übungen ↓"
+_LABEL_SIMILAR = "App-Übungen und echte KA waren sehr ähnlich"
+
+
+def _delta_label(delta: float) -> str:
+    if delta < -0.2:
+        return _LABEL_BETTER
+    if delta > 0.2:
+        return _LABEL_WORSE
+    return _LABEL_SIMILAR
+
+
+def comparison_for_assessment(
+    conn: sqlite3.Connection, assessment_id: int
+) -> ComparisonData | None:
+    """Compute app-practice vs real grade comparison for one assessment.
+
+    Window: attempts in the same subject finished between the previous
+    scheduled_event (same subject) and this assessment's event_date.
+    If no previous event: all attempts up to event_date.
+    Returns None if the assessment has no scheduled_event_id or no
+    matching attempts in the window.
+    """
+    a = conn.execute(
+        "SELECT * FROM assessments WHERE id = ?", (assessment_id,)
+    ).fetchone()
+    if a is None or a["scheduled_event_id"] is None:
+        return None
+    event = conn.execute(
+        "SELECT * FROM scheduled_events WHERE id = ?", (a["scheduled_event_id"],)
+    ).fetchone()
+    if event is None:
+        return None
+
+    # Find previous event of same subject for the same user
+    prev = conn.execute(
+        """
+        SELECT MAX(event_date) AS prev_date
+        FROM scheduled_events
+        WHERE user_id = ? AND subject = ? AND event_date < ?
+        """,
+        (a["user_id"], a["subject"], event["event_date"]),
+    ).fetchone()
+    prev_date = prev["prev_date"] if prev else None
+
+    # Find attempts in window
+    if prev_date is None:
+        cur = conn.execute(
+            """
+            SELECT AVG(att.note) AS avg_note, COUNT(*) AS n
+            FROM attempts att
+            JOIN tests t ON t.id = att.test_id
+            WHERE att.user_id = ?
+              AND att.completed = 1
+              AND t.subject = ?
+              AND date(att.finished_at) <= ?
+            """,
+            (a["user_id"], a["subject"], event["event_date"]),
+        )
+    else:
+        cur = conn.execute(
+            """
+            SELECT AVG(att.note) AS avg_note, COUNT(*) AS n
+            FROM attempts att
+            JOIN tests t ON t.id = att.test_id
+            WHERE att.user_id = ?
+              AND att.completed = 1
+              AND t.subject = ?
+              AND date(att.finished_at) > ?
+              AND date(att.finished_at) <= ?
+            """,
+            (a["user_id"], a["subject"], prev_date, event["event_date"]),
+        )
+    row = cur.fetchone()
+    n = int(row["n"] or 0)
+    if n == 0:
+        return None
+    app_avg = float(row["avg_note"])
+    real = float(a["grade"])
+    delta = round(real - app_avg, 2)
+    return ComparisonData(
+        assessment_id=assessment_id,
+        subject=a["subject"],
+        attempts_count=n,
+        attempts_grade_avg=round(app_avg, 2),
+        real_grade=real,
+        delta=delta,
+        delta_label=_delta_label(delta),
+    )
