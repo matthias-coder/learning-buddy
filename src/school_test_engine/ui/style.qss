@@ -464,3 +464,107 @@ QMessageBox QLabel {
     color: #2f2b22;
     font-size: 11pt;
 }
+
+/* ----- Phase 7: Schul-Cockpit ----- */
+
+/* Top-bar Termine/Noten buttons */
+QPushButton#topBarAction {
+    background: transparent;
+    color: #4a4538;
+    border: 1px solid #d8cdb8;
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 10pt;
+}
+QPushButton#topBarAction:hover {
+    background: #f4efe6;
+}
+
+/* ExamCard (hero KA card on menu) */
+ClickableCard#examCard {
+    background: #fbf6ec;
+    border: 1px solid #ead9be;
+    border-radius: 14px;
+}
+ClickableCard#examCard:hover {
+    background: #f6efde;
+}
+
+/* Compact tile (row of small tiles when KAs present) */
+ClickableCard#compactTile {
+    background: #fbf6ec;
+    border: 1px solid #e6dac0;
+    border-radius: 12px;
+}
+ClickableCard#compactTile:hover {
+    background: #f3e9cf;
+}
+
+/* Empty-state row on menu */
+QFrame#emptyEvents {
+    background: transparent;
+    border: 1px dashed #d8cdb8;
+    border-radius: 12px;
+}
+
+/* Event list card (Termine page) */
+ClickableCard#eventListCard {
+    background: #fbf6ec;
+    border: 1px solid #ead9be;
+    border-radius: 12px;
+}
+ClickableCard#eventListCard[dimmed="true"] {
+    background: #f4efe6;
+    border: 1px solid #e1d7c1;
+}
+
+/* Subject tab buttons on Grades page */
+QPushButton#subjectTab {
+    background: transparent;
+    color: #4a4538;
+    border: 1px solid #d8cdb8;
+    padding: 5px 14px;
+    border-radius: 14px;
+    font-size: 10pt;
+}
+QPushButton#subjectTab:checked {
+    background: #3e552d;
+    color: #f6f1e6;
+    border-color: #3e552d;
+}
+QPushButton#subjectTab:hover:!checked {
+    background: #f4efe6;
+}
+
+/* Grade hero card on Grades page */
+QFrame#gradeHero {
+    background: #fbf6ec;
+    border: 1px solid #ead9be;
+    border-radius: 16px;
+}
+
+/* Assessment card on Grades page */
+QFrame#assessmentCard {
+    background: #fbf6ec;
+    border: 1px solid #ead9be;
+    border-radius: 12px;
+}
+
+/* Comparison card inside assessment card */
+QFrame#comparisonCard {
+    background: #f4efe6;
+    border: 1px solid #d8cdb8;
+    border-radius: 10px;
+}
+
+/* Danger button (delete in dialogs) */
+QPushButton#danger {
+    background: transparent;
+    color: #7e3b39;
+    border: 1px solid #c9a5a2;
+    padding: 5px 14px;
+    border-radius: 10px;
+}
+QPushButton#danger:hover {
+    background: #f6dcdb;
+}
