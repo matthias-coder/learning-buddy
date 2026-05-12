@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "title": "Mathe — Bruchrechnung",
+  "subject": "Mathe",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Brüche addieren, subtrahieren, multiplizieren, dividieren.",
+  "time_limit_minutes": 20,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Bruchrechnung — Addition",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Was ergibt die folgende Addition?",
+      "prompt_math": "\\frac{1}{2} + \\frac{1}{4}",
+      "choices": [
+        { "id": "a", "text": "1/6" },
+        { "id": "b", "text": "2/6" },
+        { "id": "c", "text": "3/4" },
+        { "id": "d", "text": "1/2" }
+      ],
+      "correct": ["c"],
+      "explanation": "Hauptnenner 4: 2/4 + 1/4 = 3/4."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Bruchrechnung — Multiplikation",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Berechne. Gib das Ergebnis als gekürzten Bruch in der Form a/b an.",
+      "prompt_math": "\\frac{2}{3} \\cdot \\frac{3}{5}",
+      "accepted_answers": ["2/5", "0.4", "0,4"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Zähler·Zähler / Nenner·Nenner = 6/15 = 2/5."
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "topic": "Bruchrechnung — Division",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welcher Ausdruck ist äquivalent zur Division?",
+      "prompt_math": "\\frac{3}{4} \\div \\frac{2}{5}",
+      "choices": [
+        { "id": "a", "text": "3/4 · 5/2" },
+        { "id": "b", "text": "3/4 · 2/5" },
+        { "id": "c", "text": "4/3 · 2/5" },
+        { "id": "d", "text": "4/3 · 5/2" }
+      ],
+      "correct": ["a"],
+      "explanation": "Division durch einen Bruch = Multiplikation mit dem Kehrwert."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Bruchrechnung — Kürzen und Erweitern",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welche Brüche sind äquivalent zu 3/4?",
+      "choices": [
+        { "id": "a", "text": "6/8" },
+        { "id": "b", "text": "9/12" },
+        { "id": "c", "text": "12/15" },
+        { "id": "d", "text": "15/20" }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "6/8, 9/12 und 15/20 lassen sich alle auf 3/4 kürzen. 12/15 = 4/5."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Bruchrechnung — Gemischte Aufgabe",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Berechne. Antwort als gekürzten Bruch oder Dezimalzahl.",
+      "prompt_math": "\\frac{2}{3} + \\frac{1}{6} \\cdot \\frac{4}{5}",
+      "accepted_answers": ["4/5", "0.8", "0,8"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Punkt vor Strich: 1/6 · 4/5 = 4/30 = 2/15. Dann 2/3 + 2/15 = 10/15 + 2/15 = 12/15 = 4/5."
+    }
+  ]
+}

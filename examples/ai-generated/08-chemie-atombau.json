@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Chemie — Atombau und Periodensystem",
+  "subject": "Chemie",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Protonen, Neutronen, Elektronen, Schalenmodell, Periodensystem.",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Atombau — Teilchen",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welches Teilchen befindet sich NICHT im Atomkern?",
+      "choices": [
+        { "id": "a", "text": "Proton" },
+        { "id": "b", "text": "Neutron" },
+        { "id": "c", "text": "Elektron" },
+        { "id": "d", "text": "Alle drei sind im Kern." }
+      ],
+      "correct": ["c"],
+      "explanation": "Elektronen bewegen sich in der Atomhülle, nicht im Kern."
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "topic": "Atombau — Ordnungszahl",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Was gibt die Ordnungszahl eines Elements an?",
+      "choices": [
+        { "id": "a", "text": "Anzahl der Neutronen" },
+        { "id": "b", "text": "Anzahl der Protonen" },
+        { "id": "c", "text": "Anzahl der Elektronen und Neutronen zusammen" },
+        { "id": "d", "text": "Atommasse in u" }
+      ],
+      "correct": ["b"],
+      "explanation": "Die Ordnungszahl entspricht der Protonenzahl im Kern."
+    },
+    {
+      "id": "q3",
+      "type": "short_answer",
+      "topic": "Atombau — Schalenmodell",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Wie viele Elektronen passen maximal auf die zweite Schale (L-Schale)?",
+      "accepted_answers": ["8", "acht", "Acht"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Maximal 2·n² Elektronen pro Schale. n=2 → 2·4 = 8."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Atombau — Periodensystem",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Aussagen zum Periodensystem (PSE) sind korrekt?",
+      "choices": [
+        { "id": "a", "text": "Elemente einer Gruppe haben die gleiche Anzahl Außenelektronen." },
+        { "id": "b", "text": "Eine Periode entspricht einer Elektronenschale." },
+        { "id": "c", "text": "Edelgase stehen in der 1. Hauptgruppe." },
+        { "id": "d", "text": "Die Ordnungszahl nimmt von links nach rechts in einer Periode zu." }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "Edelgase stehen in der 8. Hauptgruppe, daher ist c falsch."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Atombau — Massenzahl",
+      "difficulty": "schwer",
+      "points": 3,
+      "prompt": "Ein Sauerstoffatom hat 8 Protonen und 8 Neutronen. Wie groß ist die Massenzahl?",
+      "accepted_answers": ["16", "sechzehn", "Sechzehn"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Massenzahl A = Protonen + Neutronen = 8 + 8 = 16."
+    }
+  ]
+}

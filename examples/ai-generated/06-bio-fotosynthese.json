@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Bio — Fotosynthese",
+  "subject": "Bio",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Wie Pflanzen aus Licht, Wasser und CO₂ Zucker und Sauerstoff machen.",
+  "time_limit_minutes": 20,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Fotosynthese — Edukte und Produkte",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welche Stoffe benötigt eine Pflanze für die Fotosynthese?",
+      "choices": [
+        { "id": "a", "text": "Sauerstoff und Glucose" },
+        { "id": "b", "text": "Kohlenstoffdioxid und Wasser" },
+        { "id": "c", "text": "Stickstoff und Wasser" },
+        { "id": "d", "text": "Mineralien und Sauerstoff" }
+      ],
+      "correct": ["b"],
+      "explanation": "Edukte: CO₂ + H₂O → mit Lichtenergie → Glucose + O₂."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Fotosynthese — Pigment",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welches grüne Pigment in den Chloroplasten absorbiert Licht für die Fotosynthese?",
+      "accepted_answers": ["Chlorophyll", "chlorophyll", "das Chlorophyll"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Chlorophyll ist das wichtigste Pigment; es absorbiert vor allem rotes und blaues Licht."
+    },
+    {
+      "id": "q3",
+      "type": "multi_choice",
+      "topic": "Fotosynthese — Produkte",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welche Stoffe sind Produkte der Fotosynthese?",
+      "choices": [
+        { "id": "a", "text": "Sauerstoff (O₂)" },
+        { "id": "b", "text": "Kohlenstoffdioxid (CO₂)" },
+        { "id": "c", "text": "Glucose (C₆H₁₂O₆)" },
+        { "id": "d", "text": "Wasser (H₂O)" }
+      ],
+      "correct": ["a", "c"],
+      "scoring": "partial",
+      "explanation": "Produkte: Glucose und Sauerstoff. CO₂ und Wasser sind Edukte."
+    },
+    {
+      "id": "q4",
+      "type": "single_choice",
+      "topic": "Fotosynthese — Ort",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "In welchem Zellorganell läuft die Fotosynthese ab?",
+      "choices": [
+        { "id": "a", "text": "Mitochondrium" },
+        { "id": "b", "text": "Chloroplast" },
+        { "id": "c", "text": "Zellkern" },
+        { "id": "d", "text": "Vakuole" }
+      ],
+      "correct": ["b"],
+      "explanation": "Chloroplasten enthalten Chlorophyll und sind der Ort der Fotosynthese."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Fotosynthese — Wortgleichung",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Ergänze die Wortgleichung: Kohlenstoffdioxid + Wasser → Glucose + ___.",
+      "accepted_answers": ["Sauerstoff", "O2", "O₂", "sauerstoff"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂."
+    }
+  ]
+}

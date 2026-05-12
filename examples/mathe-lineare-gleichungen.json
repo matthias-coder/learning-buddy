@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Mathe — Lineare Gleichungen (Grundlagen)",
+  "subject": "Mathe",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Übungstest zu linearen Gleichungen mit einer Unbekannten.",
+  "time_limit_minutes": 20,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Lineare Gleichungen — Umformen",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welche Lösung hat die Gleichung 3x + 6 = 15?",
+      "choices": [
+        { "id": "a", "text": "x = 2" },
+        { "id": "b", "text": "x = 3" },
+        { "id": "c", "text": "x = 7" },
+        { "id": "d", "text": "x = -3" }
+      ],
+      "correct": ["b"],
+      "explanation": "3x + 6 = 15  →  3x = 9  →  x = 3."
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "topic": "Lineare Gleichungen — Umformen",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welche Lösung hat 2(x + 4) = 18?",
+      "choices": [
+        { "id": "a", "text": "x = 5" },
+        { "id": "b", "text": "x = 7" },
+        { "id": "c", "text": "x = 11" },
+        { "id": "d", "text": "x = 13" }
+      ],
+      "correct": ["a"],
+      "explanation": "2x + 8 = 18  →  2x = 10  →  x = 5."
+    },
+    {
+      "id": "q3",
+      "type": "multi_choice",
+      "topic": "Lineare Gleichungen — Eigenschaften",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Aussagen über die Gleichung 4x - 8 = 0 sind korrekt?",
+      "choices": [
+        { "id": "a", "text": "x = 2 ist eine Lösung." },
+        { "id": "b", "text": "Die Gleichung hat genau eine Lösung." },
+        { "id": "c", "text": "x = -2 ist eine Lösung." },
+        { "id": "d", "text": "Die Gleichung ist linear." }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "4x = 8  →  x = 2. Lineare Gleichungen mit einer Unbekannten haben genau eine Lösung."
+    },
+    {
+      "id": "q4",
+      "type": "short_answer",
+      "topic": "Lineare Gleichungen — Anwendung",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Eine Zahl, vermindert um 7, ergibt 12. Wie heißt die Zahl?",
+      "accepted_answers": ["19", "x=19", "x = 19"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "x - 7 = 12  →  x = 19."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Lineare Gleichungen — Anwendung",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Das Dreifache einer Zahl, vermehrt um 5, ergibt 23. Wie heißt die Zahl?",
+      "accepted_answers": ["6", "x=6", "x = 6"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "3x + 5 = 23  →  3x = 18  →  x = 6."
+    }
+  ]
+}

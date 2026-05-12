@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Mathe — Prozentrechnung",
+  "subject": "Mathe",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Prozentwert, Grundwert, Prozentsatz und Anwendungen.",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Prozentrechnung — Prozentwert",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Wie viel sind 25 % von 80?",
+      "choices": [
+        { "id": "a", "text": "15" },
+        { "id": "b", "text": "20" },
+        { "id": "c", "text": "25" },
+        { "id": "d", "text": "32" }
+      ],
+      "correct": ["b"],
+      "explanation": "25 % = 1/4. 80 / 4 = 20."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Prozentrechnung — Grundwert",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Ein Pullover kostet im Angebot 36 €. Das sind 80 % des ursprünglichen Preises. Wie hoch war der Originalpreis (in Euro, nur Zahl)?",
+      "accepted_answers": ["45", "45€", "45 €", "45.00", "45,00"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Grundwert G = Prozentwert / Prozentsatz = 36 / 0,8 = 45 €."
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "topic": "Prozentrechnung — Prozentsatz",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "In einer Klasse mit 25 Schülern tragen 15 eine Brille. Wie viel Prozent sind das?",
+      "choices": [
+        { "id": "a", "text": "40 %" },
+        { "id": "b", "text": "50 %" },
+        { "id": "c", "text": "60 %" },
+        { "id": "d", "text": "75 %" }
+      ],
+      "correct": ["c"],
+      "explanation": "p = 15 / 25 = 0,6 = 60 %."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Prozentrechnung — Mehrwertsteuer und Rabatt",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Aussagen sind korrekt? Ein Artikel kostet 100 € netto.",
+      "choices": [
+        { "id": "a", "text": "Mit 19 % MwSt. ergeben sich 119 € brutto." },
+        { "id": "b", "text": "Bei 10 % Rabatt auf den Nettopreis zahlt man 90 €." },
+        { "id": "c", "text": "Brutto = Netto · 1,19 ist korrekt für 19 % MwSt." },
+        { "id": "d", "text": "10 % Rabatt + 19 % MwSt. ergibt am Ende 109 €." }
+      ],
+      "correct": ["a", "b", "c"],
+      "scoring": "partial",
+      "explanation": "a, b, c stimmen. d falsch: 100·0,9·1,19 = 107,10 €."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Prozentrechnung — Zinsrechnung",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Wie viel Euro Zinsen erhältst du in einem Jahr für 800 € bei 2,5 % Zinssatz? Nur die Zahl angeben.",
+      "accepted_answers": ["20", "20€", "20 €", "20.00", "20,00"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Z = K · p / 100 = 800 · 2,5 / 100 = 20 €."
+    }
+  ]
+}

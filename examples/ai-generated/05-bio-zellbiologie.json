@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "title": "Bio — Zellbiologie",
+  "subject": "Bio",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Aufbau pflanzlicher und tierischer Zellen.",
+  "time_limit_minutes": 20,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Zellbiologie — Zellbestandteile",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welches Zellorganell wird als 'Kraftwerk der Zelle' bezeichnet?",
+      "choices": [
+        { "id": "a", "text": "Zellkern" },
+        { "id": "b", "text": "Mitochondrium" },
+        { "id": "c", "text": "Ribosom" },
+        { "id": "d", "text": "Vakuole" }
+      ],
+      "correct": ["b"],
+      "explanation": "In Mitochondrien wird durch Zellatmung Energie (ATP) gewonnen — daher 'Kraftwerk'."
+    },
+    {
+      "id": "q2",
+      "type": "multi_choice",
+      "topic": "Zellbiologie — Pflanzliche Zelle",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welche Bestandteile kommen NUR in pflanzlichen Zellen vor (nicht in tierischen)?",
+      "choices": [
+        { "id": "a", "text": "Zellwand" },
+        { "id": "b", "text": "Chloroplasten" },
+        { "id": "c", "text": "Mitochondrien" },
+        { "id": "d", "text": "Große Zentralvakuole" }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "Zellwand, Chloroplasten und große Zentralvakuole sind pflanzentypisch. Mitochondrien haben beide."
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "topic": "Zellbiologie — Zellkern",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welche Hauptaufgabe hat der Zellkern?",
+      "choices": [
+        { "id": "a", "text": "Energieproduktion" },
+        { "id": "b", "text": "Speicherung der Erbinformation (DNA)" },
+        { "id": "c", "text": "Wasserspeicherung" },
+        { "id": "d", "text": "Fotosynthese" }
+      ],
+      "correct": ["b"],
+      "explanation": "Im Zellkern liegt die DNA, die alle Erbinformationen enthält."
+    },
+    {
+      "id": "q4",
+      "type": "short_answer",
+      "topic": "Zellbiologie — Membran",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Wie heißt die dünne Hülle, die jede Zelle umgibt und kontrolliert, welche Stoffe ein- und austreten dürfen?",
+      "accepted_answers": ["Zellmembran", "Plasmamembran", "die Zellmembran"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Die Zellmembran (auch Plasmamembran) ist eine selektiv permeable Hülle."
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "topic": "Zellbiologie — Ribosomen",
+      "difficulty": "schwer",
+      "points": 3,
+      "prompt": "An welchen Organellen werden Proteine hergestellt?",
+      "choices": [
+        { "id": "a", "text": "Ribosomen" },
+        { "id": "b", "text": "Lysosomen" },
+        { "id": "c", "text": "Golgi-Apparat" },
+        { "id": "d", "text": "Vakuolen" }
+      ],
+      "correct": ["a"],
+      "explanation": "Ribosomen sind die Orte der Proteinbiosynthese (Translation)."
+    }
+  ]
+}

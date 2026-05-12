@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "title": "Geschichte — Französische Revolution",
+  "subject": "Geschichte",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Ursachen, Verlauf und Folgen der Französischen Revolution 1789.",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Französische Revolution — Sturm auf die Bastille",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "An welchem Datum stürmte das Pariser Volk die Bastille?",
+      "choices": [
+        { "id": "a", "text": "4. Juli 1776" },
+        { "id": "b", "text": "14. Juli 1789" },
+        { "id": "c", "text": "9. November 1799" },
+        { "id": "d", "text": "1. Mai 1789" }
+      ],
+      "correct": ["b"],
+      "explanation": "Der Sturm auf die Bastille am 14. Juli 1789 gilt als Beginn der Revolution — bis heute französischer Nationalfeiertag."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Französische Revolution — Leitgedanken",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Wie lautet der berühmte Dreiklang der Französischen Revolution? (Drei deutsche Wörter, durch Komma getrennt.)",
+      "accepted_answers": [
+        "Freiheit, Gleichheit, Brüderlichkeit",
+        "Freiheit, Gleichheit, Brüderlichkeit.",
+        "Freiheit Gleichheit Brüderlichkeit",
+        "Liberté, Égalité, Fraternité"
+      ],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Liberté, Égalité, Fraternité — Freiheit, Gleichheit, Brüderlichkeit. Bis heute Wahlspruch Frankreichs."
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "topic": "Französische Revolution — König",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welcher König wurde 1793 in Paris hingerichtet?",
+      "choices": [
+        { "id": "a", "text": "Ludwig XIV." },
+        { "id": "b", "text": "Ludwig XV." },
+        { "id": "c", "text": "Ludwig XVI." },
+        { "id": "d", "text": "Napoleon Bonaparte" }
+      ],
+      "correct": ["c"],
+      "explanation": "Ludwig XVI. wurde am 21. Januar 1793 mit der Guillotine hingerichtet."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Französische Revolution — Ursachen",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Faktoren gelten als Ursachen für die Französische Revolution?",
+      "choices": [
+        { "id": "a", "text": "Hohe Staatsverschuldung und Steuerprivilegien für Adel und Klerus" },
+        { "id": "b", "text": "Aufklärerische Ideen (Rousseau, Voltaire, Montesquieu)" },
+        { "id": "c", "text": "Hungersnöte und schlechte Ernten" },
+        { "id": "d", "text": "Der Berliner Mauerbau" }
+      ],
+      "correct": ["a", "b", "c"],
+      "scoring": "partial",
+      "explanation": "a, b, c sind zentrale Ursachen. Der Mauerbau war 1961 — also rund 170 Jahre später."
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "topic": "Französische Revolution — Stände",
+      "difficulty": "schwer",
+      "points": 3,
+      "prompt": "Welcher Stand zahlte vor der Revolution KEINE Steuern?",
+      "choices": [
+        { "id": "a", "text": "Der erste und zweite Stand (Klerus und Adel)" },
+        { "id": "b", "text": "Der dritte Stand (Bauern, Bürger)" },
+        { "id": "c", "text": "Alle Stände zahlten gleich viel." },
+        { "id": "d", "text": "Nur die Bauern zahlten Steuern." }
+      ],
+      "correct": ["a"],
+      "explanation": "Klerus (1. Stand) und Adel (2. Stand) waren weitgehend steuerfrei. Die Steuerlast trug der 3. Stand — ein zentraler Konfliktpunkt."
+    }
+  ]
+}

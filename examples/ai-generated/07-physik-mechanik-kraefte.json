@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "title": "Physik — Mechanik: Kräfte und Bewegung",
+  "subject": "Physik",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Newtons Gesetze, Gewichtskraft, gleichförmige Bewegung.",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Mechanik — Einheiten",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "In welcher Einheit wird Kraft im SI-System gemessen?",
+      "choices": [
+        { "id": "a", "text": "Joule (J)" },
+        { "id": "b", "text": "Watt (W)" },
+        { "id": "c", "text": "Newton (N)" },
+        { "id": "d", "text": "Pascal (Pa)" }
+      ],
+      "correct": ["c"],
+      "explanation": "Kraft wird in Newton gemessen: 1 N = 1 kg · m/s²."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Mechanik — Gewichtskraft",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Wie groß ist die Gewichtskraft eines Körpers mit der Masse m = 5 kg? Verwende g = 10 N/kg. Gib das Ergebnis in Newton an (nur Zahl).",
+      "prompt_math": "F_G = m \\cdot g",
+      "accepted_answers": ["50", "50 N", "50N"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "F_G = m · g = 5 kg · 10 N/kg = 50 N."
+    },
+    {
+      "id": "q3",
+      "type": "single_choice",
+      "topic": "Mechanik — Newtons 1. Gesetz",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Was besagt das Trägheitsgesetz (1. Newtonsches Gesetz)?",
+      "choices": [
+        { "id": "a", "text": "Kraft ist Masse mal Beschleunigung." },
+        { "id": "b", "text": "Ein Körper bleibt in Ruhe oder gleichförmiger Bewegung, solange keine resultierende Kraft auf ihn wirkt." },
+        { "id": "c", "text": "Jede Kraft hat eine gleich große, entgegengesetzte Gegenkraft." },
+        { "id": "d", "text": "Energie kann weder erzeugt noch vernichtet werden." }
+      ],
+      "correct": ["b"],
+      "explanation": "Trägheitsgesetz: Ohne resultierende Kraft → Bewegungszustand bleibt erhalten."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Mechanik — Kräfte",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Aussagen über Kräfte sind richtig?",
+      "choices": [
+        { "id": "a", "text": "Kräfte sind Vektoren — sie haben Betrag und Richtung." },
+        { "id": "b", "text": "Zwei gleich große Kräfte in entgegengesetzter Richtung heben sich auf." },
+        { "id": "c", "text": "Eine Kraft kann nur einen Körper verformen, nicht beschleunigen." },
+        { "id": "d", "text": "Reibung wirkt der Bewegung entgegen." }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "Kräfte sind Vektoren, können sich aufheben, Reibung wirkt der Bewegung entgegen. c ist falsch — Kräfte können beides."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Mechanik — Geschwindigkeit",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Ein Auto fährt 120 km in 2 Stunden gleichförmig. Wie groß ist die Durchschnittsgeschwindigkeit in km/h?",
+      "prompt_math": "v = \\frac{s}{t}",
+      "accepted_answers": ["60", "60 km/h", "60km/h"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "v = s / t = 120 km / 2 h = 60 km/h."
+    }
+  ]
+}

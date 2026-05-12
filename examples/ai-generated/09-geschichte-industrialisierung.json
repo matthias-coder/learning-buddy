@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "title": "Geschichte — Industrialisierung",
+  "subject": "Geschichte",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Industrielle Revolution, soziale Folgen, technische Erfindungen.",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Industrialisierung — Ursprung",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "In welchem Land begann die Industrielle Revolution Ende des 18. Jahrhunderts?",
+      "choices": [
+        { "id": "a", "text": "Deutschland" },
+        { "id": "b", "text": "Frankreich" },
+        { "id": "c", "text": "England" },
+        { "id": "d", "text": "USA" }
+      ],
+      "correct": ["c"],
+      "explanation": "England war Vorreiter — Dampfmaschine, Textilindustrie, Kohle und Eisen."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Industrialisierung — Schlüsselerfindung",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welcher Schotte verbesserte 1769 die Dampfmaschine entscheidend?",
+      "accepted_answers": ["James Watt", "Watt", "James watt"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "James Watt patentierte 1769 eine verbesserte Dampfmaschine."
+    },
+    {
+      "id": "q3",
+      "type": "multi_choice",
+      "topic": "Industrialisierung — Soziale Folgen",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche sozialen Folgen hatte die Industrialisierung im 19. Jahrhundert?",
+      "choices": [
+        { "id": "a", "text": "Landflucht und Wachstum der Städte" },
+        { "id": "b", "text": "Entstehung des Industrieproletariats" },
+        { "id": "c", "text": "Sofortige Einführung der allgemeinen Krankenversicherung in ganz Europa" },
+        { "id": "d", "text": "Kinderarbeit in Fabriken" }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "a, b, d sind klassische Folgen. Die Sozialversicherung kam in Deutschland erst ab 1883 (Bismarck) und nicht europaweit sofort."
+    },
+    {
+      "id": "q4",
+      "type": "single_choice",
+      "topic": "Industrialisierung — Soziale Frage",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welcher deutsche Reichskanzler führte ab 1883 die Sozialgesetzgebung (Kranken-, Unfall-, Rentenversicherung) ein?",
+      "choices": [
+        { "id": "a", "text": "Konrad Adenauer" },
+        { "id": "b", "text": "Otto von Bismarck" },
+        { "id": "c", "text": "Friedrich Ebert" },
+        { "id": "d", "text": "Wilhelm II." }
+      ],
+      "correct": ["b"],
+      "explanation": "Bismarck wollte mit den Sozialgesetzen die Arbeiter an den Staat binden und die Sozialdemokratie schwächen."
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "topic": "Industrialisierung — Verkehr",
+      "difficulty": "schwer",
+      "points": 3,
+      "prompt": "Wo verkehrte 1835 die erste deutsche Eisenbahn?",
+      "choices": [
+        { "id": "a", "text": "Berlin — Potsdam" },
+        { "id": "b", "text": "Nürnberg — Fürth" },
+        { "id": "c", "text": "München — Augsburg" },
+        { "id": "d", "text": "Hamburg — Lübeck" }
+      ],
+      "correct": ["b"],
+      "explanation": "Am 7. Dezember 1835 fuhr der 'Adler' zwischen Nürnberg und Fürth — die erste deutsche Eisenbahnstrecke mit Dampfantrieb."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[project]
+name = "school-test-engine"
+version = "0.1.0"
+description = "Übungs-Test-Engine für die Realschule (8. Klasse): KI-generierte Fragen importieren, üben, Wissenslücken finden."
+requires-python = ">=3.11"
+dependencies = [
+    "PySide6>=6.7",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+school-test-engine = "school_test_engine.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "title": "Englisch — Past Simple vs. Present Perfect",
+  "subject": "Englisch",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Wann verwendet man Past Simple, wann Present Perfect?",
+  "time_limit_minutes": 20,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Tenses — Past Simple",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Choose the correct form: 'Yesterday I ___ to the cinema.'",
+      "choices": [
+        { "id": "a", "text": "go" },
+        { "id": "b", "text": "went" },
+        { "id": "c", "text": "have gone" },
+        { "id": "d", "text": "goes" }
+      ],
+      "correct": ["b"],
+      "explanation": "'Yesterday' = abgeschlossener Zeitpunkt in der Vergangenheit → Past Simple: went."
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "topic": "Tenses — Present Perfect",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Choose the correct form: 'She ___ already finished her homework.'",
+      "choices": [
+        { "id": "a", "text": "has" },
+        { "id": "b", "text": "have" },
+        { "id": "c", "text": "had" },
+        { "id": "d", "text": "is" }
+      ],
+      "correct": ["a"],
+      "explanation": "'already' ist ein Signalwort für Present Perfect. 3. Person Singular → has finished."
+    },
+    {
+      "id": "q3",
+      "type": "short_answer",
+      "topic": "Tenses — Past Simple",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Setze 'eat' in der richtigen Form ein: 'We ___ pizza last Friday.' (Nur das Verb angeben.)",
+      "accepted_answers": ["ate", "Ate"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "'last Friday' = Past Simple. eat → ate (unregelmäßig)."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Tenses — Signalwörter",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Which signal words typically indicate Present Perfect?",
+      "choices": [
+        { "id": "a", "text": "already" },
+        { "id": "b", "text": "yesterday" },
+        { "id": "c", "text": "just" },
+        { "id": "d", "text": "since 2010" }
+      ],
+      "correct": ["a", "c", "d"],
+      "scoring": "partial",
+      "explanation": "already, just, since/for → Present Perfect. yesterday → Past Simple."
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "topic": "Tenses — Mixed",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Choose the correct sentence.",
+      "choices": [
+        { "id": "a", "text": "I have seen him last week." },
+        { "id": "b", "text": "I saw him last week." },
+        { "id": "c", "text": "I see him last week." },
+        { "id": "d", "text": "I had seen him last week." }
+      ],
+      "correct": ["b"],
+      "explanation": "'last week' = abgeschlossen → Past Simple: saw. Mit Present Perfect dürfte keine konkrete Zeitangabe stehen."
+    }
+  ]
+}

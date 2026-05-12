@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "title": "Mathe — Quadratische Gleichungen",
+  "subject": "Mathe",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Test mit echten LaTeX-Formeln (Phase-3-Demo).",
+  "time_limit_minutes": 25,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Quadratische Gleichungen — Faktorisierung",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Welche Lösungen hat die quadratische Gleichung?",
+      "prompt_math": "x^2 - 5x + 6 = 0",
+      "choices": [
+        { "id": "a", "text": "x = 1 und x = 6" },
+        { "id": "b", "text": "x = 2 und x = 3" },
+        { "id": "c", "text": "x = -2 und x = -3" },
+        { "id": "d", "text": "Keine Lösung" }
+      ],
+      "correct": ["b"],
+      "explanation": "Faktorisierung: (x-2)(x-3) = 0, also x = 2 oder x = 3."
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "topic": "Quadratische Gleichungen — Diskriminante",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Was ist die Diskriminante D dieser Gleichung?",
+      "prompt_math": "x^2 - 4x - 5 = 0",
+      "choices": [
+        { "id": "a", "text": "D = 4" },
+        { "id": "b", "text": "D = 16" },
+        { "id": "c", "text": "D = 36" },
+        { "id": "d", "text": "D = -4" }
+      ],
+      "correct": ["c"],
+      "explanation": "D = b² − 4ac = (-4)² − 4·1·(-5) = 16 + 20 = 36."
+    },
+    {
+      "id": "q3",
+      "type": "short_answer",
+      "topic": "Quadratische Gleichungen — Mitternachtsformel",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Berechne die positive Lösung mit der Mitternachtsformel.",
+      "prompt_math": "x_{1,2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}, \\quad x^2 - 4x - 5 = 0",
+      "accepted_answers": ["5", "x=5", "x = 5"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "x = (4 ± √36) / 2 = (4 ± 6) / 2 → x₁ = 5, x₂ = -1. Positive Lösung: 5."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Quadratische Gleichungen — Eigenschaften",
+      "difficulty": "mittel",
+      "points": 4,
+      "prompt": "Welche Aussagen über diese Gleichung sind korrekt?",
+      "prompt_math": "2x^2 - 8 = 0",
+      "choices": [
+        { "id": "a", "text": "x = 2 ist eine Lösung." },
+        { "id": "b", "text": "x = -2 ist eine Lösung." },
+        { "id": "c", "text": "Die Gleichung hat keine reelle Lösung." },
+        { "id": "d", "text": "Die Lösungen liegen symmetrisch um den Ursprung." }
+      ],
+      "correct": ["a", "b", "d"],
+      "scoring": "partial",
+      "explanation": "2x² = 8 → x² = 4 → x = ±2. Symmetrisch um 0."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Quadratische Gleichungen — Brüche",
+      "difficulty": "schwer",
+      "points": 4,
+      "prompt": "Löse die Gleichung. Wie heißt die positive Lösung?",
+      "prompt_math": "\\frac{x^2}{2} = 8",
+      "accepted_answers": ["4", "x=4", "x = 4"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "x² = 16 → x = ±4. Positive Lösung: 4."
+    }
+  ]
+}

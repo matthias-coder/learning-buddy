@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Englisch — Vocabulary: Travel & Transport",
+  "subject": "Englisch",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Vokabeln rund um Reisen, Verkehr und Urlaub.",
+  "time_limit_minutes": 15,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Vocabulary — Travel",
+      "difficulty": "leicht",
+      "points": 1,
+      "prompt": "What is the German translation of 'luggage'?",
+      "choices": [
+        { "id": "a", "text": "Rucksack" },
+        { "id": "b", "text": "Gepäck" },
+        { "id": "c", "text": "Reisepass" },
+        { "id": "d", "text": "Fahrkarte" }
+      ],
+      "correct": ["b"],
+      "explanation": "luggage = Gepäck. Rucksack = backpack, Reisepass = passport, Fahrkarte = ticket."
+    },
+    {
+      "id": "q2",
+      "type": "single_choice",
+      "topic": "Vocabulary — Transport",
+      "difficulty": "leicht",
+      "points": 1,
+      "prompt": "Wie heißt 'Bahnsteig' auf Englisch?",
+      "choices": [
+        { "id": "a", "text": "station" },
+        { "id": "b", "text": "platform" },
+        { "id": "c", "text": "lane" },
+        { "id": "d", "text": "rail" }
+      ],
+      "correct": ["b"],
+      "explanation": "platform = Bahnsteig. station = Bahnhof."
+    },
+    {
+      "id": "q3",
+      "type": "short_answer",
+      "topic": "Vocabulary — Travel",
+      "difficulty": "leicht",
+      "points": 2,
+      "prompt": "Translate to English: 'Reisepass'.",
+      "accepted_answers": ["passport", "a passport", "the passport"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Reisepass = passport."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Vocabulary — Means of Transport",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Which of these are means of transport (Verkehrsmittel)?",
+      "choices": [
+        { "id": "a", "text": "ferry" },
+        { "id": "b", "text": "suitcase" },
+        { "id": "c", "text": "underground" },
+        { "id": "d", "text": "tram" }
+      ],
+      "correct": ["a", "c", "d"],
+      "scoring": "partial",
+      "explanation": "ferry, underground (U-Bahn), tram (Straßenbahn) sind Verkehrsmittel. suitcase = Koffer."
+    },
+    {
+      "id": "q5",
+      "type": "short_answer",
+      "topic": "Vocabulary — At the Airport",
+      "difficulty": "mittel",
+      "points": 2,
+      "prompt": "Translate to English: 'Abflug'.",
+      "accepted_answers": ["departure", "the departure", "departures"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "Abflug = departure. Ankunft = arrival."
+    }
+  ]
+}

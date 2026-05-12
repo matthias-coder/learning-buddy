@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" width="360" height="72" role="img" aria-label="the Kessler family — Three Oaks">
+  <defs>
+    <radialGradient id="canopy2" cx="50%" cy="60%" r="55%">
+      <stop offset="0%" stop-color="#9bba7b" stop-opacity="0.95"></stop>
+      <stop offset="70%" stop-color="#658a47" stop-opacity="0.95"></stop>
+      <stop offset="100%" stop-color="#506f39" stop-opacity="1"></stop>
+    </radialGradient>
+    <radialGradient id="fire2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dfb968"></stop>
+      <stop offset="70%" stop-color="#c26a3d"></stop>
+      <stop offset="100%" stop-color="#7e4025"></stop>
+    </radialGradient>
+  </defs>
+  <g transform="translate(0,0)">
+    <g stroke="#658a47" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M10 50 L10 44" stroke="#4a4538"></path>
+      <path d="M10 44 C 6 44, 4 41, 5 38 C 4 35, 6 32, 9 33 C 10 30, 14 30, 15 33 C 17 32, 18 35, 17 37 C 18 40, 15 44, 10 44 Z" fill="#9bba7b" fill-opacity="0.7" stroke="#506f39" stroke-width="0.9"></path>
+      <path d="M62 50 L62 44" stroke="#4a4538"></path>
+      <path d="M62 44 C 66 44, 68 41, 67 38 C 68 35, 66 32, 63 33 C 62 30, 58 30, 57 33 C 55 32, 54 35, 55 37 C 54 40, 57 44, 62 44 Z" fill="#9bba7b" fill-opacity="0.7" stroke="#506f39" stroke-width="0.9"></path>
+    </g>
+    <line x1="4" y1="50" x2="68" y2="50" stroke="#d8cdb8" stroke-width="0.8" stroke-dasharray="1.2 1.8"></line>
+    <g stroke="#a89e89" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.65">
+      <path d="M32 46 C 33 44, 33 42, 34 40" stroke-dasharray="1.2 1.8"></path>
+      <path d="M40 46 C 39 44, 39 42, 38 40" stroke-dasharray="1.2 1.8"></path>
+    </g>
+    <g>
+      <path d="M36 50 C 34 42, 34 36, 36 26" stroke="#4a4538" stroke-width="2.6" stroke-linecap="round" fill="none"></path>
+      <path d="M36 32 C 33 30, 30 28, 28 26" stroke="#4a4538" stroke-width="1.6" stroke-linecap="round" fill="none"></path>
+      <path d="M36 30 C 39 28, 42 26, 44 24" stroke="#4a4538" stroke-width="1.6" stroke-linecap="round" fill="none"></path>
+      <path d="M36 6 C 30 6, 25 9, 23 14 C 18 15, 15 19, 16 24 C 13 27, 15 32, 19 32 C 21 34, 25 34, 28 33 C 30 35, 35 35, 36 33 C 37 35, 42 35, 44 33 C 47 34, 51 34, 53 32 C 57 32, 59 27, 56 24 C 57 19, 54 15, 49 14 C 47 9, 42 6, 36 6 Z" fill="url(#canopy2)" stroke="#3e552d" stroke-width="1"></path>
+      <g transform="translate(26.5,22) rotate(-18)"><path d="M-0.2 -3.2 L-0.2 -4.3" stroke="#4a4538" stroke-width="0.7" stroke-linecap="round"></path><ellipse cx="0" cy="0.3" rx="1.9" ry="2.3" fill="#c79d44" stroke="#7a5a1d" stroke-width="0.6"></ellipse><path d="M-2 -1.4 C -2 -2.8, 2 -2.8, 2 -1.4 Z" fill="#7a5a1d" stroke="#3e2f10" stroke-width="0.5" stroke-linejoin="round"></path></g><g transform="translate(36,19)"><path d="M0 -4 L0 -5.2" stroke="#4a4538" stroke-width="0.8" stroke-linecap="round"></path><ellipse cx="0" cy="0" rx="2.2" ry="2.7" fill="#dfb968" stroke="#7a5a1d" stroke-width="0.6"></ellipse><path d="M-2.3 -1.8 C -2.3 -3.4, 2.3 -3.4, 2.3 -1.8 Z" fill="#7a5a1d" stroke="#3e2f10" stroke-width="0.5" stroke-linejoin="round"></path></g><g transform="translate(45.5,24) rotate(20)"><path d="M0 -3.2 L0 -4.3" stroke="#4a4538" stroke-width="0.7" stroke-linecap="round"></path><ellipse cx="0" cy="0.3" rx="1.9" ry="2.3" fill="#c79d44" stroke="#7a5a1d" stroke-width="0.6"></ellipse><path d="M-2 -1.4 C -2 -2.8, 2 -2.8, 2 -1.4 Z" fill="#7a5a1d" stroke="#3e2f10" stroke-width="0.5" stroke-linejoin="round"></path></g>
+    </g>
+    <g stroke="#1e1b15" stroke-linejoin="round" stroke-linecap="round">
+      <ellipse cx="36" cy="50" rx="18" ry="3" fill="#2f2b22" stroke-width="1.2"></ellipse>
+      <path d="M18 50.5 C 18 60, 22 67, 36 67 C 50 67, 54 60, 54 50.5 Z" fill="#2f2b22" stroke-width="1.2"></path>
+      <ellipse cx="36" cy="51.5" rx="15.5" ry="1.6" fill="url(#fire2)"></ellipse>
+      <path d="M17 50 C 14 51, 14 53, 17 54" stroke="#1e1b15" stroke-width="1" fill="none"></path>
+      <path d="M55 50 C 58 51, 58 53, 55 54" stroke="#1e1b15" stroke-width="1" fill="none"></path>
+    </g>
+  </g>
+  <text x="90" y="38" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="400" letter-spacing="-0.01em" fill="#1e1b15">the <tspan font-style="italic" font-weight="500">Kessler</tspan> family</text>
+  <text x="90" y="56" font-family="Inter, sans-serif" font-size="10.5" letter-spacing="0.14em" fill="#658a47" font-weight="500">THREE OAKS</text>
+</svg>

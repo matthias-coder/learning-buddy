@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "title": "Englisch — Irregular Verbs (Simple Past)",
+  "subject": "Englisch",
+  "grade": 8,
+  "school_type": "Realschule",
+  "description": "Übungstest zu unregelmäßigen Verben im Simple Past.",
+  "time_limit_minutes": 15,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "single_choice",
+      "topic": "Irregular Verbs — Simple Past",
+      "difficulty": "leicht",
+      "points": 1,
+      "prompt": "What is the Simple Past form of 'to go'?",
+      "choices": [
+        { "id": "a", "text": "goed" },
+        { "id": "b", "text": "went" },
+        { "id": "c", "text": "gone" },
+        { "id": "d", "text": "going" }
+      ],
+      "correct": ["b"],
+      "explanation": "go — went — gone."
+    },
+    {
+      "id": "q2",
+      "type": "short_answer",
+      "topic": "Irregular Verbs — Simple Past",
+      "difficulty": "leicht",
+      "points": 1,
+      "prompt": "Simple Past von 'to write'? (nur die Verbform schreiben)",
+      "accepted_answers": ["wrote"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "write — wrote — written."
+    },
+    {
+      "id": "q3",
+      "type": "short_answer",
+      "topic": "Irregular Verbs — Simple Past",
+      "difficulty": "mittel",
+      "points": 1,
+      "prompt": "Simple Past von 'to bring'?",
+      "accepted_answers": ["brought"],
+      "case_sensitive": false,
+      "trim_whitespace": true,
+      "explanation": "bring — brought — brought."
+    },
+    {
+      "id": "q4",
+      "type": "multi_choice",
+      "topic": "Irregular Verbs — Simple Past",
+      "difficulty": "mittel",
+      "points": 3,
+      "prompt": "Welche der folgenden Wörter sind korrekte Simple-Past-Formen?",
+      "choices": [
+        { "id": "a", "text": "saw" },
+        { "id": "b", "text": "buyed" },
+        { "id": "c", "text": "thought" },
+        { "id": "d", "text": "swimmed" }
+      ],
+      "correct": ["a", "c"],
+      "scoring": "partial",
+      "explanation": "see → saw, think → thought. buy → bought, swim → swam."
+    },
+    {
+      "id": "q5",
+      "type": "single_choice",
+      "topic": "Irregular Verbs — Past Participle",
+      "difficulty": "mittel",
+      "points": 2,
+      "prompt": "Welche Form ist das Past Participle von 'to take'?",
+      "choices": [
+        { "id": "a", "text": "took" },
+        { "id": "b", "text": "taken" },
+        { "id": "c", "text": "takes" },
+        { "id": "d", "text": "taking" }
+      ],
+      "correct": ["b"],
+      "explanation": "take — took — taken."
+    }
+  ]
+}

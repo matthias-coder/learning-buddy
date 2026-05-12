@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Übungstests
+Comment=Klassenarbeits-Übungen für die 8. Klasse Realschule
+GenericName=Test Engine
+Exec=__PROJECT_DIR__/run.sh
+Icon=__PROJECT_DIR__/assets/icon.svg
+Terminal=false
+Categories=Education;Math;Languages;
+Keywords=Schule;Test;Übung;Mathe;Englisch;
+StartupNotify=true
