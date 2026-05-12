@@ -6,7 +6,9 @@ from pathlib import Path
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 
+from .pages.events import EventsPage
 from .pages.gaps import GapsPage
+from .pages.grades import GradesPage
 from .pages.history import HistoryPage
 from .pages.import_wizard import ImportPage
 from .pages.library import LibraryPage
@@ -44,6 +46,8 @@ class MainWindow(QMainWindow):
         self.import_page = ImportPage(self, conn)
         self.gaps_page = GapsPage(self, conn)
         self.history_page = HistoryPage(self, conn)
+        self.events_page = EventsPage(self, conn)
+        self.grades_page = GradesPage(self, conn)
 
         for page in (
             self.profile_picker_page,
@@ -56,6 +60,8 @@ class MainWindow(QMainWindow):
             self.import_page,
             self.gaps_page,
             self.history_page,
+            self.events_page,
+            self.grades_page,
         ):
             self.stack.addWidget(page)
 
@@ -101,6 +107,14 @@ class MainWindow(QMainWindow):
     def show_history(self) -> None:
         self.history_page.reload()
         self.stack.setCurrentWidget(self.history_page)
+
+    def show_events(self) -> None:
+        self.events_page.reload()
+        self.stack.setCurrentWidget(self.events_page)
+
+    def show_grades(self) -> None:
+        self.grades_page.reload()
+        self.stack.setCurrentWidget(self.grades_page)
 
     def start_test(self, test_id: int) -> None:
         self._return_to_history = False
