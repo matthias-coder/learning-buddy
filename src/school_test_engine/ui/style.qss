@@ -568,3 +568,16 @@ QPushButton#danger {
 QPushButton#danger:hover {
     background: #f6dcdb;
 }
+
+/* ----- Phase 8: Test bauen ----- */
+
+/* Read-only prompt output area */
+QPlainTextEdit#promptOutput {
+    background: #fbf6ec;
+    color: #1e1b15;
+    border: 1px solid #ead9be;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10pt;
+}
