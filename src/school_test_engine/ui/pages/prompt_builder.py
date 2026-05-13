@@ -71,7 +71,9 @@ class PromptBuilderPage(QWidget):
         self.subject_combo = QComboBox()
         self.subject_combo.addItems(SUBJECTS_ALL)
         self.subject_combo.setEditable(True)
-        self.subject_combo.currentTextChanged.connect(self._on_subject_changed)
+        self.subject_combo.activated.connect(
+            lambda _idx: self._on_subject_changed(self.subject_combo.currentText())
+        )
         form_row1.addWidget(self.subject_combo)
         form_row1.addSpacing(20)
         form_row1.addWidget(QLabel("Anzahl:"))
@@ -293,11 +295,12 @@ class PromptBuilderPage(QWidget):
     def _on_subject_changed(self, text: str) -> None:
         if self._loading:
             return
-        # Save current draft before switching
-        self._autosave()
-        # Reload with new subject
-        self._current_subject = text.strip() or SUBJECTS_ALL[0]
-        self.show_for(subject=self._current_subject)
+        new_subject = text.strip() or SUBJECTS_ALL[0]
+        # Save current form state under the OLD subject (still held in _current_subject)
+        # before reloading with new subject's draft.
+        self._autosave_under(self._current_subject)
+        self._current_subject = new_subject
+        self.show_for(subject=new_subject)
 
     def _on_dist_mode_changed(self, _checked: bool) -> None:
         if self._loading:
@@ -315,11 +318,14 @@ class PromptBuilderPage(QWidget):
     # ------------------------------------------------------------------
 
     def _autosave(self) -> None:
-        uid = self.window.active_user_id
-        if uid is None:
-            return
         subject = self.subject_combo.currentText().strip()
         if not subject:
+            return
+        self._autosave_under(subject)
+
+    def _autosave_under(self, subject: str) -> None:
+        uid = self.window.active_user_id
+        if uid is None or not subject:
             return
         topics_text = "\n".join(self._current_topics())
         prompt_drafts_repo.upsert(
