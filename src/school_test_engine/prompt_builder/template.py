@@ -16,7 +16,7 @@ _BACKUP_TEMPLATE = """\
 
 ## Aufgabe
 
-Du erzeugst einen Übungs-Test für die 8. Klasse Realschule in Deutschland.
+Du erzeugst einen Übungs-Test für die **{{grade}}. Klasse {{school_type}}** in **{{bundesland}}** (Schule: {{school_name}}, Schuljahr {{school_year}}).
 Antworte ausschließlich mit gültigem JSON im unten beschriebenen Format.
 
 ## Schema
@@ -26,8 +26,8 @@ Antworte ausschließlich mit gültigem JSON im unten beschriebenen Format.
   "schema_version": 1,
   "title": "<Titel>",
   "subject": "<Mathe|Englisch|Bio|Physik|Chemie|Geschichte>",
-  "grade": 8,
-  "school_type": "Realschule",
+  "grade": {{grade}},
+  "school_type": "{{school_type}}",
   "questions": [
     {
       "id": "q1",

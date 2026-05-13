@@ -6,7 +6,7 @@ Diese Datei in Claude, ChatGPT oder Gemini einfügen, am Ende **Fach + Thema + A
 
 ## Aufgabe
 
-Du erzeugst einen Übungs-Test für die **8. Klasse Realschule** in Deutschland. Antworte **ausschließlich mit gültigem JSON** im unten beschriebenen Format. Keine Erklärung, kein Code-Block-Fence, kein Markdown drumherum — nur das pure JSON.
+Du erzeugst einen Übungs-Test für die **{{grade}}. Klasse {{school_type}}** in **{{bundesland}}** (Schule: {{school_name}}, Schuljahr {{school_year}}). Antworte **ausschließlich mit gültigem JSON** im unten beschriebenen Format. Keine Erklärung, kein Code-Block-Fence, kein Markdown drumherum — nur das pure JSON.
 
 ## Schema
 
@@ -15,8 +15,8 @@ Du erzeugst einen Übungs-Test für die **8. Klasse Realschule** in Deutschland.
   "schema_version": 1,
   "title": "<kurzer Titel des Tests>",
   "subject": "<Mathe|Englisch|Bio|Physik|Chemie|Geschichte>",
-  "grade": 8,
-  "school_type": "Realschule",
+  "grade": {{grade}},
+  "school_type": "{{school_type}}",
   "description": "<1 Satz, optional>",
   "time_limit_minutes": <Zahl, optional>,
   "questions": [
