@@ -61,6 +61,11 @@ def update_user(
     avatar_image=_SENTINEL,
     birthday=_SENTINEL,
     ai_style_briefing=_SENTINEL,
+    grade=_SENTINEL,
+    school_type=_SENTINEL,
+    bundesland=_SENTINEL,
+    school_name=_SENTINEL,
+    school_year=_SENTINEL,
     sort_order: int | None = None,
 ) -> None:
     fields: list[str] = []
@@ -75,6 +80,16 @@ def update_user(
         fields.append("birthday = ?"); values.append(birthday)
     if ai_style_briefing is not _SENTINEL:
         fields.append("ai_style_briefing = ?"); values.append(ai_style_briefing)
+    if grade is not _SENTINEL:
+        fields.append("grade = ?"); values.append(grade)
+    if school_type is not _SENTINEL:
+        fields.append("school_type = ?"); values.append(school_type)
+    if bundesland is not _SENTINEL:
+        fields.append("bundesland = ?"); values.append(bundesland)
+    if school_name is not _SENTINEL:
+        fields.append("school_name = ?"); values.append(school_name)
+    if school_year is not _SENTINEL:
+        fields.append("school_year = ?"); values.append(school_year)
     if sort_order is not None:
         fields.append("sort_order = ?"); values.append(sort_order)
     if not fields:
