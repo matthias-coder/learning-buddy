@@ -67,3 +67,26 @@ def test_count_users(conn):
 
 def test_get_unknown_user(conn):
     assert users_repo.get_user(conn, 99999) is None
+
+
+def test_update_user_ai_style_briefing(conn):
+    uid = users_repo.create_user(conn, "Stil-Tester")
+    users_repo.update_user(conn, uid, ai_style_briefing="Schreibstil: Du-Form.")
+    row = users_repo.get_user(conn, uid)
+    assert row["ai_style_briefing"] == "Schreibstil: Du-Form."
+
+
+def test_update_user_clear_ai_style_briefing_with_none(conn):
+    uid = users_repo.create_user(conn, "Stil-Tester")
+    users_repo.update_user(conn, uid, ai_style_briefing="X")
+    users_repo.update_user(conn, uid, ai_style_briefing=None)
+    row = users_repo.get_user(conn, uid)
+    assert row["ai_style_briefing"] is None
+
+
+def test_update_user_omitting_ai_style_briefing_leaves_it(conn):
+    uid = users_repo.create_user(conn, "Stil-Tester")
+    users_repo.update_user(conn, uid, ai_style_briefing="Bleibt")
+    users_repo.update_user(conn, uid, name="neu")
+    row = users_repo.get_user(conn, uid)
+    assert row["ai_style_briefing"] == "Bleibt"

@@ -60,6 +60,7 @@ def update_user(
     avatar: str | None = None,
     avatar_image=_SENTINEL,
     birthday=_SENTINEL,
+    ai_style_briefing=_SENTINEL,
     sort_order: int | None = None,
 ) -> None:
     fields: list[str] = []
@@ -72,6 +73,8 @@ def update_user(
         fields.append("avatar_image = ?"); values.append(avatar_image)
     if birthday is not _SENTINEL:
         fields.append("birthday = ?"); values.append(birthday)
+    if ai_style_briefing is not _SENTINEL:
+        fields.append("ai_style_briefing = ?"); values.append(ai_style_briefing)
     if sort_order is not None:
         fields.append("sort_order = ?"); values.append(sort_order)
     if not fields:
