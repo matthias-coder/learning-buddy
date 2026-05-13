@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QPlainTextEdit,
     QPushButton,
     QScrollArea,
     QSizePolicy,
@@ -47,6 +48,7 @@ class ProfileValues:
     avatar: str
     avatar_image: bytes | None
     birthday: str | None
+    ai_style_briefing: str | None
 
 
 def _pixmap_to_png_bytes(pm: QPixmap, max_dim: int = 256) -> bytes:
@@ -72,6 +74,7 @@ class _ProfileEditDialog(QDialog):
         initial_avatar: str = "👤",
         initial_image: bytes | None = None,
         initial_birthday: str | None = None,
+        initial_style_briefing: str | None = None,
     ):
         super().__init__(parent)
         self.setWindowTitle("Profil bearbeiten" if initial_name else "Neues Profil")
@@ -147,6 +150,21 @@ class _ProfileEditDialog(QDialog):
         preview_row.addStretch(1)
         outer.addLayout(preview_row)
 
+        # Style-Briefing for the AI prompt generator (Phase 8)
+        style_label = QLabel("KI-Stil-Hinweis (optional)")
+        style_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        outer.addWidget(style_label)
+
+        self.style_edit = QPlainTextEdit()
+        self.style_edit.setPlaceholderText(
+            "z. B.: Schreibstil: Du-Form, freundlich.\n"
+            "Mathe: saubere Äquivalenzumformungen in der Erklärung."
+        )
+        self.style_edit.setMaximumHeight(110)
+        if initial_style_briefing:
+            self.style_edit.setPlainText(initial_style_briefing)
+        outer.addWidget(self.style_edit)
+
         buttons = QHBoxLayout()
         cancel = QPushButton("Abbrechen")
         cancel.clicked.connect(self.reject)
@@ -215,11 +233,13 @@ class _ProfileEditDialog(QDialog):
             d = self.birthday_edit.date()
             if d.year() > 1900:
                 bd = d.toString("yyyy-MM-dd")
+        briefing_text = self.style_edit.toPlainText().strip()
         return ProfileValues(
             name=self.name_edit.text().strip(),
             avatar=self._selected_avatar or "👤",
             avatar_image=self._avatar_image,
             birthday=bd,
+            ai_style_briefing=briefing_text or None,
         )
 
 
@@ -383,6 +403,7 @@ class ProfileManagerPage(QWidget):
             initial_avatar=u["avatar"],
             initial_image=row_get(u, "avatar_image"),
             initial_birthday=row_get(u, "birthday"),
+            initial_style_briefing=row_get(u, "ai_style_briefing"),
         )
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
@@ -394,6 +415,7 @@ class ProfileManagerPage(QWidget):
             self.conn, user_id,
             name=v.name, avatar=v.avatar,
             avatar_image=v.avatar_image, birthday=v.birthday,
+            ai_style_briefing=v.ai_style_briefing,
         )
         self.reload()
         if self.window.active_user_id == user_id:
