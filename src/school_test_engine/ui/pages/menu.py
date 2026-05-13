@@ -55,6 +55,11 @@ class MenuPage(QWidget):
         top_row.addStretch(1)
 
         # New top-bar icon buttons
+        builder_btn = QPushButton("📝 Test bauen")
+        builder_btn.setObjectName("topBarAction")
+        builder_btn.clicked.connect(lambda: self.window.show_prompt_builder())
+        top_row.addWidget(builder_btn)
+
         events_btn = QPushButton("📅 Termine")
         events_btn.setObjectName("topBarAction")
         events_btn.clicked.connect(self.window.show_events)
@@ -138,6 +143,7 @@ class MenuPage(QWidget):
         strip.setAlignment(Qt.AlignmentFlag.AlignCenter)
         for ev in events:
             card = ExamCard(ev)
+            card.practice_clicked.connect(self._on_practice_clicked)
             card.enter_grade_clicked.connect(self._on_enter_grade)
             card.edit_clicked.connect(self._on_edit_event)
             strip.addWidget(card)
@@ -217,6 +223,14 @@ class MenuPage(QWidget):
     # ------------------------------------------------------------------
     # ExamCard actions
     # ------------------------------------------------------------------
+
+    def _on_practice_clicked(self, event_id: int) -> None:
+        import json
+        ev = events_repo.get(self.window.conn, event_id)
+        if ev is None:
+            return
+        topics = json.loads(ev["topics"] or "[]")
+        self.window.show_prompt_builder(subject=ev["subject"], topics=topics)
 
     def _on_enter_grade(self, event_id: int) -> None:
         from PySide6.QtWidgets import QDialog
