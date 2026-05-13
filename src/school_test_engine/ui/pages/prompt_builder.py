@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...prompt_builder.assembler import assemble_prompt
+from ...prompt_builder.school_context import SchoolContext
 from ...storage import prompt_drafts_repo, users_repo
 from .._layouts import row_get
 from .._subjects import SUBJECTS_ALL
@@ -130,6 +131,18 @@ class PromptBuilderPage(QWidget):
         self.dist_warn.setStyleSheet("color: #7e3b39; font-size: 10pt;")
         outer.addWidget(self.dist_warn)
 
+        # Schul-Kontext preview row (Phase 9)
+        ctx_row = QHBoxLayout()
+        self.ctx_label = QLabel("Schul-Kontext: —")
+        self.ctx_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
+        self.ctx_label.setWordWrap(True)
+        ctx_row.addWidget(self.ctx_label, 1)
+        ctx_edit_link = QPushButton("Profil bearbeiten")
+        ctx_edit_link.setObjectName("text")
+        ctx_edit_link.clicked.connect(lambda: self.window.show_profile_manager("menu"))
+        ctx_row.addWidget(ctx_edit_link)
+        outer.addLayout(ctx_row)
+
         # Style-Briefing preview row
         style_row = QHBoxLayout()
         self.style_label = QLabel("Stil-Briefing (aus Profil): —")
@@ -183,6 +196,10 @@ class PromptBuilderPage(QWidget):
                 self.style_label.setText(
                     "Stil-Briefing (aus Profil): — (Hinweis im Profil hinterlegen für persönlichen KI-Stil)"
                 )
+
+            # Schul-Kontext preview
+            ctx = SchoolContext.from_user_row(user)
+            self._render_context_preview(ctx)
 
             # Decide subject
             target_subject = subject or self._current_subject
@@ -268,25 +285,59 @@ class PromptBuilderPage(QWidget):
     # Live build
     # ------------------------------------------------------------------
 
+    def _render_context_preview(self, ctx: SchoolContext) -> None:
+        if not ctx.is_minimally_complete():
+            self.ctx_label.setText(
+                "⚠ Schul-Kontext unvollständig — fülle Klasse und Schultyp im Profil aus"
+            )
+            self.ctx_label.setStyleSheet("color: #7e3b39; font-size: 10pt; font-weight: 500;")
+            return
+        parts = [f"{ctx.grade}. Klasse {ctx.school_type}"]
+        if ctx.bundesland:
+            parts.append(ctx.bundesland)
+        if ctx.school_year:
+            parts.append(f"Schuljahr {ctx.school_year}")
+        if ctx.school_name:
+            parts.append(ctx.school_name)
+        self.ctx_label.setText("Schul-Kontext: " + " · ".join(parts))
+        self.ctx_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
+
     def _rebuild_prompt(self) -> None:
         uid = self.window.active_user_id
         briefing = None
+        ctx = SchoolContext(None, None, None, None, None)
         if uid is not None:
             user = users_repo.get_user(self.conn, uid)
             if user is not None:
                 briefing = row_get(user, "ai_style_briefing")
+                ctx = SchoolContext.from_user_row(user)
 
-        ok = self._validate_distribution()
-        dist_str = self._current_dist_string() if ok else "manuell:inkonsistent"
+        dist_ok = self._validate_distribution()
+        dist_str = self._current_dist_string() if dist_ok else "manuell:inkonsistent"
         out = assemble_prompt(
             subject=self.subject_combo.currentText().strip() or SUBJECTS_ALL[0],
             topics=self._current_topics(),
             count=self.count_spin.value(),
             distribution=dist_str,
             style_briefing=briefing,
+            school_context=ctx,
         )
         self.output_view.setPlainText(out)
-        self.copy_btn.setEnabled(ok)
+        # Hart-Validierung: Copy-Button only enabled when distribution AND school-context are both valid
+        context_ok = ctx.is_minimally_complete()
+        self.copy_btn.setEnabled(dist_ok and context_ok)
+        if not context_ok:
+            self._status_lbl.setText("Schul-Kontext unvollständig")
+            self._status_lbl.setStyleSheet("color: #7e3b39; font-size: 10pt;")
+        elif not dist_ok:
+            # Status from _validate_distribution warn-label is shown elsewhere; clear copy status
+            self._status_lbl.setText("")
+        else:
+            # Don't overwrite "Kopiert ✓" if it's currently shown
+            current = self._status_lbl.text()
+            if current.startswith("Schul-Kontext"):
+                self._status_lbl.setText("")
+                self._status_lbl.setStyleSheet(f"color: {Semantic.ACCENT}; font-size: 10pt;")
 
     # ------------------------------------------------------------------
     # Signals
