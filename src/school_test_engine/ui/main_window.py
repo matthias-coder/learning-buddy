@@ -15,6 +15,7 @@ from .pages.library import LibraryPage
 from .pages.menu import MenuPage
 from .pages.profile_manager import ProfileManagerPage
 from .pages.profile_picker import ProfilePickerPage
+from .pages.prompt_builder import PromptBuilderPage
 from .pages.results import ResultsPage
 from .pages.review import ReviewPage
 from .pages.runner import RunnerPage
@@ -48,6 +49,7 @@ class MainWindow(QMainWindow):
         self.history_page = HistoryPage(self, conn)
         self.events_page = EventsPage(self, conn)
         self.grades_page = GradesPage(self, conn)
+        self.prompt_builder_page = PromptBuilderPage(self, conn)
 
         for page in (
             self.profile_picker_page,
@@ -62,6 +64,7 @@ class MainWindow(QMainWindow):
             self.history_page,
             self.events_page,
             self.grades_page,
+            self.prompt_builder_page,
         ):
             self.stack.addWidget(page)
 
@@ -115,6 +118,10 @@ class MainWindow(QMainWindow):
     def show_grades(self) -> None:
         self.grades_page.reload()
         self.stack.setCurrentWidget(self.grades_page)
+
+    def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
+        self.prompt_builder_page.show_for(subject, topics)
+        self.stack.setCurrentWidget(self.prompt_builder_page)
 
     def start_test(self, test_id: int) -> None:
         self._return_to_history = False
