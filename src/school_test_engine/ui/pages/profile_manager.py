@@ -8,12 +8,15 @@ from pathlib import Path
 from PySide6.QtCore import QBuffer, QByteArray, QDate, QIODevice, Qt
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
+    QComboBox,
     QDateEdit,
     QDialog,
     QFileDialog,
+    QFormLayout,
     QFrame,
     QGridLayout,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -25,6 +28,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...prompt_builder.school_context import BUNDESLAENDER, SCHOOL_TYPES
 from ...storage import users_repo
 from .._format import fmt_dt
 from .._layouts import clear_layout, row_get
@@ -49,6 +53,11 @@ class ProfileValues:
     avatar_image: bytes | None
     birthday: str | None
     ai_style_briefing: str | None
+    grade: int | None
+    school_type: str | None
+    bundesland: str | None
+    school_name: str | None
+    school_year: str | None
 
 
 def _pixmap_to_png_bytes(pm: QPixmap, max_dim: int = 256) -> bytes:
@@ -75,6 +84,11 @@ class _ProfileEditDialog(QDialog):
         initial_image: bytes | None = None,
         initial_birthday: str | None = None,
         initial_style_briefing: str | None = None,
+        initial_grade: int | None = None,
+        initial_school_type: str | None = None,
+        initial_bundesland: str | None = None,
+        initial_school_name: str | None = None,
+        initial_school_year: str | None = None,
     ):
         super().__init__(parent)
         self.setWindowTitle("Profil bearbeiten" if initial_name else "Neues Profil")
@@ -165,6 +179,75 @@ class _ProfileEditDialog(QDialog):
             self.style_edit.setPlainText(initial_style_briefing)
         outer.addWidget(self.style_edit)
 
+        # Schul-Kontext (Phase 9)
+        ctx_label = QLabel("Schul-Kontext")
+        ctx_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        outer.addWidget(ctx_label)
+
+        ctx_form = QFormLayout()
+        ctx_form.setSpacing(8)
+
+        # Klassenstufe combo (NULL + 5..13)
+        self.grade_combo = QComboBox()
+        self.grade_combo.addItem("—", None)
+        for g in range(5, 14):
+            self.grade_combo.addItem(f"Klasse {g}", g)
+        if initial_grade is not None:
+            idx = self.grade_combo.findData(initial_grade)
+            if idx >= 0:
+                self.grade_combo.setCurrentIndex(idx)
+        ctx_form.addRow("Klassenstufe:", self.grade_combo)
+
+        # School type combo (NULL + 3 predefined + Andere…)
+        self.school_type_combo = QComboBox()
+        self.school_type_combo.addItem("—", None)
+        for st in SCHOOL_TYPES:
+            self.school_type_combo.addItem(st, st)
+        self.school_type_combo.addItem("Andere…", "__OTHER__")
+        if initial_school_type:
+            idx = self.school_type_combo.findData(initial_school_type)
+            if idx >= 0:
+                self.school_type_combo.setCurrentIndex(idx)
+            else:
+                last_idx = self.school_type_combo.count() - 1  # index of "Andere…"
+                self.school_type_combo.insertItem(last_idx, initial_school_type, initial_school_type)
+                self.school_type_combo.setCurrentIndex(last_idx)
+        self.school_type_combo.activated.connect(self._on_school_type_activated)
+        ctx_form.addRow("Schultyp:", self.school_type_combo)
+
+        # Bundesland combo (NULL + 16 BL + Andere…)
+        self.bundesland_combo = QComboBox()
+        self.bundesland_combo.addItem("—", None)
+        for bl in BUNDESLAENDER:
+            self.bundesland_combo.addItem(bl, bl)
+        self.bundesland_combo.addItem("Andere…", "__OTHER__")
+        if initial_bundesland:
+            idx = self.bundesland_combo.findData(initial_bundesland)
+            if idx >= 0:
+                self.bundesland_combo.setCurrentIndex(idx)
+            else:
+                last_idx = self.bundesland_combo.count() - 1
+                self.bundesland_combo.insertItem(last_idx, initial_bundesland, initial_bundesland)
+                self.bundesland_combo.setCurrentIndex(last_idx)
+        self.bundesland_combo.activated.connect(self._on_bundesland_activated)
+        ctx_form.addRow("Bundesland:", self.bundesland_combo)
+
+        # School-Name (free text)
+        self.school_name_edit = QLineEdit()
+        self.school_name_edit.setPlaceholderText("z. B. Heinrich-Heine-Realschule")
+        if initial_school_name:
+            self.school_name_edit.setText(initial_school_name)
+        ctx_form.addRow("Schul-Name:", self.school_name_edit)
+
+        # School-Year (free text)
+        self.school_year_edit = QLineEdit()
+        self.school_year_edit.setPlaceholderText("2025/26")
+        if initial_school_year:
+            self.school_year_edit.setText(initial_school_year)
+        ctx_form.addRow("Schuljahr:", self.school_year_edit)
+
+        outer.addLayout(ctx_form)
+
         buttons = QHBoxLayout()
         cancel = QPushButton("Abbrechen")
         cancel.clicked.connect(self.reject)
@@ -221,6 +304,29 @@ class _ProfileEditDialog(QDialog):
         self.birthday_edit.setDate(QDate(1900, 1, 1))
         self.birthday_edit.blockSignals(False)
 
+    def _on_school_type_activated(self, idx: int) -> None:
+        self._handle_other_trigger(self.school_type_combo, idx, "Schultyp eingeben", "Eigener Schultyp:")
+
+    def _on_bundesland_activated(self, idx: int) -> None:
+        self._handle_other_trigger(self.bundesland_combo, idx, "Bundesland eingeben", "Eigenes Bundesland:")
+
+    def _handle_other_trigger(self, combo: QComboBox, idx: int, title: str, label: str) -> None:
+        if combo.itemData(idx) != "__OTHER__":
+            return
+        text, ok = QInputDialog.getText(self, title, label)
+        text = text.strip() if ok else ""
+        if not text:
+            combo.setCurrentIndex(0)  # revert to "—" (NULL)
+            return
+        last_idx = combo.count() - 1  # position of "Andere…"
+        # Avoid duplicate insertion if user typed an existing predefined value
+        existing = combo.findData(text)
+        if existing >= 0:
+            combo.setCurrentIndex(existing)
+            return
+        combo.insertItem(last_idx, text, text)
+        combo.setCurrentIndex(last_idx)
+
     def _refresh_preview(self) -> None:
         self.preview.set_avatar(
             emoji=self._selected_avatar,
@@ -240,6 +346,11 @@ class _ProfileEditDialog(QDialog):
             avatar_image=self._avatar_image,
             birthday=bd,
             ai_style_briefing=briefing_text or None,
+            grade=self.grade_combo.currentData(),
+            school_type=self.school_type_combo.currentData() if self.school_type_combo.currentData() != "__OTHER__" else None,
+            bundesland=self.bundesland_combo.currentData() if self.bundesland_combo.currentData() != "__OTHER__" else None,
+            school_name=self.school_name_edit.text().strip() or None,
+            school_year=self.school_year_edit.text().strip() or None,
         )
 
 
@@ -404,6 +515,11 @@ class ProfileManagerPage(QWidget):
             initial_image=row_get(u, "avatar_image"),
             initial_birthday=row_get(u, "birthday"),
             initial_style_briefing=row_get(u, "ai_style_briefing"),
+            initial_grade=row_get(u, "grade"),
+            initial_school_type=row_get(u, "school_type"),
+            initial_bundesland=row_get(u, "bundesland"),
+            initial_school_name=row_get(u, "school_name"),
+            initial_school_year=row_get(u, "school_year"),
         )
         if dlg.exec() != QDialog.DialogCode.Accepted:
             return
@@ -416,6 +532,9 @@ class ProfileManagerPage(QWidget):
             name=v.name, avatar=v.avatar,
             avatar_image=v.avatar_image, birthday=v.birthday,
             ai_style_briefing=v.ai_style_briefing,
+            grade=v.grade, school_type=v.school_type,
+            bundesland=v.bundesland, school_name=v.school_name,
+            school_year=v.school_year,
         )
         self.reload()
         if self.window.active_user_id == user_id:
