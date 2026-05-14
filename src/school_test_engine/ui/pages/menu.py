@@ -25,10 +25,12 @@ from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
 from ..dialogs.assessment_dialog import AssessmentDialog
 from ..dialogs.event_dialog import EventDialog
+from ..responsive import is_narrow
 from ..widgets.avatar_badge import round_pixmap
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
 from ..widgets.exam_card import ExamCard
+from ..widgets.hamburger_menu import HamburgerMenu
 
 
 LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomark.svg"
@@ -72,6 +74,17 @@ class MenuPage(QWidget):
         grades_btn.setObjectName("topBarAction")
         grades_btn.clicked.connect(self.window.show_grades)
         top_row.addWidget(grades_btn)
+
+        # Phase 11: store action-button refs for narrow-mode toggling
+        self._top_bar_actions = [builder_btn, events_btn, grades_btn]
+
+        # Hamburger fallback (hidden in wide mode)
+        self._hamburger = HamburgerMenu()
+        self._hamburger.add_action("📝 Test bauen", lambda: self.window.show_prompt_builder())
+        self._hamburger.add_action("📅 Termine", self.window.show_events)
+        self._hamburger.add_action("📊 Noten", self.window.show_grades)
+        self._hamburger.setVisible(False)  # default: wide-mode
+        top_row.addWidget(self._hamburger)
 
         self.chip = _ProfileChip()
         self.chip.switch_clicked.connect(self._switch_profile)
@@ -131,6 +144,23 @@ class MenuPage(QWidget):
     def _switch_profile(self) -> None:
         self.window.show_profile_picker()
 
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._apply_responsive_layout()
+
+    def _apply_responsive_layout(self) -> None:
+        narrow = is_narrow(self)
+        # Toggle top-bar buttons
+        for btn in self._top_bar_actions:
+            btn.setVisible(not narrow)
+        self._hamburger.setVisible(narrow)
+        # Toggle the action-grid: rebuild dynamic content so columns change
+        # Note: dynamic_layout is rebuilt in reload(); we trigger reload only if
+        # the narrow-state actually changed since the last call.
+        if getattr(self, "_last_narrow_state", None) != narrow:
+            self._last_narrow_state = narrow
+            self.reload()
+
     # ------------------------------------------------------------------
     # Layout variants
     # ------------------------------------------------------------------
@@ -176,7 +206,8 @@ class MenuPage(QWidget):
         grid_wrap.addStretch(1)
         container = QWidget()
         container.setMaximumWidth(820)
-        row = QHBoxLayout(container)
+        narrow = is_narrow(self)
+        row = QVBoxLayout(container) if narrow else QHBoxLayout(container)
         row.setSpacing(12)
         row.setContentsMargins(0, 0, 0, 0)
 
@@ -213,19 +244,22 @@ class MenuPage(QWidget):
 
         start = _make_action_card("ÜBEN", "Test starten", "Wähle einen Test aus deiner Bibliothek")
         start.clicked.connect(self.window.show_library)
-        grid.addWidget(start, 0, 0)
 
         imp = _make_action_card("AUFGABEN", "Test importieren", "Neue Fragen aus einer JSON-Datei einlesen")
         imp.clicked.connect(self.window.show_import)
-        grid.addWidget(imp, 0, 1)
 
         gaps = _make_action_card("ANALYSE", "Was noch hakt", "Themen sortiert nach Schwäche — mit Üben-Knopf")
         gaps.clicked.connect(self.window.show_gaps)
-        grid.addWidget(gaps, 1, 0)
 
         hist = _make_action_card("RÜCKBLICK", "Bisherige Versuche", "Alle Tests mit Note und Datum")
         hist.clicked.connect(self.window.show_history)
-        grid.addWidget(hist, 1, 1)
+
+        narrow = is_narrow(self)
+        cols = 1 if narrow else 2
+        cards = [start, imp, gaps, hist]
+        for idx, card in enumerate(cards):
+            row, col = divmod(idx, cols)
+            grid.addWidget(card, row, col)
 
         grid_wrap.addWidget(grid_container)
         grid_wrap.addStretch(1)

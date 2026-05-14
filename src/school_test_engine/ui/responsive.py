@@ -17,5 +17,8 @@ def is_narrow(widget: QWidget) -> bool:
 
     Use this in resizeEvent or reload() to decide between wide/narrow layouts.
     """
-    top = widget.window()
+    # Use QWidget.window explicitly: some pages shadow .window with an attribute
+    # that points to the MainWindow (callable as an instance). Calling the
+    # bound method via the class avoids that collision.
+    top = QWidget.window(widget)
     return top.width() < BREAKPOINT_NARROW
