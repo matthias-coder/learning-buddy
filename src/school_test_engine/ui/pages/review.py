@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -65,6 +65,17 @@ class ReviewPage(QWidget):
         submit.clicked.connect(self._submit)
         bottom.addWidget(submit)
         layout.addLayout(bottom)
+
+        # Phase 14: keyboard shortcuts on Review-Page
+        self._review_shortcuts: list[QShortcut] = []
+        for key, cb in [
+            (Qt.Key.Key_Escape, self._back_to_runner),
+            (Qt.Key.Key_Return, self._submit),
+            (Qt.Key.Key_Enter, self._submit),
+        ]:
+            sc = QShortcut(QKeySequence(key), self)
+            sc.activated.connect(cb)
+            self._review_shortcuts.append(sc)
 
     def show_for_attempt(self) -> None:
         items = self.window.runner_page.get_status_overview()
