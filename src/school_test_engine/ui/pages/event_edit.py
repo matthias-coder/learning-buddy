@@ -121,6 +121,11 @@ class EventEditPage(QWidget):
 
         # Footer: delete (only in edit mode)
         footer = QHBoxLayout()
+        self.plan_btn = QPushButton("Lernplan PDF")
+        self.plan_btn.setObjectName("text")
+        self.plan_btn.clicked.connect(self._export_plan)
+        self.plan_btn.setVisible(False)
+        footer.addWidget(self.plan_btn)
         self.delete_btn = QPushButton("Löschen")
         self.delete_btn.setObjectName("danger")
         self.delete_btn.clicked.connect(self._delete)
@@ -138,9 +143,11 @@ class EventEditPage(QWidget):
         if event_id is None:
             self.title_label.setText("Klassenarbeit")
             self.delete_btn.setVisible(False)
+            self.plan_btn.setVisible(False)
         else:
             self.title_label.setText("Termin bearbeiten")
             self.delete_btn.setVisible(True)
+            self.plan_btn.setVisible(True)
             self._load_event(event_id)
 
     def _reset_fields(self) -> None:
@@ -211,6 +218,16 @@ class EventEditPage(QWidget):
             return
         events_repo.delete(self.conn, self._event_id)
         self._navigate_back()
+
+    def _export_plan(self) -> None:
+        if self._event_id is None:
+            return
+        from datetime import date
+        from ...pdf_export.study_plan import export_study_plan
+        from ...pdf_export._common import save_pdf_with_dialog
+        html = export_study_plan(self.conn, self._event_id)
+        default = f"learning-buddy-lernplan-{date.today().isoformat()}.pdf"
+        save_pdf_with_dialog(self, html, default)
 
     def _cancel(self) -> None:
         self._navigate_back()

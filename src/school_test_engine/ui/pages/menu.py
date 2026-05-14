@@ -199,6 +199,7 @@ class MenuPage(QWidget):
             card.practice_clicked.connect(self._on_practice_clicked)
             card.enter_grade_clicked.connect(self._on_enter_grade)
             card.edit_clicked.connect(self._on_edit_event)
+            card.study_plan_clicked.connect(self._on_export_study_plan)
             strip.addWidget(card)
         wrap = QWidget()
         wrap.setLayout(strip)
@@ -348,6 +349,14 @@ class MenuPage(QWidget):
 
     def _on_edit_event(self, event_id: int) -> None:
         self.window.show_event_edit(event_id=event_id, return_to="menu")
+
+    def _on_export_study_plan(self, event_id: int) -> None:
+        from datetime import date
+        from ...pdf_export.study_plan import export_study_plan
+        from ...pdf_export._common import save_pdf_with_dialog
+        html = export_study_plan(self.window.conn, event_id)
+        default = f"learning-buddy-lernplan-{date.today().isoformat()}.pdf"
+        save_pdf_with_dialog(self, html, default)
 
     def _on_add_event_from_menu(self) -> None:
         self.window.show_event_edit(event_id=None, return_to="menu")

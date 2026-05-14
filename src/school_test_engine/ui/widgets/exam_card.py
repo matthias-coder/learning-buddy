@@ -44,6 +44,7 @@ class ExamCard(ClickableCard):
     practice_clicked = Signal(int)   # emits event_id (Phase 8 will hook up)
     enter_grade_clicked = Signal(int)
     edit_clicked = Signal(int)
+    study_plan_clicked = Signal(int)   # Phase 14: triggers PDF Lernplan-Export
 
     def __init__(self, event_data, parent=None):
         super().__init__(object_name="examCard", parent=parent)
@@ -97,6 +98,11 @@ class ExamCard(ClickableCard):
             grade_btn.setObjectName("text")
             grade_btn.clicked.connect(lambda: self.enter_grade_clicked.emit(self.event_id))
             actions.addWidget(grade_btn)
+
+            plan_btn = QPushButton("Lernplan PDF")
+            plan_btn.setObjectName("text")
+            plan_btn.clicked.connect(lambda: self.study_plan_clicked.emit(self.event_id))
+            actions.addWidget(plan_btn)
         else:
             done = Pill("Note erfasst ✓", "tea")
             actions.addWidget(done)
