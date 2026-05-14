@@ -67,6 +67,7 @@ def update_user(
     school_name=_SENTINEL,
     school_year=_SENTINEL,
     sort_order: int | None = None,
+    show_keyboard_hints: int | None = None,
 ) -> None:
     fields: list[str] = []
     values: list = []
@@ -92,6 +93,8 @@ def update_user(
         fields.append("school_year = ?"); values.append(school_year)
     if sort_order is not None:
         fields.append("sort_order = ?"); values.append(sort_order)
+    if show_keyboard_hints is not None:
+        fields.append("show_keyboard_hints = ?"); values.append(int(show_keyboard_hints))
     if not fields:
         return
     values.append(user_id)
