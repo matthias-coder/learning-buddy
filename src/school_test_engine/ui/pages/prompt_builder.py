@@ -52,22 +52,13 @@ class PromptBuilderPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(14)
 
-        # Header
+        # Header (Phase 12.1: copy button moved to output area below)
         head = QHBoxLayout()
         back = QPushButton("← Zurück")
         back.setObjectName("text")
         back.clicked.connect(self.window.show_menu)
         head.addWidget(back)
         head.addStretch(1)
-
-        self.copy_btn = QPushButton("📋 Kopieren")
-        self.copy_btn.setObjectName("primary")
-        self.copy_btn.clicked.connect(self._copy_to_clipboard)
-        head.addWidget(self.copy_btn)
-
-        self._status_lbl = QLabel("")
-        self._status_lbl.setStyleSheet(f"color: {Semantic.ACCENT}; font-size: 10pt;")
-        head.addWidget(self._status_lbl)
         outer.addLayout(head)
 
         eyebrow = QLabel("TEST BAUEN")
@@ -144,28 +135,20 @@ class PromptBuilderPage(QWidget):
         self.dist_warn.setStyleSheet("color: #7e3b39; font-size: 10pt;")
         outer.addWidget(self.dist_warn)
 
-        # Schul-Kontext preview row (Phase 9)
+        # Schul-Kontext preview row (Phase 9 + Phase 12.1: removed Profil-bearbeiten link)
         ctx_row = QHBoxLayout()
         self.ctx_label = QLabel("Schul-Kontext: —")
         self.ctx_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
         self.ctx_label.setWordWrap(True)
         ctx_row.addWidget(self.ctx_label, 1)
-        ctx_edit_link = QPushButton("Profil bearbeiten")
-        ctx_edit_link.setObjectName("text")
-        ctx_edit_link.clicked.connect(lambda: self.window.show_profile_manager("menu"))
-        ctx_row.addWidget(ctx_edit_link)
         outer.addLayout(ctx_row)
 
-        # Style-Briefing preview row
+        # Style-Briefing preview row (Phase 12.1: removed Profil-bearbeiten link)
         style_row = QHBoxLayout()
         self.style_label = QLabel("Stil-Briefing (aus Profil): —")
         self.style_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
         self.style_label.setWordWrap(True)
         style_row.addWidget(self.style_label, 1)
-        edit_link = QPushButton("Profil bearbeiten")
-        edit_link.setObjectName("text")
-        edit_link.clicked.connect(lambda: self.window.show_profile_manager("menu"))
-        style_row.addWidget(edit_link)
         outer.addLayout(style_row)
 
         # --- Output ---
@@ -174,10 +157,23 @@ class PromptBuilderPage(QWidget):
         sep.setStyleSheet("color: #d8cdb8;")
         outer.addWidget(sep)
 
-        outer.addWidget(QLabel("🪄 Generierter Prompt:"))
+        # Phase 12.1: output header with label + status + copy button (moved from page header)
+        output_header = QHBoxLayout()
+        output_header.addWidget(QLabel("🪄 Generierter Prompt:"))
+        output_header.addStretch(1)
+        self._status_lbl = QLabel("")
+        self._status_lbl.setStyleSheet(f"color: {Semantic.ACCENT}; font-size: 10pt;")
+        output_header.addWidget(self._status_lbl)
+        self.copy_btn = QPushButton("📋 Kopieren")
+        self.copy_btn.setObjectName("primary")
+        self.copy_btn.clicked.connect(self._copy_to_clipboard)
+        output_header.addWidget(self.copy_btn)
+        outer.addLayout(output_header)
+
         self.output_view = QPlainTextEdit()
         self.output_view.setReadOnly(True)
         self.output_view.setObjectName("promptOutput")
+        self.output_view.setMinimumHeight(360)  # Phase 12.1: enlarged from default ~150
         outer.addWidget(self.output_view, 1)
 
         self._set_manual_enabled(False)
