@@ -24,7 +24,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...storage import assessments_repo
+from ...storage import assessments_repo, events_repo
 from .._subjects import SUBJECTS_ALL, note_color
 from ..design import FontFamily
 
@@ -241,6 +241,11 @@ class AssessmentEditPage(QWidget):
                     self.subject.setCurrentIndex(idx)
                 else:
                     self.subject.setEditText(prefill_subject)
+            if prefill_event_id is not None:
+                ev = events_repo.get(self.conn, prefill_event_id)
+                if ev is not None:
+                    d = ev["event_date"]
+                    self.date_edit.setDate(QDate(int(d[:4]), int(d[5:7]), int(d[8:10])))
         else:
             self.title_label.setText("Note bearbeiten")
             self.delete_btn.setVisible(True)
