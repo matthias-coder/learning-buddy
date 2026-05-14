@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox,
     QFormLayout,
     QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -39,37 +40,42 @@ class _GradeSelector(QFrame):
     def __init__(self, initial: float = 2.0, parent=None):
         super().__init__(parent)
         self._value = float(initial)
-        h = QHBoxLayout(self)
-        h.setSpacing(4)
+        h = QGridLayout(self)
+        h.setSpacing(8)
         h.setContentsMargins(0, 0, 0, 0)
 
         self._buttons: dict[int, QPushButton] = {}
-        for n in range(1, 7):
+        for idx, n in enumerate(range(1, 7)):
             b = QPushButton(str(n))
             b.setCheckable(True)
-            b.setFixedSize(48, 48)
+            b.setFixedSize(56, 56)  # was 48x48 — 56 ≥ MIN_TOUCH_SIZE (44)
             color = note_color(n)
             b.setStyleSheet(
                 f"QPushButton {{ background: #f4efe6; color: {color}; "
-                f"font-family: 'Fraunces'; font-size: 18pt; border: 2px solid transparent; border-radius: 10px; }}"
+                f"font-family: 'Fraunces'; font-size: 22pt; border: 2px solid transparent; border-radius: 10px; }}"
                 f"QPushButton:checked {{ background: {color}; color: #f6f1e6; }}"
             )
             b.clicked.connect(lambda _, val=n: self._set_int(val))
             self._buttons[n] = b
-            h.addWidget(b)
+            row, col = divmod(idx, 3)  # 3 columns
+            h.addWidget(b, row, col)
 
-        h.addSpacing(8)
+        # Half-step toggle in a 3rd row, right-aligned (column 2)
         self._half = QPushButton(",5")
         self._half.setCheckable(True)
-        self._half.setFixedSize(40, 48)
+        self._half.setFixedSize(56, 40)  # was 40x48 — 56 wide for grid alignment
         self._half.setStyleSheet(
             "QPushButton { background: #f4efe6; color: #4a4538; "
             "font-family: 'Fraunces'; font-size: 14pt; border: 2px solid transparent; border-radius: 10px; }"
             "QPushButton:checked { background: #c79d44; color: #f6f1e6; }"
         )
         self._half.clicked.connect(self._toggle_half)
-        h.addWidget(self._half)
-        h.addStretch(1)
+        h.addWidget(self._half, 2, 2)  # row 2 (third row), col 2 (right)
+
+        # Make remaining cells stretchable so buttons don't get squished
+        h.setColumnStretch(0, 1)
+        h.setColumnStretch(1, 1)
+        h.setColumnStretch(2, 1)
 
         self._apply(self._value)
 
@@ -116,7 +122,8 @@ class AssessmentDialog(QDialog):
                  prefill_event_id: int | None = None):
         super().__init__(parent)
         self.setWindowTitle("Note" if initial is None else "Note bearbeiten")
-        self.setMinimumWidth(440)
+        self.setMinimumWidth(380)
+        self.setMaximumWidth(540)
         self._deleted = False
         self._prefill_event_id = prefill_event_id
 
