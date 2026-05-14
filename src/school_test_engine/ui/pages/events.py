@@ -7,7 +7,6 @@ from datetime import date, datetime
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QDialog,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -18,8 +17,6 @@ from PySide6.QtWidgets import (
 
 from ...storage import events_repo, assessments_repo
 from ..design import Color, FontFamily, Semantic
-from ..dialogs.event_dialog import EventDialog
-from ..dialogs.assessment_dialog import AssessmentDialog
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.pill import Pill
 from .._subjects import subject_variant
@@ -158,30 +155,7 @@ class EventsPage(QWidget):
     # ------------------------------------------------------------------
 
     def _add_event(self):
-        dlg = EventDialog(self)
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            data = dlg.data()
-            events_repo.create(
-                self.conn, self.window.active_user_id,
-                data["subject"], data["kind"], data["event_date"],
-                topics=data["topics"], note=data["note"],
-            )
-            self.reload()
+        self.window.show_event_edit(event_id=None, return_to="events")
 
     def _edit_event(self, event_id: int):
-        ev = events_repo.get(self.conn, event_id)
-        if ev is None:
-            return
-        dlg = EventDialog(self, initial=ev)
-        if dlg.exec() != QDialog.DialogCode.Accepted:
-            return
-        if dlg.is_delete():
-            events_repo.delete(self.conn, event_id)
-        else:
-            data = dlg.data()
-            events_repo.update(
-                self.conn, event_id,
-                subject=data["subject"], kind=data["kind"], event_date=data["event_date"],
-                topics=data["topics"], note=data["note"],
-            )
-        self.reload()
+        self.window.show_event_edit(event_id=event_id, return_to="events")

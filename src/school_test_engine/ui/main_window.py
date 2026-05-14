@@ -10,6 +10,8 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget
 from ..daily import builder as daily_builder
 from ..daily import finalize as daily_finalize
 from ..storage import attempts_repo, daily_sessions_repo
+from .pages.assessment_edit import AssessmentEditPage
+from .pages.event_edit import EventEditPage
 from .pages.events import EventsPage
 from .pages.gaps import GapsPage
 from .pages.grades import GradesPage
@@ -56,6 +58,8 @@ class MainWindow(QMainWindow):
         self.events_page = EventsPage(self, conn)
         self.grades_page = GradesPage(self, conn)
         self.prompt_builder_page = PromptBuilderPage(self, conn)
+        self.event_edit_page = EventEditPage(self, conn)
+        self.assessment_edit_page = AssessmentEditPage(self, conn)
 
         for page in (
             self.profile_picker_page,
@@ -72,6 +76,8 @@ class MainWindow(QMainWindow):
             self.events_page,
             self.grades_page,
             self.prompt_builder_page,
+            self.event_edit_page,
+            self.assessment_edit_page,
         ):
             self.stack.addWidget(page)
 
@@ -133,6 +139,22 @@ class MainWindow(QMainWindow):
     def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
         self.prompt_builder_page.show_for(subject, topics)
         self.stack.setCurrentWidget(self.prompt_builder_page)
+
+    def show_event_edit(self, event_id: int | None = None, return_to: str = "events") -> None:
+        self.event_edit_page.show_for(event_id, return_to)
+        self.stack.setCurrentWidget(self.event_edit_page)
+
+    def show_assessment_edit(
+        self,
+        assessment_id: int | None = None,
+        return_to: str = "grades",
+        prefill_subject: str | None = None,
+        prefill_event_id: int | None = None,
+    ) -> None:
+        self.assessment_edit_page.show_for(
+            assessment_id, return_to, prefill_subject, prefill_event_id,
+        )
+        self.stack.setCurrentWidget(self.assessment_edit_page)
 
     def start_test(self, test_id: int) -> None:
         self._return_to_history = False
