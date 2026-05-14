@@ -1,20 +1,28 @@
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QPainter, QPainterPath, QPixmap, QPixmapCache
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QWidget
 
 from ..design import Semantic
 
 
+PLACEHOLDER_SVG_PATH = (
+    Path(__file__).resolve().parents[3].parent / "assets" / "avatar-placeholder.svg"
+)
+
+
 class AvatarBadge(QLabel):
-    """Rundes Avatar — Foto wenn vorhanden, sonst Emoji.
+    """Rundes Avatar — Foto wenn vorhanden, sonst SVG-Silhouette.
 
     Bytes werden über QPixmapCache gecacht (Schlüssel = sha1+Durchmesser),
     damit derselbe Avatar an mehreren Stellen (Chip, Liste, Picker) nicht
-    bei jedem Rerender neu dekodiert wird.
+    bei jedem Rerender neu dekodiert wird. Der SVG-Placeholder wird ebenfalls
+    pro Durchmesser einmal in den Cache gerendert.
     """
 
     def __init__(
@@ -30,17 +38,14 @@ class AvatarBadge(QLabel):
         self.setFixedSize(diameter, diameter)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setStyleSheet(
-            f"background: {Semantic.BG_ELEVATED}; "
+            f"background: transparent; "
             f"border: 1px solid {Semantic.BORDER}; "
             f"border-radius: {diameter // 2}px;"
         )
-        self._emoji_font = QFont()
-        self._emoji_font.setPointSize(max(12, diameter // 2 - 4))
         self.set_avatar(emoji=emoji, image_bytes=image_bytes)
 
     def set_avatar(self, *, emoji: str, image_bytes: bytes | None) -> None:
-        # Phase 12: emoji parameter retained for backward compat but ignored.
-        # Display generic placeholder when no image.
+        # Phase 13: emoji parameter retained for backward compat but ignored.
         if image_bytes:
             pm = _cached_round_pixmap(image_bytes, self._diameter - 4)
             if pm is not None:
@@ -50,12 +55,11 @@ class AvatarBadge(QLabel):
         self._render_placeholder()
 
     def _render_placeholder(self) -> None:
-        """Render a generic person-silhouette placeholder."""
         self.clear()
-        self.setText("\U0001f464")
-        self.setFont(self._emoji_font)
+        pm = _cached_placeholder_pixmap(self._diameter)
+        self.setPixmap(pm)
         self.setStyleSheet(
-            f"background: #f4efe6; color: #b3a98e; border-radius: {self._diameter // 2}px;"
+            f"background: transparent; border-radius: {self._diameter // 2}px;"
         )
 
 
@@ -91,3 +95,19 @@ def _cached_round_pixmap(image_bytes: bytes, diameter: int) -> QPixmap | None:
     rounded = round_pixmap(pm, diameter)
     QPixmapCache.insert(key, rounded)
     return rounded
+
+
+def _cached_placeholder_pixmap(diameter: int) -> QPixmap:
+    key = f"avatar-placeholder:{diameter}"
+    cached = QPixmapCache.find(key)
+    if cached is not None:
+        return cached
+    pm = QPixmap(diameter, diameter)
+    pm.fill(Qt.GlobalColor.transparent)
+    renderer = QSvgRenderer(str(PLACEHOLDER_SVG_PATH))
+    painter = QPainter(pm)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+    renderer.render(painter)
+    painter.end()
+    QPixmapCache.insert(key, pm)
+    return pm
