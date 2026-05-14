@@ -56,11 +56,10 @@ class ProfilePickerPage(QWidget):
         outer.addLayout(header)
         outer.addSpacing(8)
 
-        # FlowLayout in einem zentrierten Container — fixe Breite 880 für 3 Cards pro Reihe.
+        # FlowLayout in einem linksbündigen Container — fixe Breite 880 für 3 Cards pro Reihe.
         # Phase 12.1 fix: ohne setMinimumWidth nimmt der Container nur die natürliche
         # Größe (sizeHint) des FlowLayouts an = Größe EINER Karte → Karten stacken vertikal.
         grid_row = QHBoxLayout()
-        grid_row.addStretch(1)
         self.grid_container = QWidget()
         self.grid_container.setMinimumWidth(880)
         self.grid_container.setMaximumWidth(880)
