@@ -140,7 +140,7 @@ class LibraryPage(QWidget):
         self.scroll.show()
 
         for r in rows:
-            card = _make_test_card(r)
+            card = _make_test_card(r, on_pdf=self._export_pdf)
             tid = int(r["id"])
             card.clicked.connect(lambda _tid=tid: self.window.start_test(_tid))
             self.list_layout.addWidget(card)
@@ -152,6 +152,14 @@ class LibraryPage(QWidget):
         if self._resume_attempt_id is None:
             return
         self.window.resume_attempt(self._resume_attempt_id)
+
+    def _export_pdf(self, test_id: int, subject: str) -> None:
+        from datetime import date
+        from ...pdf_export.test_sheet import export_test_sheet
+        from ...pdf_export._common import save_pdf_with_dialog
+        html = export_test_sheet(self.conn, test_id)
+        default = f"learning-buddy-{subject.lower()}-{date.today().isoformat()}.pdf"
+        save_pdf_with_dialog(self, html, default)
 
     def _discard_resume(self) -> None:
         if self._resume_attempt_id is None:
@@ -167,7 +175,7 @@ class LibraryPage(QWidget):
             self.reload()
 
 
-def _make_test_card(row) -> ClickableCard:
+def _make_test_card(row, on_pdf=None) -> ClickableCard:
     card = ClickableCard(object_name="actionCard")
     card.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
     card.setMinimumHeight(96)
@@ -198,7 +206,15 @@ def _make_test_card(row) -> ClickableCard:
     left.addWidget(meta)
     layout.addLayout(left, stretch=1)
 
-    # Rechte Seite: Clay-Pfeil
+    # Rechte Seite: optionaler PDF-Button + Clay-Pfeil
+    if on_pdf is not None:
+        pdf_btn = QPushButton("PDF")
+        pdf_btn.setObjectName("text")
+        pdf_btn.clicked.connect(
+            lambda checked=False, tid=int(row["id"]), subj=row["subject"]: on_pdf(tid, subj)
+        )
+        layout.addWidget(pdf_btn)
+
     arrow = QLabel("→")
     arrow.setStyleSheet("color: #c26a3d; font-size: 18pt; font-weight: 600;")
     arrow.setAlignment(Qt.AlignmentFlag.AlignCenter)
