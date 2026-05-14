@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.conn = conn
         self.active_user_id: int | None = None
-        self.setWindowTitle("Übungstests")
+        self.setWindowTitle("Learning Buddy")
 
         qss_path = Path(__file__).parent / "style.qss"
         if qss_path.exists():

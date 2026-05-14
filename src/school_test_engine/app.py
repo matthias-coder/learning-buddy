@@ -14,8 +14,9 @@ from .ui.main_window import MainWindow
 
 def main() -> int:
     app = QApplication(sys.argv)
-    app.setApplicationName("School Test Engine")
-    app.setApplicationDisplayName("Übungstests")
+    app.setApplicationName("Learning Buddy")
+    app.setApplicationDisplayName("Learning Buddy")
+    app.setOrganizationName("Matthias Kessler")
 
     icon_path = Path(__file__).resolve().parents[2] / "assets" / "logomark.svg"
     if icon_path.exists():
