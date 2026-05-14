@@ -51,6 +51,10 @@ class GradesPage(QWidget):
         back.clicked.connect(self.window.show_menu)
         head.addWidget(back)
         head.addStretch(1)
+        pdf_btn = QPushButton("Als PDF")
+        pdf_btn.setObjectName("text")
+        pdf_btn.clicked.connect(self._export_pdf)
+        head.addWidget(pdf_btn)
         add = QPushButton("+ Note")
         add.setObjectName("primary")
         add.clicked.connect(self._add_assessment)
@@ -248,6 +252,17 @@ class GradesPage(QWidget):
     # ------------------------------------------------------------------
     # Actions
     # ------------------------------------------------------------------
+
+    def _export_pdf(self) -> None:
+        uid = self.window.active_user_id
+        if uid is None:
+            return
+        from datetime import date
+        from ...pdf_export.grade_report import export_grade_report
+        from ...pdf_export._common import save_pdf_with_dialog
+        html = export_grade_report(self.conn, uid)
+        default = f"learning-buddy-notenuebersicht-{date.today().isoformat()}.pdf"
+        save_pdf_with_dialog(self, html, default)
 
     def _add_assessment(self):
         self.window.show_assessment_edit(
