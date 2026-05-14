@@ -8,7 +8,6 @@ from PySide6.QtGui import QFont
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QHBoxLayout,
-    QInputDialog,
     QLabel,
     QPushButton,
     QVBoxLayout,
@@ -106,7 +105,9 @@ class ProfilePickerPage(QWidget):
 
         # "+ Neues Profil"-Kachel als letzte
         plus = ProfileCard(avatar="+", name="Neues Profil", plus=True)
-        plus.clicked.connect(self._create_new)
+        plus.clicked.connect(
+            lambda: self.window.show_profile_edit(user_id=None, return_to="picker")
+        )
         self.grid.addWidget(plus)
 
     def _meta_for(self, user_id: int) -> str:
@@ -122,24 +123,6 @@ class ProfilePickerPage(QWidget):
 
     def _pick(self, user_id: int) -> None:
         self.window.set_active_user(user_id)
-
-    def _create_new(self) -> None:
-        name, ok = QInputDialog.getText(
-            self,
-            "Neues Profil",
-            "Wie soll das Profil heißen?",
-        )
-        if not ok or not name.strip():
-            return
-        avatar, ok = QInputDialog.getText(
-            self,
-            "Avatar wählen",
-            "Ein Emoji als Avatar (z.B. 🧒 oder 🦊). Leer = 👤.",
-        )
-        avatar = avatar.strip() or "👤"
-        uid = users_repo.create_user(self.conn, name.strip(), avatar)
-        self.reload()
-        self.window.set_active_user(uid)
 
     def _open_manager(self) -> None:
         self.window.show_profile_manager(return_to="picker")
