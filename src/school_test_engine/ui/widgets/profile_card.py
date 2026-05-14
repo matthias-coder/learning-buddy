@@ -46,8 +46,12 @@ class ProfileCard(QFrame):
             if pm.loadFromData(image_bytes):
                 avatar_lbl.setPixmap(round_pixmap(pm, 84))
         if not avatar_lbl.pixmap():
-            avatar_lbl.setText(avatar)
+            # Phase 12: generic placeholder instead of emoji (avatar param ignored)
+            avatar_lbl.setText("\U0001f464")
             big = QFont(); big.setPointSize(48); avatar_lbl.setFont(big)
+            avatar_lbl.setStyleSheet(
+                "background: #f4efe6; color: #b3a98e; border-radius: 42px;"
+            )
         layout.addWidget(avatar_lbl)
 
         name_lbl = QLabel(name)

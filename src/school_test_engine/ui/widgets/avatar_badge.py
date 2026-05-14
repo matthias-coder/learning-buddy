@@ -39,15 +39,24 @@ class AvatarBadge(QLabel):
         self.set_avatar(emoji=emoji, image_bytes=image_bytes)
 
     def set_avatar(self, *, emoji: str, image_bytes: bytes | None) -> None:
+        # Phase 12: emoji parameter retained for backward compat but ignored.
+        # Display generic placeholder when no image.
         if image_bytes:
             pm = _cached_round_pixmap(image_bytes, self._diameter - 4)
             if pm is not None:
                 self.setPixmap(pm)
                 self.setText("")
                 return
+        self._render_placeholder()
+
+    def _render_placeholder(self) -> None:
+        """Render a generic person-silhouette placeholder."""
         self.clear()
-        self.setText(emoji)
+        self.setText("\U0001f464")
         self.setFont(self._emoji_font)
+        self.setStyleSheet(
+            f"background: #f4efe6; color: #b3a98e; border-radius: {self._diameter // 2}px;"
+        )
 
 
 def round_pixmap(pm: QPixmap, diameter: int) -> QPixmap:
