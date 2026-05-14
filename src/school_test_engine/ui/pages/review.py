@@ -53,6 +53,11 @@ class ReviewPage(QWidget):
         back = QPushButton("← Weiter üben")
         back.clicked.connect(self._back_to_runner)
         bottom.addWidget(back)
+
+        to_menu = QPushButton("← Zurück zum Menü")
+        to_menu.setObjectName("text")
+        to_menu.clicked.connect(self._back_to_menu)
+        bottom.addWidget(to_menu)
         bottom.addStretch(1)
         submit = QPushButton("Abgeben ✓")
         submit.setObjectName("primary")
@@ -111,6 +116,9 @@ class ReviewPage(QWidget):
 
     def _back_to_runner(self) -> None:
         self.window.back_to_runner()
+
+    def _back_to_menu(self) -> None:
+        self.window.show_menu()
 
     def _submit(self) -> None:
         items = self.window.runner_page.get_status_overview()
