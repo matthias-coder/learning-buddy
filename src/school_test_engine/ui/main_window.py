@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import sqlite3
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
 
+from ..daily import builder as daily_builder
+from ..daily import finalize as daily_finalize
+from ..storage import attempts_repo, daily_sessions_repo
 from .pages.events import EventsPage
 from .pages.gaps import GapsPage
 from .pages.grades import GradesPage
@@ -128,6 +132,42 @@ class MainWindow(QMainWindow):
         self.runner_page.start_new(test_id)
         self.stack.setCurrentWidget(self.runner_page)
 
+    def start_daily_five(self) -> None:
+        """Start (or resume) today's Daily-5 session."""
+        uid = self.active_user_id
+        if uid is None:
+            return
+        today = date.today()
+        today_iso = today.isoformat()
+
+        existing = daily_sessions_repo.get_for_today(self.conn, uid, today_iso)
+        if existing is not None:
+            if existing["completed_at"] is not None:
+                return  # already done today
+            if existing["attempt_id"] is not None:
+                # Resume in-progress session
+                self.resume_attempt(existing["attempt_id"])
+                return
+
+        # Build fresh test + start attempt + record session
+        test_id = daily_builder.build_daily_test(self.conn, uid, today)
+        if test_id is None:
+            return  # pool insufficient (should not happen if card was clickable)
+
+        points_total = self.conn.execute(
+            "SELECT COALESCE(SUM(points), 0) AS pts FROM questions WHERE test_id = ?",
+            (test_id,),
+        ).fetchone()["pts"]
+        attempt_id = attempts_repo.start_attempt(self.conn, test_id, int(points_total), uid)
+        daily_sessions_repo.start_session(
+            self.conn, uid, today_iso,
+            test_id=test_id,
+            attempt_id=attempt_id,
+            started_at=datetime.now(timezone.utc).isoformat(),
+        )
+        self.runner_page.resume(attempt_id)
+        self.stack.setCurrentWidget(self.runner_page)
+
     def resume_attempt(self, attempt_id: int) -> None:
         self._return_to_history = False
         self.runner_page.resume(attempt_id)
@@ -145,6 +185,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.runner_page)
 
     def show_results(self, attempt_id: int) -> None:
+        daily_finalize.finalize_if_daily(self.conn, attempt_id)
         self._return_to_history = (
             self.stack.currentWidget() is self.history_page
         )
