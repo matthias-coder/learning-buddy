@@ -48,11 +48,6 @@ class ProfilePickerPage(QWidget):
             logo_row.addStretch(1)
             header.addLayout(logo_row)
 
-        eyebrow = QLabel("die Kessler Familie")
-        eyebrow.setObjectName("eyebrow")
-        eyebrow.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        eyebrow.setStyleSheet("color: #6f6757; letter-spacing: 1.5pt;")
-        header.addWidget(eyebrow)
         title = QLabel("Wer übt heute?")
         title.setObjectName("title")
         title.setFont(QFont(FontFamily.DISPLAY, 40, QFont.Weight.Normal))
