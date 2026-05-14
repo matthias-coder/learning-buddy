@@ -126,12 +126,9 @@ class MenuPage(QWidget):
         self.chip.set_user(user["avatar"], user["name"], row_get(user, "avatar_image"))
         self.greeting.setText(f"Hallo, {user['name']}")
 
-        # Rebuild dynamic content
-        while self._dynamic_layout.count():
-            item = self._dynamic_layout.takeAt(0)
-            w = item.widget()
-            if w:
-                w.deleteLater()
+        # Rebuild dynamic content — recursive clear so nested QHBoxLayouts/QGridLayouts
+        # don't leak their child widgets across reloads (Phase 12.1 fix).
+        self._clear_layout_recursive(self._dynamic_layout)
 
         events = cockpit.upcoming_events_for_menu(self.window.conn, uid, today=date.today())
         if events:
@@ -140,6 +137,27 @@ class MenuPage(QWidget):
         else:
             self._build_empty_state()
             self._build_full_grid()
+
+    @staticmethod
+    def _clear_layout_recursive(layout) -> None:
+        """Recursively detach + delete every widget inside a layout (including
+        nested layouts). `setParent(None)` removes the widget from its parent's
+        children list IMMEDIATELY (so it stops being rendered + counted), then
+        `deleteLater` schedules actual destruction. Without setParent(None),
+        widgets stay visible as orphans of the original container until the
+        event loop processes deletions — leading to ghosted duplicates when
+        reload() runs multiple times quickly (e.g. during initial resize events)."""
+        while layout.count():
+            item = layout.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+                continue
+            child_layout = item.layout()
+            if child_layout is not None:
+                MenuPage._clear_layout_recursive(child_layout)
+                child_layout.deleteLater()
 
     def _switch_profile(self) -> None:
         self.window.show_profile_picker()
