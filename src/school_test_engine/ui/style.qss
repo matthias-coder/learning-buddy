@@ -581,3 +581,68 @@ QPlainTextEdit#promptOutput {
     font-family: "IBM Plex Mono", monospace;
     font-size: 10pt;
 }
+
+/* ----- Phase 11: Responsive UI — focus rings & touch targets ----- */
+
+/* Focus rings for keyboard + touch navigation */
+QPushButton:focus,
+QComboBox:focus,
+QLineEdit:focus,
+QPlainTextEdit:focus,
+QTextEdit:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus,
+QRadioButton:focus,
+QCheckBox:focus,
+QDateEdit:focus {
+    outline: none;
+    border: 2px solid #3e552d;
+}
+
+ClickableCard:focus,
+QFrame#profileRow:focus,
+QFrame#profileCard:focus {
+    border: 2px solid #3e552d;
+}
+
+/* Hamburger button (narrow-mode top-bar) */
+QPushButton#hamburger {
+    background: transparent;
+    color: #4a4538;
+    border: 1px solid #d8cdb8;
+    border-radius: 22px;
+    font-size: 18pt;
+}
+QPushButton#hamburger:hover {
+    background: #f4efe6;
+}
+QPushButton#hamburger:focus {
+    border: 2px solid #3e552d;
+}
+
+/* Touch-target minimum heights for primary/text/danger buttons */
+QPushButton#primary,
+QPushButton#text,
+QPushButton#danger,
+QPushButton#topBarAction {
+    min-height: 44px;
+}
+
+/* Subject tabs on Grades page — taller for touch (was implicit ~36) */
+QPushButton#subjectTab {
+    background: transparent;
+    color: #4a4538;
+    border: 1px solid #d8cdb8;
+    padding: 8px 16px;
+    border-radius: 14px;
+    font-size: 10pt;
+    min-height: 44px;
+}
+QPushButton#subjectTab:checked {
+    background: #3e552d;
+    color: #f6f1e6;
+    border-color: #3e552d;
+}
+QPushButton#subjectTab:hover:!checked {
+    background: #f4efe6;
+}
