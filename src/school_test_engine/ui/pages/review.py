@@ -3,7 +3,6 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QMessageBox,
@@ -15,12 +14,11 @@ from PySide6.QtWidgets import (
 
 from ..design import FontFamily
 from ..widgets.eyebrow import Eyebrow
+from ..widgets.flow_layout import FlowLayout
 
 
 class ReviewPage(QWidget):
     """Übersichts-Screen vor dem endgültigen Abgeben."""
-
-    COLUMNS = 4
 
     def __init__(self, window):
         super().__init__()
@@ -47,8 +45,7 @@ class ReviewPage(QWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.grid_container = QWidget()
-        self.grid = QGridLayout(self.grid_container)
-        self.grid.setSpacing(10)
+        self.grid = FlowLayout(self.grid_container, h_spacing=10, v_spacing=10)
         self.scroll.setWidget(self.grid_container)
         layout.addWidget(self.scroll, stretch=1)
 
@@ -80,10 +77,9 @@ class ReviewPage(QWidget):
             if w is not None:
                 w.deleteLater()
 
-        for pos, it in enumerate(items):
+        for it in items:
             tile = self._make_tile(it)
-            row, col = divmod(pos, self.COLUMNS)
-            self.grid.addWidget(tile, row, col)
+            self.grid.addWidget(tile)
 
     def _make_tile(self, item: dict) -> QPushButton:
         # Status-Icon: rotes ⚪ wenn nicht beantwortet, 🟢 wenn beantwortet.
