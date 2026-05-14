@@ -19,4 +19,4 @@ if command -v update-desktop-database >/dev/null 2>&1; then
 fi
 
 echo "✓ Installiert: $TARGET"
-echo "  Du findest 'Übungstests' jetzt im Startmenü unter Bildung/Lernen."
+echo "  Du findest 'Learning Buddy' jetzt im Startmenü unter Bildung/Lernen."
