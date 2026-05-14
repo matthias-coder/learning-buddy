@@ -6,7 +6,6 @@ from datetime import datetime
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -19,7 +18,6 @@ from PySide6.QtWidgets import (
 from ...cockpit import service as cockpit
 from ...storage import assessments_repo
 from ..design import Color, FontFamily, Semantic
-from ..dialogs.assessment_dialog import AssessmentDialog
 from ..widgets.comparison_view import ComparisonView
 from ..widgets.grade_pill import GradePill
 from ..widgets.pill import Pill
@@ -233,32 +231,14 @@ class GradesPage(QWidget):
     # ------------------------------------------------------------------
 
     def _add_assessment(self):
-        dlg = AssessmentDialog(self, prefill_subject=self._current_subject)
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            data = dlg.data()
-            assessments_repo.create(
-                self.conn, self.window.active_user_id,
-                data["subject"], data["category"], data["assessment_date"],
-                grade=data["grade"], points=data["points"], max_points=data["max_points"],
-                note=data["note"], scheduled_event_id=data["scheduled_event_id"],
-            )
-            self.reload()
+        self.window.show_assessment_edit(
+            assessment_id=None,
+            return_to="grades",
+            prefill_subject=self._current_subject,
+        )
 
     def _edit_assessment(self, assessment_id: int):
-        row = assessments_repo.get(self.conn, assessment_id)
-        if row is None:
-            return
-        dlg = AssessmentDialog(self, initial=row, prefill_event_id=row["scheduled_event_id"])
-        if dlg.exec() != QDialog.DialogCode.Accepted:
-            return
-        if dlg.is_delete():
-            assessments_repo.delete(self.conn, assessment_id)
-        else:
-            data = dlg.data()
-            assessments_repo.update(
-                self.conn, assessment_id,
-                subject=data["subject"], category=data["category"], assessment_date=data["assessment_date"],
-                grade=data["grade"], points=data["points"], max_points=data["max_points"],
-                note=data["note"], scheduled_event_id=data["scheduled_event_id"],
-            )
-        self.reload()
+        self.window.show_assessment_edit(
+            assessment_id=assessment_id,
+            return_to="grades",
+        )

@@ -20,11 +20,9 @@ from PySide6.QtWidgets import (
 from ...cockpit import service as cockpit
 from ...daily import builder as daily_builder
 from ...daily import streak as daily_streak
-from ...storage import users_repo, events_repo, assessments_repo, daily_sessions_repo
+from ...storage import users_repo, events_repo, daily_sessions_repo
 from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
-from ..dialogs.assessment_dialog import AssessmentDialog
-from ..dialogs.event_dialog import EventDialog
 from ..responsive import is_narrow
 from ..widgets.avatar_badge import round_pixmap
 from ..widgets.clickable_card import ClickableCard
@@ -334,57 +332,21 @@ class MenuPage(QWidget):
         self.window.show_prompt_builder(subject=ev["subject"], topics=topics)
 
     def _on_enter_grade(self, event_id: int) -> None:
-        from PySide6.QtWidgets import QDialog
         ev = events_repo.get(self.window.conn, event_id)
         if ev is None:
             return
-        dlg = AssessmentDialog(
-            self, prefill_subject=ev["subject"], prefill_event_id=event_id
+        self.window.show_assessment_edit(
+            assessment_id=None,
+            return_to="menu",
+            prefill_subject=ev["subject"],
+            prefill_event_id=event_id,
         )
-        # Prefill date with KA date
-        from PySide6.QtCore import QDate
-        d = ev["event_date"]
-        dlg.date_edit.setDate(QDate(int(d[:4]), int(d[5:7]), int(d[8:10])))
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            data = dlg.data()
-            assessments_repo.create(
-                self.window.conn, self.window.active_user_id,
-                data["subject"], data["category"], data["assessment_date"],
-                grade=data["grade"], points=data["points"], max_points=data["max_points"],
-                note=data["note"], scheduled_event_id=event_id,
-            )
-            self.reload()
 
     def _on_edit_event(self, event_id: int) -> None:
-        from PySide6.QtWidgets import QDialog
-        ev = events_repo.get(self.window.conn, event_id)
-        if ev is None:
-            return
-        dlg = EventDialog(self, initial=ev)
-        if dlg.exec() != QDialog.DialogCode.Accepted:
-            return
-        if dlg.is_delete():
-            events_repo.delete(self.window.conn, event_id)
-        else:
-            data = dlg.data()
-            events_repo.update(
-                self.window.conn, event_id,
-                subject=data["subject"], kind=data["kind"], event_date=data["event_date"],
-                topics=data["topics"], note=data["note"],
-            )
-        self.reload()
+        self.window.show_event_edit(event_id=event_id, return_to="menu")
 
     def _on_add_event_from_menu(self) -> None:
-        from PySide6.QtWidgets import QDialog
-        dlg = EventDialog(self)
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            data = dlg.data()
-            events_repo.create(
-                self.window.conn, self.window.active_user_id,
-                data["subject"], data["kind"], data["event_date"],
-                topics=data["topics"], note=data["note"],
-            )
-            self.reload()
+        self.window.show_event_edit(event_id=None, return_to="menu")
 
 
 # ----------------------------------------------------------------------
