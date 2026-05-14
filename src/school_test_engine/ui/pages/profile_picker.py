@@ -65,6 +65,7 @@ class ProfilePickerPage(QWidget):
         grid_row = QHBoxLayout()
         grid_row.addStretch(1)
         self.grid_container = QWidget()
+        self.grid_container.setMaximumWidth(880)
         self.grid = FlowLayout(h_spacing=20, v_spacing=20)
         self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid_container.setLayout(self.grid)
