@@ -18,13 +18,16 @@ from PySide6.QtWidgets import (
 )
 
 from ...cockpit import service as cockpit
-from ...storage import users_repo, events_repo, assessments_repo
+from ...daily import builder as daily_builder
+from ...daily import streak as daily_streak
+from ...storage import users_repo, events_repo, assessments_repo, daily_sessions_repo
 from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
 from ..dialogs.assessment_dialog import AssessmentDialog
 from ..dialogs.event_dialog import EventDialog
 from ..widgets.avatar_badge import round_pixmap
 from ..widgets.clickable_card import ClickableCard
+from ..widgets.daily_card import DailyCard
 from ..widgets.exam_card import ExamCard
 
 
@@ -191,6 +194,14 @@ class MenuPage(QWidget):
         grid_wrap.addStretch(1)
         self._dynamic_layout.addLayout(grid_wrap)
 
+        # Phase 10: Daily-5 card
+        uid = self.window.active_user_id
+        if uid is not None:
+            state, streak, last_grade = self._compute_daily_state(uid)
+            card = DailyCard(state, streak, last_grade=last_grade)
+            card.practice_clicked.connect(self.window.start_daily_five)
+            self._dynamic_layout.addWidget(card)
+
     def _build_full_grid(self) -> None:
         grid_wrap = QHBoxLayout()
         grid_wrap.addStretch(1)
@@ -219,6 +230,40 @@ class MenuPage(QWidget):
         grid_wrap.addWidget(grid_container)
         grid_wrap.addStretch(1)
         self._dynamic_layout.addLayout(grid_wrap)
+
+        # Phase 10: Daily-5 card
+        uid = self.window.active_user_id
+        if uid is not None:
+            state, streak, last_grade = self._compute_daily_state(uid)
+            card = DailyCard(state, streak, last_grade=last_grade)
+            card.practice_clicked.connect(self.window.start_daily_five)
+            self._dynamic_layout.addWidget(card)
+
+    # ------------------------------------------------------------------
+    # Daily-5 helpers
+    # ------------------------------------------------------------------
+
+    def _compute_daily_state(self, uid: int) -> tuple[str, int, int | None]:
+        """Return (state, streak, last_grade)."""
+        today = date.today()
+        today_iso = today.isoformat()
+
+        streak = daily_streak.current_streak(self.window.conn, uid, today)
+
+        session = daily_sessions_repo.get_for_today(self.window.conn, uid, today_iso)
+        if session is not None and session["completed_at"] is not None:
+            # Done — look up the attempt's grade
+            attempt_row = self.window.conn.execute(
+                "SELECT note FROM attempts WHERE id = ?",
+                (session["attempt_id"],),
+            ).fetchone() if session["attempt_id"] else None
+            last_grade = attempt_row["note"] if attempt_row else None
+            return ("done", streak, last_grade)
+
+        if not daily_builder.has_enough_questions(self.window.conn, uid):
+            return ("no_library", streak, None)
+
+        return ("due", streak, None)
 
     # ------------------------------------------------------------------
     # ExamCard actions
