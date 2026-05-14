@@ -17,6 +17,7 @@ from .pages.history import HistoryPage
 from .pages.import_wizard import ImportPage
 from .pages.library import LibraryPage
 from .pages.menu import MenuPage
+from .pages.profile_edit import ProfileEditPage
 from .pages.profile_manager import ProfileManagerPage
 from .pages.profile_picker import ProfilePickerPage
 from .pages.prompt_builder import PromptBuilderPage
@@ -43,6 +44,7 @@ class MainWindow(QMainWindow):
 
         self.profile_picker_page = ProfilePickerPage(self, conn)
         self.profile_manager_page = ProfileManagerPage(self, conn)
+        self.profile_edit_page = ProfileEditPage(self, conn)
         self.menu_page = MenuPage(self)
         self.library_page = LibraryPage(self, conn)
         self.runner_page = RunnerPage(self, conn)
@@ -58,6 +60,7 @@ class MainWindow(QMainWindow):
         for page in (
             self.profile_picker_page,
             self.profile_manager_page,
+            self.profile_edit_page,
             self.menu_page,
             self.library_page,
             self.runner_page,
@@ -94,6 +97,10 @@ class MainWindow(QMainWindow):
     def show_profile_manager(self, return_to: str = "picker") -> None:
         self.profile_manager_page.show_for(return_to)
         self.stack.setCurrentWidget(self.profile_manager_page)
+
+    def show_profile_edit(self, user_id: int | None = None, return_to: str = "picker") -> None:
+        self.profile_edit_page.show_for(user_id, return_to)
+        self.stack.setCurrentWidget(self.profile_edit_page)
 
     def show_menu(self) -> None:
         self._return_to_history = False
