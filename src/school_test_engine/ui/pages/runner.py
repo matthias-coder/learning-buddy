@@ -99,7 +99,7 @@ class RunnerPage(QWidget):
         self.back_btn.clicked.connect(self._on_back)
         buttons.addWidget(self.back_btn)
 
-        self.mark_btn = QPushButton("🚩  Markieren")
+        self.mark_btn = QPushButton("Markieren")
         self.mark_btn.clicked.connect(self._on_mark_toggle)
         buttons.addWidget(self.mark_btn)
 
@@ -318,7 +318,7 @@ class RunnerPage(QWidget):
         self.answer_area.addStretch(1)
 
         self.back_btn.setEnabled(self._index > 0)
-        self.mark_btn.setText("Markierung entfernen" if mark_state else "🚩  Markieren")
+        self.mark_btn.setText("Markierung entfernen" if mark_state else "Markieren")
         is_last = self._index == len(self._questions) - 1
         self.next_btn.setText("Zur Übersicht →" if is_last else "Weiter →")
 

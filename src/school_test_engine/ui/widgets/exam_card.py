@@ -88,7 +88,7 @@ class ExamCard(ClickableCard):
         actions = QHBoxLayout()
         actions.setSpacing(8)
         if event_data.linked_assessment_id is None:
-            practice_btn = QPushButton("✨ Test bauen")
+            practice_btn = QPushButton("Test bauen")
             practice_btn.setObjectName("primary")
             practice_btn.clicked.connect(lambda: self.practice_clicked.emit(self.event_id))
             actions.addWidget(practice_btn)

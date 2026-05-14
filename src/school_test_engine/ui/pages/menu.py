@@ -4,7 +4,7 @@ from datetime import date
 from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QFont, QPixmap
+from PySide6.QtGui import QFont
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QFrame,
@@ -24,7 +24,7 @@ from ...storage import users_repo, events_repo, daily_sessions_repo
 from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
 from ..responsive import is_narrow
-from ..widgets.avatar_badge import round_pixmap
+from ..widgets.avatar_badge import AvatarBadge
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
 from ..widgets.exam_card import ExamCard
@@ -58,17 +58,17 @@ class MenuPage(QWidget):
         top_row.addStretch(1)
 
         # New top-bar icon buttons
-        builder_btn = QPushButton("📝 Test bauen")
+        builder_btn = QPushButton("Test bauen")
         builder_btn.setObjectName("topBarAction")
         builder_btn.clicked.connect(lambda: self.window.show_prompt_builder())
         top_row.addWidget(builder_btn)
 
-        events_btn = QPushButton("📅 Termine")
+        events_btn = QPushButton("Termine")
         events_btn.setObjectName("topBarAction")
         events_btn.clicked.connect(self.window.show_events)
         top_row.addWidget(events_btn)
 
-        grades_btn = QPushButton("📊 Noten")
+        grades_btn = QPushButton("Noten")
         grades_btn.setObjectName("topBarAction")
         grades_btn.clicked.connect(self.window.show_grades)
         top_row.addWidget(grades_btn)
@@ -78,9 +78,9 @@ class MenuPage(QWidget):
 
         # Hamburger fallback (hidden in wide mode)
         self._hamburger = HamburgerMenu()
-        self._hamburger.add_action("📝 Test bauen", lambda: self.window.show_prompt_builder())
-        self._hamburger.add_action("📅 Termine", self.window.show_events)
-        self._hamburger.add_action("📊 Noten", self.window.show_grades)
+        self._hamburger.add_action("Test bauen", lambda: self.window.show_prompt_builder())
+        self._hamburger.add_action("Termine", self.window.show_events)
+        self._hamburger.add_action("Noten", self.window.show_grades)
         self._hamburger.setVisible(False)  # default: wide-mode
         top_row.addWidget(self._hamburger)
 
@@ -367,10 +367,8 @@ class _ProfileChip(QFrame):
         h.setContentsMargins(10, 4, 6, 4)
         h.setSpacing(8)
 
-        self.avatar = QLabel("👤")
+        self.avatar = AvatarBadge(emoji="ignored", image_bytes=None, diameter=28)
         self.avatar.setObjectName("profileChipAvatar")
-        self.avatar.setFixedSize(28, 28)
-        self.avatar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         h.addWidget(self.avatar)
 
         self.name = QLabel("…")
@@ -383,15 +381,7 @@ class _ProfileChip(QFrame):
         h.addWidget(switch)
 
     def set_user(self, avatar: str, name: str, image_bytes: bytes | None = None) -> None:
-        if image_bytes:
-            pm = QPixmap()
-            if pm.loadFromData(image_bytes):
-                self.avatar.setPixmap(round_pixmap(pm, 28))
-                self.avatar.setText("")
-                self.name.setText(name)
-                return
-        self.avatar.clear()
-        self.avatar.setText(avatar)
+        self.avatar.set_avatar(emoji="ignored", image_bytes=image_bytes)
         self.name.setText(name)
 
 
