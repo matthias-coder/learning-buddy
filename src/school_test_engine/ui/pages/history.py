@@ -20,13 +20,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...storage import attempts_repo
+from ...storage import assessments_repo, attempts_repo
 from .._format import fmt_dt, fmt_num
 from .._layouts import clear_layout
 from .._subjects import note_color, subject_variant
 from ..design import FontFamily, Semantic
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.eyebrow import Eyebrow
+from ..widgets.grade_heatmap import GradeHeatmap
 from ..widgets.pill import Pill
 from ..widgets.sparkline import Sparkline
 
@@ -55,6 +56,12 @@ class HistoryPage(QWidget):
         self.spark_layout.setContentsMargins(0, 0, 0, 0)
         self.spark_layout.setSpacing(0)
         outer.addWidget(self.spark_container)
+
+        # Phase 14: Wochen-Heatmap
+        self.heatmap_label = Eyebrow("WOCHEN-ÜBERSICHT")
+        outer.addWidget(self.heatmap_label)
+        self.heatmap = GradeHeatmap()
+        outer.addWidget(self.heatmap)
 
         self.empty_label = QLabel(
             "Noch keine abgeschlossenen Tests. Mach den ersten — er taucht hier auf."
@@ -89,7 +96,28 @@ class HistoryPage(QWidget):
             self.conn, self.window.active_user_id
         )
         self._render_sparkline(self._attempts)
+        self._render_heatmap()
         self._render_cards(self._attempts)
+
+    def _render_heatmap(self) -> None:
+        from datetime import date, timedelta
+        uid = self.window.active_user_id
+        if uid is None:
+            self.heatmap.hide()
+            self.heatmap_label.hide()
+            return
+        today = date.today()
+        monday_today = today - timedelta(days=today.weekday())
+        weeks = [monday_today - timedelta(weeks=i) for i in reversed(range(8))]
+        raw = assessments_repo.heatmap_data(self.conn, uid, weeks_back=8)
+        if not raw:
+            self.heatmap.hide()
+            self.heatmap_label.hide()
+            return
+        rows = sorted(raw.items(), key=lambda kv: kv[0])
+        self.heatmap.set_data(weeks=weeks, rows=rows)
+        self.heatmap.show()
+        self.heatmap_label.show()
 
     def _render_sparkline(self, attempts) -> None:
         clear_layout(self.spark_layout)
