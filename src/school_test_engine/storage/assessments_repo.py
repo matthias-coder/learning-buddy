@@ -116,3 +116,34 @@ def update(
 def delete(conn: sqlite3.Connection, assessment_id: int) -> None:
     conn.execute("DELETE FROM assessments WHERE id = ?", (assessment_id,))
     conn.commit()
+
+
+def heatmap_data(
+    conn: sqlite3.Connection, user_id: int, weeks_back: int = 8,
+):
+    """Returns {subject: {week_monday_date: avg_grade}} for assessments within
+    the last `weeks_back` weeks. Week start is Monday."""
+    from datetime import date, timedelta
+    today = date.today()
+    earliest_monday = today - timedelta(days=today.weekday() + (weeks_back - 1) * 7)
+    earliest_iso = earliest_monday.isoformat()
+
+    cur = conn.execute(
+        """
+        SELECT subject, assessment_date, grade
+        FROM assessments
+        WHERE user_id = ? AND assessment_date >= ?
+        ORDER BY subject ASC, assessment_date ASC
+        """,
+        (user_id, earliest_iso),
+    )
+    raw: dict[str, dict[date, list[float]]] = {}
+    for row in cur.fetchall():
+        d = date.fromisoformat(row["assessment_date"])
+        monday = d - timedelta(days=d.weekday())
+        raw.setdefault(row["subject"], {}).setdefault(monday, []).append(float(row["grade"]))
+
+    averaged: dict[str, dict[date, float]] = {}
+    for subject, weeks in raw.items():
+        averaged[subject] = {wk: sum(vals) / len(vals) for wk, vals in weeks.items()}
+    return averaged
