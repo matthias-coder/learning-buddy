@@ -27,8 +27,9 @@ class ProfileCard(QFrame):
         super().__init__(parent)
         self.setObjectName("profileCardPlus" if plus else "profileCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setFixedSize(240, 210)
-        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        self.setMinimumSize(200, 180)
+        self.setMaximumWidth(280)
         if not plus:
             apply_warm_shadow(self, blur=14, dy=2, alpha=0.07)
 

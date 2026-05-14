@@ -7,7 +7,6 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
-    QGridLayout,
     QHBoxLayout,
     QInputDialog,
     QLabel,
@@ -18,6 +17,7 @@ from PySide6.QtWidgets import (
 
 from ...storage import attempts_repo, users_repo
 from ..design import FontFamily
+from ..widgets.flow_layout import FlowLayout
 from ..widgets.profile_card import ProfileCard
 
 
@@ -26,8 +26,6 @@ LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomar
 
 class ProfilePickerPage(QWidget):
     """Startseite: Auswahl des aktiven Profils. Netflix-Stil."""
-
-    COLUMNS = 3
 
     def __init__(self, window, conn: sqlite3.Connection):
         super().__init__()
@@ -64,13 +62,13 @@ class ProfilePickerPage(QWidget):
         outer.addLayout(header)
         outer.addSpacing(8)
 
-        # Grid in einem zentrierten Container — KEIN stretch=1, sonst dehnen sich Karten
+        # FlowLayout in einem zentrierten Container — KEIN stretch=1, sonst dehnen sich Karten
         grid_row = QHBoxLayout()
         grid_row.addStretch(1)
         self.grid_container = QWidget()
-        self.grid = QGridLayout(self.grid_container)
-        self.grid.setSpacing(20)
+        self.grid = FlowLayout(h_spacing=20, v_spacing=20)
         self.grid.setContentsMargins(0, 0, 0, 0)
+        self.grid_container.setLayout(self.grid)
         grid_row.addWidget(self.grid_container)
         grid_row.addStretch(1)
         outer.addLayout(grid_row)
@@ -86,7 +84,7 @@ class ProfilePickerPage(QWidget):
         outer.addLayout(footer)
 
     def reload(self) -> None:
-        # Grid leeren
+        # Layout leeren
         while self.grid.count():
             it = self.grid.takeAt(0)
             w = it.widget()
@@ -94,7 +92,7 @@ class ProfilePickerPage(QWidget):
                 w.deleteLater()
 
         users = users_repo.list_users(self.conn)
-        for pos, u in enumerate(users):
+        for u in users:
             meta = self._meta_for(int(u["id"]))
             try:
                 img = u["avatar_image"]
@@ -104,15 +102,12 @@ class ProfilePickerPage(QWidget):
                 avatar=u["avatar"], name=u["name"], meta=meta, image_bytes=img,
             )
             card.clicked.connect(lambda _uid=int(u["id"]): self._pick(_uid))
-            row, col = divmod(pos, self.COLUMNS)
-            self.grid.addWidget(card, row, col)
+            self.grid.addWidget(card)
 
         # "+ Neues Profil"-Kachel als letzte
         plus = ProfileCard(avatar="+", name="Neues Profil", plus=True)
         plus.clicked.connect(self._create_new)
-        last_pos = len(users)
-        row, col = divmod(last_pos, self.COLUMNS)
-        self.grid.addWidget(plus, row, col)
+        self.grid.addWidget(plus)
 
     def _meta_for(self, user_id: int) -> str:
         n = self.conn.execute(
