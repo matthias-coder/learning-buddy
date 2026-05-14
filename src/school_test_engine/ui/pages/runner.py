@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -19,7 +20,8 @@ from PySide6.QtWidgets import (
 )
 
 from ...grading.scoring import score_multi, score_short, score_single
-from ...storage import attempts_repo, tests_repo
+from ...storage import attempts_repo, tests_repo, users_repo
+from ..keyboard_shortcuts import install_runner_shortcuts
 from ...util.shuffle import new_seed, shuffled
 from ..design import FontFamily
 from ..widgets.eyebrow import Eyebrow
@@ -126,6 +128,24 @@ class RunnerPage(QWidget):
         nav_container.setLayout(buttons)
         buttons.setContentsMargins(40, 12, 40, 24)
         outer.addWidget(nav_container)
+
+        # Phase 14: cheat-sheet (visibility toggled per-user via show_keyboard_hints)
+        self.cheat_sheet = QLabel(
+            "Tab Optionen · Space wählen · ←→ Fragen · M markieren · O Übersicht · Esc Menü"
+        )
+        self.cheat_sheet.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.cheat_sheet.setStyleSheet("color: #a89e89; font-size: 9pt; padding: 4px;")
+        outer.addWidget(self.cheat_sheet)
+
+        # Phase 14: keyboard shortcuts (Tab/Space handled natively by Qt focus)
+        self._shortcuts = install_runner_shortcuts(
+            self,
+            on_prev=self._on_back,
+            on_next=self._on_next,
+            on_mark=self._on_mark_toggle,
+            on_overview=self._goto_overview,
+            on_abort=self._abort,
+        )
 
         self._radio_group: QButtonGroup | None = None
         self._checkboxes: list[QCheckBox] = []
@@ -237,6 +257,13 @@ class RunnerPage(QWidget):
 
         self._index = max(0, min(current_index, len(self._questions) - 1))
         self._render_question()
+
+        # Phase 14: honor per-user keyboard-hint preference
+        uid = self.window.active_user_id
+        if uid is not None:
+            user_row = users_repo.get_user(self.conn, uid)
+            if user_row is not None:
+                self.cheat_sheet.setVisible(bool(user_row["show_keyboard_hints"]))
 
     def _clear_answer_area(self) -> None:
         while self.answer_area.count():
