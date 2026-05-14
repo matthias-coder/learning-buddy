@@ -51,7 +51,7 @@ class MenuPage(QWidget):
             logo = QSvgWidget(str(LOGOMARK_PATH))
             logo.setFixedSize(QSize(36, 36))
             top_row.addWidget(logo)
-        wordmark = QLabel("die <i>Kessler</i> Übungstests")
+        wordmark = QLabel("Learning Buddy")
         wordmark.setFont(QFont(FontFamily.DISPLAY, 14, QFont.Weight.Normal))
         wordmark.setStyleSheet(f"color: {Color.PAPER_700};")
         top_row.addWidget(wordmark)
@@ -109,6 +109,10 @@ class MenuPage(QWidget):
         self._dynamic_layout.setContentsMargins(0, 0, 0, 0)
         outer.addWidget(self._dynamic_container)
         outer.addStretch(1)
+        footer = QLabel("designed by Matthias")
+        footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        footer.setStyleSheet("color: #a89e89; font-size: 9pt;")
+        outer.addWidget(footer)
 
     # ------------------------------------------------------------------
     # Lifecycle
