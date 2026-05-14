@@ -255,6 +255,10 @@ class MenuPage(QWidget):
         grid_wrap = QHBoxLayout()
         grid_wrap.addStretch(1)
         grid_container = QWidget()
+        # Phase 12.2 fix: same pattern as profile-picker — without setMinimumWidth
+        # the container shrinks to QGridLayout's natural minimumSize (sum of card
+        # min sizes), making cards look left-shifted instead of centered.
+        grid_container.setMinimumWidth(820)
         grid_container.setMaximumWidth(820)
         grid = QGridLayout(grid_container)
         grid.setSpacing(16)

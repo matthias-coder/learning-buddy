@@ -646,3 +646,14 @@ QPushButton#subjectTab:checked {
 QPushButton#subjectTab:hover:!checked {
     background: #f4efe6;
 }
+
+/* ----- Phase 12.2: Daily-5 Card styling (was missing from Phase 10 QSS) ----- */
+
+ClickableCard#dailyCard {
+    background: #fbf6ec;
+    border: 1px solid #ead9be;
+    border-radius: 14px;
+}
+ClickableCard#dailyCard:hover {
+    background: #f6efde;
+}
