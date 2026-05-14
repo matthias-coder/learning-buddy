@@ -44,7 +44,8 @@ class EventDialog(QDialog):
     def __init__(self, parent=None, initial=None):
         super().__init__(parent)
         self.setWindowTitle("Klassenarbeit" if initial is None else "Termin bearbeiten")
-        self.setMinimumWidth(420)
+        self.setMinimumWidth(380)
+        self.setMaximumWidth(540)
         self._deleted = False
 
         layout = QVBoxLayout(self)

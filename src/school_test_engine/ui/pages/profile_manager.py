@@ -92,7 +92,8 @@ class _ProfileEditDialog(QDialog):
     ):
         super().__init__(parent)
         self.setWindowTitle("Profil bearbeiten" if initial_name else "Neues Profil")
-        self.setMinimumWidth(540)
+        self.setMinimumWidth(420)
+        self.setMaximumWidth(620)
         self._selected_avatar = initial_avatar
         self._avatar_image: bytes | None = initial_image
         self._tiles: list[AvatarTile] = []
