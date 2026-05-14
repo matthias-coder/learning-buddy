@@ -1,5 +1,14 @@
 /* Kessler Family Design System — Qt Style Sheet
    paper-and-ink Wärme · Clay-Terracotta · Tea-Green
+   =============================================================
+
+   Button convention (Phase 13):
+   Every QPushButton in the codebase MUST have one of three objectName values:
+     - "primary"  Haupt-Aktion einer Seite/Form (orange filled pillow)
+     - "text"     Sekundäre Aktion / Navigation (transparent pillow, hover effect)
+     - "danger"   Destruktive Aktion (rose-tinted pillow)
+   Exceptions: buttons with their own inline setStyleSheet() (review tiles,
+   grade selectors, subject tabs) are intentionally non-standard.
    ============================================================= */
 
 QWidget {
