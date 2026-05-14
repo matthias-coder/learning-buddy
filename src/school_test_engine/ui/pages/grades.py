@@ -19,6 +19,7 @@ from ...cockpit import service as cockpit
 from ...storage import assessments_repo
 from ..design import Color, FontFamily, Semantic
 from ..widgets.comparison_view import ComparisonView
+from ..widgets.grade_chart import GradeChart
 from ..widgets.grade_pill import GradePill
 from ..widgets.pill import Pill
 from .._subjects import SUBJECTS_ALL, subject_variant
@@ -122,6 +123,24 @@ class GradesPage(QWidget):
 
         # List of assessments
         rows = assessments_repo.list_by_subject(self.conn, uid, self._current_subject)
+
+        # Phase 14: Notenverlauf-Chart
+        from datetime import date as _date
+        chart_eyebrow = QLabel("NOTENVERLAUF")
+        chart_eyebrow.setObjectName("eyebrow")
+        self._content_layout.addWidget(chart_eyebrow)
+        schriftlich_pts = [
+            (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
+            for r in rows if r["category"] == "schriftlich"
+        ]
+        muendlich_pts = [
+            (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
+            for r in rows if r["category"] == "muendlich"
+        ]
+        chart = GradeChart()
+        chart.set_data(schriftlich=schriftlich_pts, muendlich=muendlich_pts)
+        self._content_layout.addWidget(chart)
+
         if not rows:
             empty = QLabel("Noch keine Noten in diesem Fach.\nKlick auf „+ Note“ um deine erste einzutragen.")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
