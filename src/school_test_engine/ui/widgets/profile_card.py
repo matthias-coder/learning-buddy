@@ -25,6 +25,7 @@ class ProfileCard(QFrame):
         parent=None,
     ):
         super().__init__(parent)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setObjectName("profileCardPlus" if plus else "profileCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)

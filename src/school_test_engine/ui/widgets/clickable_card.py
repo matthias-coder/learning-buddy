@@ -14,6 +14,7 @@ class ClickableCard(QFrame):
 
     def __init__(self, *, object_name: str = "card", with_shadow: bool = True, parent=None):
         super().__init__(parent)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setObjectName(object_name)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         if with_shadow:
