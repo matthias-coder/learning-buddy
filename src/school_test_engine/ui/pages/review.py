@@ -51,6 +51,7 @@ class ReviewPage(QWidget):
 
         bottom = QHBoxLayout()
         back = QPushButton("← Weiter üben")
+        back.setObjectName("text")
         back.clicked.connect(self._back_to_runner)
         bottom.addWidget(back)
 

@@ -56,6 +56,7 @@ class LibraryPage(QWidget):
         rl_buttons = QHBoxLayout()
         rl_buttons.addStretch(1)
         self.discard_btn = QPushButton("Verwerfen")
+        self.discard_btn.setObjectName("danger")
         self.discard_btn.clicked.connect(self._discard_resume)
         rl_buttons.addWidget(self.discard_btn)
         self.resume_btn = QPushButton("Fortsetzen →")
@@ -91,6 +92,7 @@ class LibraryPage(QWidget):
         # Fuß
         bottom = QHBoxLayout()
         back = QPushButton("← Zurück")
+        back.setObjectName("text")
         back.clicked.connect(window.show_menu)
         bottom.addWidget(back)
         bottom.addStretch(1)

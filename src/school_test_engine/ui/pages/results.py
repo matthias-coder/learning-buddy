@@ -125,10 +125,12 @@ class ResultsPage(QWidget):
 
         bottom = QHBoxLayout()
         back = QPushButton("← Zurück")
+        back.setObjectName("text")
         back.clicked.connect(window.return_from_results)
         bottom.addWidget(back)
         bottom.addStretch(1)
         print_btn = QPushButton("Drucken")
+        print_btn.setObjectName("text")
         print_btn.clicked.connect(self._print)
         bottom.addWidget(print_btn)
         practice = QPushButton("Schwächen üben  →")

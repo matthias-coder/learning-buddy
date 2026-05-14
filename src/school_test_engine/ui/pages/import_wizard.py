@@ -71,6 +71,7 @@ class ImportPage(QWidget):
 
         bottom = QHBoxLayout()
         back = QPushButton("← Zurück")
+        back.setObjectName("text")
         back.clicked.connect(window.show_menu)
         bottom.addWidget(back)
         bottom.addStretch(1)

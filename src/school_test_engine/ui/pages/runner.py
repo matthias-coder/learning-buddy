@@ -63,6 +63,7 @@ class RunnerPage(QWidget):
         top_row.addWidget(self.header_eyebrow)
         top_row.addStretch(1)
         self.overview_btn = QPushButton("Übersicht")
+        self.overview_btn.setObjectName("text")
         self.overview_btn.clicked.connect(self._goto_overview)
         top_row.addWidget(self.overview_btn)
         layout.addLayout(top_row)
@@ -96,16 +97,19 @@ class RunnerPage(QWidget):
 
         buttons = QHBoxLayout()
         self.back_btn = QPushButton("← Zurück")
+        self.back_btn.setObjectName("text")
         self.back_btn.clicked.connect(self._on_back)
         buttons.addWidget(self.back_btn)
 
         self.mark_btn = QPushButton("Markieren")
+        self.mark_btn.setObjectName("text")
         self.mark_btn.clicked.connect(self._on_mark_toggle)
         buttons.addWidget(self.mark_btn)
 
         buttons.addStretch(1)
 
         self.abort_btn = QPushButton("Zurück zum Menü")
+        self.abort_btn.setObjectName("text")
         self.abort_btn.setToolTip(
             "Fortschritt wird gespeichert — du kannst später weitermachen"
         )

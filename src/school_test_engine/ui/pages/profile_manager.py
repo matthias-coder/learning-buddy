@@ -72,6 +72,7 @@ class _ProfileRow(QFrame):
         layout.addLayout(mid, stretch=1)
 
         edit_btn = QPushButton("Bearbeiten")
+        edit_btn.setObjectName("text")
         edit_btn.clicked.connect(on_edit)
         layout.addWidget(edit_btn)
         del_btn = QPushButton("Löschen")
@@ -108,7 +109,7 @@ class ProfileManagerPage(QWidget):
         action_row = QHBoxLayout()
         action_row.addStretch(1)
         add = QPushButton("+  Neues Profil anlegen")
-        add.setObjectName("primary")
+        add.setObjectName("text")
         add.clicked.connect(self._create)
         action_row.addWidget(add)
         outer.addLayout(action_row)
@@ -125,6 +126,7 @@ class ProfileManagerPage(QWidget):
 
         bottom = QHBoxLayout()
         back = QPushButton("← Zurück")
+        back.setObjectName("text")
         back.clicked.connect(self._back)
         bottom.addWidget(back)
         bottom.addStretch(1)
