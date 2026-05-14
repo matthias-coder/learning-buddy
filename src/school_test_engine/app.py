@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from PySide6.QtCore import QSize
 from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import QApplication
 
@@ -30,7 +31,8 @@ def main() -> int:
     run_migrations(conn)
 
     window = MainWindow(conn)
-    window.resize(960, 720)
+    window.setMinimumSize(QSize(1024, 600))
+    window.resize(QSize(1280, 800))
     window.show_profile_picker()
     window.show()
     return app.exec()
