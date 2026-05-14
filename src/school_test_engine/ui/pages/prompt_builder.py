@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QPushButton,
     QRadioButton,
+    QScrollArea,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -35,7 +36,19 @@ class PromptBuilderPage(QWidget):
         self._current_subject = SUBJECTS_ALL[0]
         self._loading = False  # suppress autosave while we populate fields
 
-        outer = QVBoxLayout(self)
+        outer_wrap = QVBoxLayout(self)
+        outer_wrap.setContentsMargins(0, 0, 0, 0)
+        outer_wrap.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        outer_wrap.addWidget(scroll)
+
+        content = QWidget()
+        scroll.setWidget(content)
+
+        outer = QVBoxLayout(content)
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(14)
 

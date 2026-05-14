@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QRadioButton,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
@@ -40,7 +41,19 @@ class RunnerPage(QWidget):
         self._seed: int = 0
         self._answers: dict[int, dict] = {}
 
-        layout = QVBoxLayout(self)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        outer.addWidget(scroll, 1)
+
+        content = QWidget()
+        scroll.setWidget(content)
+
+        layout = QVBoxLayout(content)
         layout.setContentsMargins(40, 30, 40, 30)
         layout.setSpacing(12)
 
@@ -101,7 +114,11 @@ class RunnerPage(QWidget):
         self.next_btn.clicked.connect(self._on_next)
         buttons.addWidget(self.next_btn)
 
-        layout.addLayout(buttons)
+        # Navigation row OUTSIDE the scroll area so it stays visible
+        nav_container = QWidget()
+        nav_container.setLayout(buttons)
+        buttons.setContentsMargins(40, 12, 40, 24)
+        outer.addWidget(nav_container)
 
         self._radio_group: QButtonGroup | None = None
         self._checkboxes: list[QCheckBox] = []

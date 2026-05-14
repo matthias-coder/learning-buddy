@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QTextEdit,
     QVBoxLayout,
     QWidget,
@@ -27,7 +28,19 @@ class ImportPage(QWidget):
         self.window = window
         self.conn = conn
 
-        layout = QVBoxLayout(self)
+        outer_wrap = QVBoxLayout(self)
+        outer_wrap.setContentsMargins(0, 0, 0, 0)
+        outer_wrap.setSpacing(0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        outer_wrap.addWidget(scroll)
+
+        content = QWidget()
+        scroll.setWidget(content)
+
+        layout = QVBoxLayout(content)
         layout.setContentsMargins(40, 30, 40, 30)
         layout.setSpacing(14)
 
