@@ -267,25 +267,28 @@ class MainWindow(QMainWindow):
         self._bg_sync_worker.finished.connect(self._on_bg_sync_done)
         self._bg_sync_worker.finished.connect(self._bg_sync_thread.quit)
         self._bg_sync_thread.finished.connect(self._bg_sync_thread.deleteLater)
+        self._bg_sync_thread.finished.connect(self._clear_bg_sync_refs)   # NEW
         self._bg_sync_thread.start()
+
+    def _clear_bg_sync_refs(self) -> None:
+        self._bg_sync_thread = None
+        self._bg_sync_worker = None
 
     def _on_bg_sync_done(self, result) -> None:
         worker_user_id = self._bg_sync_worker.user_id if self._bg_sync_worker else None
-        self._bg_sync_thread = None
-        self._bg_sync_worker = None
         if worker_user_id != self.active_user_id:
             return    # user switched; DB is fine, but UI update would target wrong profile
         if not result.error and (result.added or result.updated or result.deleted):
             self.events_synced.emit()
 
     def closeEvent(self, event):
-        # Clean up both auto-sync (MainWindow) and manual-sync (EventsPage) threads
-        # to prevent "QThread: Destroyed while thread is still running" SIGABRT.
+        # HTTP timeout in fetcher is 10s; wait long enough for any in-flight
+        # sync to complete naturally before Qt destroys the QThread.
         for thread in (
             self._bg_sync_thread,
             getattr(self.events_page, "_sync_thread", None),
         ):
             if thread is not None:
                 thread.quit()
-                thread.wait(2000)
+                thread.wait(12000)
         super().closeEvent(event)

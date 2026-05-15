@@ -23,11 +23,17 @@ class SyncWorker(QObject):
         self.user_id = user_id
 
     def run(self) -> None:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA foreign_keys = ON")
+        from ..ical_sync import SyncResult
         try:
-            result = sync_feed(conn, self.user_id)
-        finally:
-            conn.close()
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON")
+            try:
+                result = sync_feed(conn, self.user_id)
+            finally:
+                conn.close()
+        except Exception as e:
+            # Defensive: any unhandled exception still produces a finished-emit
+            # so the GUI thread sees a SyncResult and can clean up.
+            result = SyncResult(error=f"Interner Sync-Fehler: {e}")
         self.finished.emit(result)

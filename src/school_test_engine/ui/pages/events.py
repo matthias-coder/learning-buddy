@@ -232,12 +232,17 @@ class EventsPage(QWidget):
             self._sync_worker.finished.connect(self._on_sync_done)
             self._sync_worker.finished.connect(self._sync_thread.quit)
             self._sync_thread.finished.connect(self._sync_thread.deleteLater)
+            self._sync_thread.finished.connect(self._clear_sync_refs)   # NEW
             self._sync_thread.start()
+
+    def _clear_sync_refs(self) -> None:
+        """Clear thread refs only AFTER the OS thread has fully exited.
+        Called from QThread.finished — guarantees safe Python-side destruction."""
+        self._sync_thread = None
+        self._sync_worker = None
 
     def _on_sync_done(self, result: SyncResult) -> None:
         worker_user_id = self._sync_worker.user_id if self._sync_worker else self.window.active_user_id
-        self._sync_thread = None
-        self._sync_worker = None
         self.sync_button.setEnabled(True)
         if worker_user_id != self.window.active_user_id:
             return  # user switched; discard UI update
