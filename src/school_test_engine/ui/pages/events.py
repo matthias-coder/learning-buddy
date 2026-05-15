@@ -4,7 +4,7 @@ import json
 import sqlite3
 from datetime import date, datetime
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QThread
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -15,8 +15,11 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...storage import events_repo, assessments_repo
+from ...config import db_path
+from ...ical_sync import SyncResult
+from ...storage import events_repo, assessments_repo, users_repo
 from ..design import Color, FontFamily, Semantic
+from ..sync_worker import SyncWorker
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.pill import Pill
 from .._subjects import subject_variant
@@ -37,10 +40,13 @@ def _format_date(iso: str) -> str:
 
 
 class EventsPage(QWidget):
-    def __init__(self, window, conn: sqlite3.Connection):
+    def __init__(self, window, conn: sqlite3.Connection, *, sync_runner=None):
         super().__init__()
         self.window = window
         self.conn = conn
+        self._sync_runner = sync_runner
+        self._sync_thread: QThread | None = None
+        self._sync_worker: SyncWorker | None = None
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(48, 36, 48, 36)
@@ -58,6 +64,20 @@ class EventsPage(QWidget):
         add.clicked.connect(self._add_event)
         head.addWidget(add)
         outer.addLayout(head)
+
+        # Sync row (Phase 15)
+        sync_row = QHBoxLayout()
+        self.sync_button = QPushButton("↻ Synchronisieren")
+        self.sync_button.setObjectName("text")
+        self.sync_button.clicked.connect(self._start_sync)
+        sync_row.addWidget(self.sync_button)
+        sync_row.addStretch(1)
+        outer.addLayout(sync_row)
+
+        self.sync_status_label = QLabel("")
+        self.sync_status_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 9pt;")
+        self.sync_status_label.setWordWrap(True)
+        outer.addWidget(self.sync_status_label)
 
         eyebrow = QLabel("TERMINE")
         eyebrow.setObjectName("eyebrow")
@@ -96,12 +116,14 @@ class EventsPage(QWidget):
             empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 40px;")
             empty.setWordWrap(True)
             self._list_layout.addWidget(empty)
+            self._update_sync_state()
             return
 
         today_iso = date.today().isoformat()
         for ev in events:
             card = self._make_event_row(ev, is_past=ev["event_date"] < today_iso)
             self._list_layout.addWidget(card)
+        self._update_sync_state()
 
     def _make_event_row(self, ev, is_past: bool) -> ClickableCard:
         card = ClickableCard(object_name="eventListCard")
@@ -149,6 +171,100 @@ class EventsPage(QWidget):
             h.addWidget(Pill("Note fehlt", "honey"))
 
         return card
+
+    # ------------------------------------------------------------------
+    # Sync (Phase 15)
+    # ------------------------------------------------------------------
+
+    def _has_feed_url(self) -> bool:
+        uid = self.window.active_user_id
+        if uid is None:
+            return False
+        row = users_repo.get_user(self.conn, uid)
+        return bool(row and row["ical_feed_url"])
+
+    def _update_sync_state(self) -> None:
+        enabled = self._has_feed_url()
+        self.sync_button.setEnabled(enabled and self._sync_thread is None)
+        if not enabled:
+            self.sync_status_label.setText("Schulkalender nicht verknüpft")
+            return
+        self._refresh_status_from_db()
+
+    def _refresh_status_from_db(self) -> None:
+        uid = self.window.active_user_id
+        row = users_repo.get_user(self.conn, uid)
+        if not row or not row["ical_last_sync_at"]:
+            self.sync_status_label.setText("Noch nicht synchronisiert")
+            return
+        summary = json.loads(row["ical_last_sync_summary"] or "{}")
+        if summary.get("error"):
+            self.sync_status_label.setText(f"Letzter Sync fehlgeschlagen: {summary['error']}")
+            return
+        parts = []
+        if summary.get("added"):   parts.append(f"{summary['added']} neu")
+        if summary.get("updated"): parts.append(f"{summary['updated']} verschoben")
+        if summary.get("deleted"): parts.append(f"{summary['deleted']} entfernt")
+        suffix = " · " + ", ".join(parts) if parts else " · bereits aktuell"
+        self.sync_status_label.setText(f"Zuletzt synchronisiert{suffix}")
+
+    def _start_sync(self) -> None:
+        if self._sync_thread is not None:
+            return
+        self.sync_button.setEnabled(False)
+        self.sync_status_label.setText("Synchronisiere…")
+        if self._sync_runner is not None:
+            # Test-injected synchronous runner
+            self._sync_runner(self._on_sync_done)
+        else:
+            self._sync_thread = QThread()
+            self._sync_worker = SyncWorker(db_path(), self.window.active_user_id)
+            self._sync_worker.moveToThread(self._sync_thread)
+            self._sync_thread.started.connect(self._sync_worker.run)
+            self._sync_worker.finished.connect(self._on_sync_done)
+            self._sync_worker.finished.connect(self._sync_thread.quit)
+            self._sync_thread.finished.connect(self._sync_thread.deleteLater)
+            self._sync_thread.start()
+
+    def _on_sync_done(self, result: SyncResult) -> None:
+        self._sync_thread = None
+        self._sync_worker = None
+        # Rebuild events list first; the label below is the canonical
+        # "just-synced" message and must NOT be overwritten by reload().
+        self._rebuild_event_list()
+        self.sync_button.setEnabled(True)
+        if result.error:
+            self.sync_status_label.setText(f"Sync fehlgeschlagen: {result.error}")
+            return
+        parts = []
+        if result.added:   parts.append(f"{result.added} neu")
+        if result.updated: parts.append(f"{result.updated} verschoben")
+        if result.deleted: parts.append(f"{result.deleted} entfernt")
+        suffix = ", ".join(parts) if parts else "bereits aktuell"
+        self.sync_status_label.setText(f"Zuletzt synchronisiert · {suffix}")
+
+    def _rebuild_event_list(self) -> None:
+        """reload() without touching the sync status label."""
+        uid = self.window.active_user_id
+        if uid is None:
+            return
+        while self._list_layout.count():
+            item = self._list_layout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.deleteLater()
+        events = events_repo.list_all(self.conn, uid)
+        if not events:
+            empty = QLabel("Noch keine Termine eingetragen.\nKlick auf „+ Termin“ um den ersten anzulegen.")
+            empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 40px;")
+            empty.setWordWrap(True)
+            self._list_layout.addWidget(empty)
+            return
+        today_iso = date.today().isoformat()
+        for ev in events:
+            card = self._make_event_row(ev, is_past=ev["event_date"] < today_iso)
+            self._list_layout.addWidget(card)
 
     # ------------------------------------------------------------------
     # Actions
