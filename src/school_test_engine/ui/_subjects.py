@@ -5,7 +5,12 @@ Die Subject-Liste selbst lebt in `models.test.Subject` (als Literal).
 from __future__ import annotations
 
 
-SUBJECTS_ALL = ["Mathe", "Englisch", "Bio", "Physik", "Chemie", "Geschichte"]
+SUBJECTS_ALL = [
+    "Mathe", "Englisch", "Deutsch",
+    "Bio", "Physik", "Chemie",
+    "Geschichte", "Geographie", "Politik und Wirtschaft",
+    "Religion", "Musik",
+]
 
 _SUBJECT_VARIANT = {
     "Mathe": "clay",
