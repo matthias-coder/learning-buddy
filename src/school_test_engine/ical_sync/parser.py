@@ -52,7 +52,7 @@ def _categories(comp) -> tuple[str, ...]:
     cat = comp.get("CATEGORIES")
     if cat is None:
         return ()
-    # icalendar returns a vCategory object whose .cats holds the list
-    if hasattr(cat, "cats"):
-        return tuple(str(c) for c in cat.cats)
-    return (str(cat),)
+    # Multiple CATEGORIES lines per VEVENT → icalendar wraps them in a list.
+    if isinstance(cat, list):
+        return tuple(str(c) for vcats in cat for c in vcats.cats)
+    return tuple(str(c) for c in cat.cats)

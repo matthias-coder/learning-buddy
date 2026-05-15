@@ -41,4 +41,14 @@ DESCRIPTION:
 CATEGORIES:Arbeiten
 UID:20250920T153052-5927@6115.start.schulportal.hessen.de
 END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20260515T080000
+DTSTART;TZID=Europe/Berlin:20260515T080000
+DTEND;TZID=Europe/Berlin:20260515T093000
+SUMMARY:Geographie R8b Arbeit
+DESCRIPTION:Arbeit in Geographie R8b mit besonders langem Hinweis-Text der ueb
+ er die Standard-Zeilenlaenge hinausgeht und gefoldet wird (082GEO02-R)
+CATEGORIES:Arbeiten
+UID:20010101T000001-klausur-9099-14640-2026-05-15@6115.start.schulportal.hessen.de
+END:VEVENT
 END:VCALENDAR

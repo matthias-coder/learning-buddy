@@ -13,7 +13,7 @@ FIXTURE = Path(__file__).parent.parent / "fixtures" / "schulkalender_mini.ics"
 
 def test_parse_returns_all_vevents():
     events = parser.parse_events(FIXTURE.read_bytes())
-    assert len(events) == 4
+    assert len(events) == 5
 
 
 def test_parse_extracts_uid_summary_description():
@@ -45,3 +45,15 @@ def test_parse_extracts_categories():
 def test_parse_invalid_bytes_raises():
     with pytest.raises(ValueError):
         parser.parse_events(b"BEGIN:VCALENDAR\nINVALID")
+
+
+def test_parse_handles_multiline_description():
+    """iCal line-folding: a DESCRIPTION that wraps across two physical lines
+    must be reassembled into a single logical string by the parser."""
+    events = parser.parse_events(FIXTURE.read_bytes())
+    geo = next(e for e in events if "Geographie R8b" in e.summary)
+    # No literal newline or leading space in the unfolded text:
+    assert "\n" not in geo.description
+    # The two folded fragments must end up adjacent:
+    assert "ueber die Standard-Zeilenlaenge" in geo.description
+    assert geo.description.endswith("(082GEO02-R)")
