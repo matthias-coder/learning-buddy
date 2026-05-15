@@ -29,8 +29,11 @@ class EventRecord:
 _DESC_PATTERN = re.compile(
     r"^(?P<kind_label>Arbeit|Lernkontrolle|Klausur)\s+in\s+"
     r"(?P<subject>.+?)"
-    r"(?:\s+R\d+[a-z]?|\s+Q\d+)?"     # optional class designator
-    r"\s*\([^)]+\)\s*$"
+    # Optional class designator + anything between it and the trailing code-block.
+    # Greedy ".*" after the designator absorbs line-folded comments like
+    # "...R8b mit besonders langem Hinweis-Text ... (082GEO02-R)".
+    r"(?:\s+R\d+[a-z]?\b.*|\s+Q\d+\b.*|\s*)"
+    r"\([^)]+\)\s*$"
 )
 
 _KIND_MAP = {
