@@ -4,7 +4,12 @@ from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Subject = Literal["Mathe", "Englisch", "Bio", "Physik", "Chemie", "Geschichte"]
+Subject = Literal[
+    "Mathe", "Englisch", "Deutsch",
+    "Bio", "Physik", "Chemie",
+    "Geschichte", "Geographie", "Politik und Wirtschaft",
+    "Religion", "Musik",
+]
 Difficulty = Literal["leicht", "mittel", "schwer"]
 QuestionType = Literal["single_choice", "multi_choice", "short_answer"]
 
