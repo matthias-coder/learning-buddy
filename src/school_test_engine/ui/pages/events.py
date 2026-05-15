@@ -215,6 +215,10 @@ class EventsPage(QWidget):
     def _start_sync(self) -> None:
         if self._sync_thread is not None:
             return
+        # Cross-path guard: refuse if MainWindow has a background sync running
+        if getattr(self.window, "_bg_sync_thread", None) is not None:
+            self.sync_status_label.setText("Sync läuft bereits im Hintergrund …")
+            return
         self.sync_button.setEnabled(False)
         self.sync_status_label.setText("Synchronisiere…")
         if self._sync_runner is not None:

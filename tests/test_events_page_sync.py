@@ -169,3 +169,29 @@ def test_events_page_subscribes_to_events_synced(app, conn):
     from school_test_engine.ui.widgets.clickable_card import ClickableCard
     cards = [page._list_layout.itemAt(i).widget() for i in range(page._list_layout.count())]
     assert any(isinstance(w, ClickableCard) for w in cards)
+
+
+def test_manual_sync_blocked_when_bg_sync_running(app, conn):
+    """If MainWindow has an active background sync, EventsPage's manual sync
+    must refuse to start to avoid concurrent SyncWorker → IntegrityError on
+    the partial UNIQUE index."""
+    uid = users_repo.create_user(conn, name="Clemens")
+    users_repo.update_user(conn, uid, ical_feed_url="https://x/feed")
+
+    class _BusyWindow:
+        def __init__(self, conn):
+            self.conn = conn
+            self.active_user_id = uid
+            self._bg_sync_thread = "fake-thread-sentinel"  # simulates active bg sync
+        def show_menu(self): pass
+        def show_event_edit(self, event_id, return_to): pass
+
+    calls = []
+    win = _BusyWindow(conn)
+    page = EventsPage(win, conn, sync_runner=lambda cb: calls.append("called") or cb(SyncResult()))
+    page.reload()
+    page.sync_button.click()
+    # The injected runner must NOT have been called — start_sync should bail out.
+    assert calls == []
+    # Status label should indicate why
+    assert "läuft bereits" in page.sync_status_label.text() or "Sync läuft" in page.sync_status_label.text()

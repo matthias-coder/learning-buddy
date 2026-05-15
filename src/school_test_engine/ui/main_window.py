@@ -244,6 +244,10 @@ class MainWindow(QMainWindow):
 
         if self._bg_sync_thread is not None:
             return
+        # Cross-path guard: don't auto-sync if EventsPage manual sync is running
+        events_thread = getattr(self.events_page, "_sync_thread", None)
+        if events_thread is not None:
+            return
         row = users_repo.get_user(self.conn, user_id)
         if not row or not row["ical_feed_url"]:
             return
