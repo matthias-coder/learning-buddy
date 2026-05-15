@@ -53,6 +53,19 @@ def test_fetch_feed_translates_urlerror(monkeypatch):
 
 
 def test_fetch_feed_translates_timeout(monkeypatch):
+    """Real urllib timeouts arrive wrapped: URLError(reason=TimeoutError(...))."""
+    import socket
+    def _raise(req, timeout):
+        raise urllib.error.URLError(reason=socket.timeout("timed out"))
+
+    monkeypatch.setattr("urllib.request.urlopen", _raise)
+    with pytest.raises(fetcher.FeedFetchError) as e:
+        fetcher.fetch_feed("https://x.example/feed")
+    assert "Timeout" in str(e.value)
+
+
+def test_fetch_feed_translates_bare_timeout_error(monkeypatch):
+    """Defensive: bare TimeoutError (rare SSL-layer leak) also produces timeout msg."""
     def _raise(req, timeout):
         raise TimeoutError()
 

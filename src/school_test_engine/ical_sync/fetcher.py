@@ -17,6 +17,9 @@ def fetch_feed(url: str, timeout: float = 10.0) -> bytes:
                 raise FeedFetchError(f"HTTP {resp.status}")
             return resp.read()
     except urllib.error.URLError as e:
+        if isinstance(e.reason, TimeoutError):
+            raise FeedFetchError("Timeout — keine Antwort vom Server") from e
         raise FeedFetchError(f"Netzwerk-Fehler: {e.reason}") from e
     except TimeoutError as e:
+        # Defensive: some SSL paths can leak a bare timeout (CPython #89929).
         raise FeedFetchError("Timeout — keine Antwort vom Server") from e
