@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QDateEdit,
     QFileDialog,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QInputDialog,
     QLabel,
@@ -27,7 +28,7 @@ from PySide6.QtWidgets import (
 from ...prompt_builder.school_context import BUNDESLAENDER, SCHOOL_TYPES
 from ...storage import users_repo
 from .._layouts import row_get
-from ..design import Color, FontFamily, Semantic
+from ..design import FontFamily, Spacing
 from ..widgets.avatar_badge import AvatarBadge
 
 
@@ -65,7 +66,7 @@ class ProfileEditPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        outer.addWidget(scroll)
+        outer.addWidget(scroll, 1)
 
         content = QWidget()
         scroll.setWidget(content)
@@ -74,17 +75,13 @@ class ProfileEditPage(QWidget):
         layout.setContentsMargins(48, 36, 48, 36)
         layout.setSpacing(14)
 
-        # Header
+        # Header (back link only — primary actions live in the sticky footer)
         head = QHBoxLayout()
         back = QPushButton("← Zurück")
         back.setObjectName("text")
         back.clicked.connect(self._cancel)
         head.addWidget(back)
         head.addStretch(1)
-        self.save_btn = QPushButton("Speichern")
-        self.save_btn.setObjectName("primary")
-        self.save_btn.clicked.connect(self._save)
-        head.addWidget(self.save_btn)
         layout.addLayout(head)
 
         eyebrow = QLabel("PROFIL")
@@ -138,7 +135,7 @@ class ProfileEditPage(QWidget):
 
         # Style-Briefing (Phase 8)
         style_label = QLabel("KI-Stil-Hinweis (optional)")
-        style_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        style_label.setObjectName("sectionHeader")
         layout.addWidget(style_label)
         self.style_edit = QPlainTextEdit()
         self.style_edit.setPlaceholderText(
@@ -150,7 +147,7 @@ class ProfileEditPage(QWidget):
 
         # Schul-Kontext (Phase 9)
         ctx_label = QLabel("Schul-Kontext")
-        ctx_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        ctx_label.setObjectName("sectionHeader")
         layout.addWidget(ctx_label)
 
         ctx_form = QFormLayout()
@@ -190,7 +187,7 @@ class ProfileEditPage(QWidget):
 
         # Schulkalender (Phase 15)
         ical_label = QLabel("Schulkalender")
-        ical_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        ical_label.setObjectName("sectionHeader")
         layout.addWidget(ical_label)
 
         self.ical_feed_url_edit = QPlainTextEdit()
@@ -201,21 +198,41 @@ class ProfileEditPage(QWidget):
         layout.addWidget(self.ical_feed_url_edit)
 
         ical_hint = QLabel("Findest du im Schulportal unter „Kalender → Export → iCal\".")
-        ical_hint.setStyleSheet("color: #b3a98e; font-size: 9pt;")
+        ical_hint.setObjectName("fieldHint")
         ical_hint.setWordWrap(True)
         layout.addWidget(ical_hint)
 
-        # Footer: Delete (visible only in edit mode)
-        footer = QHBoxLayout()
-        footer.addStretch(1)
+        layout.addStretch(1)
+
+        # Sticky action bar — stays visible while the form scrolls.
+        outer.addWidget(self._build_action_bar())
+
+    def _build_action_bar(self) -> QFrame:
+        bar = QFrame()
+        bar.setObjectName("stickyFooter")
+        h = QHBoxLayout(bar)
+        h.setContentsMargins(Spacing.S6, Spacing.S3, Spacing.S6, Spacing.S3)
+        h.setSpacing(Spacing.S3)
+
         self.delete_btn = QPushButton("Löschen")
         self.delete_btn.setObjectName("danger")
         self.delete_btn.clicked.connect(self._delete)
         self.delete_btn.setVisible(False)
-        footer.addWidget(self.delete_btn)
-        layout.addLayout(footer)
+        h.addWidget(self.delete_btn)
 
-        layout.addStretch(1)
+        h.addStretch(1)
+
+        cancel = QPushButton("Abbrechen")
+        cancel.setObjectName("text")
+        cancel.clicked.connect(self._cancel)
+        h.addWidget(cancel)
+
+        self.save_btn = QPushButton("Speichern")
+        self.save_btn.setObjectName("primary")
+        self.save_btn.clicked.connect(self._save)
+        h.addWidget(self.save_btn)
+
+        return bar
 
     def show_for(self, user_id: int | None = None, return_to: str = "picker") -> None:
         self._user_id = user_id

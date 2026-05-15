@@ -24,6 +24,7 @@ from ...storage import users_repo, events_repo, daily_sessions_repo
 from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
 from ..responsive import is_narrow
+from ..widgets.action_card import make_action_card
 from ..widgets.avatar_badge import AvatarBadge
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
@@ -58,9 +59,9 @@ class MenuPage(QWidget):
         top_row.addStretch(1)
 
         # New top-bar icon buttons
-        builder_btn = QPushButton("Test bauen")
+        builder_btn = QPushButton("Test erstellen")
         builder_btn.setObjectName("topBarAction")
-        builder_btn.clicked.connect(lambda: self.window.show_prompt_builder())
+        builder_btn.clicked.connect(self.window.show_test_create)
         top_row.addWidget(builder_btn)
 
         events_btn = QPushButton("Termine")
@@ -78,7 +79,7 @@ class MenuPage(QWidget):
 
         # Hamburger fallback (hidden in wide mode)
         self._hamburger = HamburgerMenu()
-        self._hamburger.add_action("Test bauen", lambda: self.window.show_prompt_builder())
+        self._hamburger.add_action("Test erstellen", self.window.show_test_create)
         self._hamburger.add_action("Termine", self.window.show_events)
         self._hamburger.add_action("Noten", self.window.show_grades)
         self._hamburger.setVisible(False)  # default: wide-mode
@@ -239,7 +240,6 @@ class MenuPage(QWidget):
             ("LIBRARY", "Bibliothek", self.window.show_library),
             ("HAKT", "Lücken", self.window.show_gaps),
             ("RÜCKBLICK", "Verlauf", self.window.show_history),
-            ("IMPORT", "Test importieren", self.window.show_import),
         ]
         for eyebrow_text, title, action in items:
             tile = _make_compact_tile(eyebrow_text, title)
@@ -270,21 +270,18 @@ class MenuPage(QWidget):
         grid.setSpacing(16)
         grid.setContentsMargins(0, 0, 0, 0)
 
-        start = _make_action_card("ÜBEN", "Test starten", "Wähle einen Test aus deiner Bibliothek")
+        start = make_action_card("ÜBEN", "Test starten", "Wähle einen Test aus deiner Bibliothek")
         start.clicked.connect(self.window.show_library)
 
-        imp = _make_action_card("AUFGABEN", "Test importieren", "Neue Fragen aus einer JSON-Datei einlesen")
-        imp.clicked.connect(self.window.show_import)
-
-        gaps = _make_action_card("ANALYSE", "Was noch hakt", "Themen sortiert nach Schwäche — mit Üben-Knopf")
+        gaps = make_action_card("ANALYSE", "Was noch hakt", "Themen sortiert nach Schwäche — mit Üben-Knopf")
         gaps.clicked.connect(self.window.show_gaps)
 
-        hist = _make_action_card("RÜCKBLICK", "Bisherige Versuche", "Alle Tests mit Note und Datum")
+        hist = make_action_card("RÜCKBLICK", "Bisherige Versuche", "Alle Tests mit Note und Datum")
         hist.clicked.connect(self.window.show_history)
 
         narrow = is_narrow(self)
         cols = 1 if narrow else 2
-        cards = [start, imp, gaps, hist]
+        cards = [start, gaps, hist]
         for idx, card in enumerate(cards):
             row, col = divmod(idx, cols)
             grid.addWidget(card, row, col)
@@ -399,37 +396,6 @@ class _ProfileChip(QFrame):
     def set_user(self, avatar: str, name: str, image_bytes: bytes | None = None) -> None:
         self.avatar.set_avatar(emoji="ignored", image_bytes=image_bytes)
         self.name.setText(name)
-
-
-def _make_action_card(eyebrow_text: str, title_text: str, description: str) -> ClickableCard:
-    card = ClickableCard(object_name="actionCard")
-    card.setMinimumSize(340, 150)
-    card.setMaximumHeight(180)
-    card.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-    layout = QVBoxLayout(card)
-    layout.setContentsMargins(22, 18, 22, 16)
-    layout.setSpacing(6)
-    eyebrow = QLabel(eyebrow_text)
-    eyebrow.setObjectName("eyebrow")
-    layout.addWidget(eyebrow)
-    title = QLabel(title_text)
-    title.setObjectName("h2")
-    title.setFont(QFont(FontFamily.DISPLAY, 18, QFont.Weight.Medium))
-    title.setWordWrap(True)
-    title.setStyleSheet(f"color: {Semantic.FG};")
-    layout.addWidget(title)
-    desc = QLabel(description)
-    desc.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
-    desc.setWordWrap(True)
-    layout.addWidget(desc)
-    layout.addStretch(1)
-    arrow_row = QHBoxLayout()
-    arrow_row.addStretch(1)
-    arrow = QLabel("→")
-    arrow.setStyleSheet(f"color: {Semantic.ACCENT}; font-size: 16pt; font-weight: 600;")
-    arrow_row.addWidget(arrow)
-    layout.addLayout(arrow_row)
-    return card
 
 
 def _make_compact_tile(eyebrow_text: str, title_text: str) -> ClickableCard:

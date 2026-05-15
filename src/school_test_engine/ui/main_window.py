@@ -26,6 +26,7 @@ from .pages.prompt_builder import PromptBuilderPage
 from .pages.results import ResultsPage
 from .pages.review import ReviewPage
 from .pages.runner import RunnerPage
+from .pages.test_create import TestCreatePage
 
 
 class MainWindow(QMainWindow):
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow):
         self.prompt_builder_page = PromptBuilderPage(self, conn)
         self.event_edit_page = EventEditPage(self, conn)
         self.assessment_edit_page = AssessmentEditPage(self, conn)
+        self.test_create_page = TestCreatePage(self)
 
         for page in (
             self.profile_picker_page,
@@ -79,6 +81,7 @@ class MainWindow(QMainWindow):
             self.prompt_builder_page,
             self.event_edit_page,
             self.assessment_edit_page,
+            self.test_create_page,
         ):
             self.stack.addWidget(page)
 
@@ -143,6 +146,9 @@ class MainWindow(QMainWindow):
     def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
         self.prompt_builder_page.show_for(subject, topics)
         self.stack.setCurrentWidget(self.prompt_builder_page)
+
+    def show_test_create(self) -> None:
+        self.stack.setCurrentWidget(self.test_create_page)
 
     def show_event_edit(self, event_id: int | None = None, return_to: str = "events") -> None:
         self.event_edit_page.show_for(event_id, return_to)

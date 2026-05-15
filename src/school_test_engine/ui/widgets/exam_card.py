@@ -9,10 +9,12 @@ from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
     QVBoxLayout,
+    QWidget,
 )
 
 from ..design import Color, FontFamily, Semantic
 from .clickable_card import ClickableCard
+from .flow_layout import FlowLayout
 from .pill import Pill
 from .._subjects import subject_variant
 
@@ -55,12 +57,18 @@ class ExamCard(ClickableCard):
         layout.setContentsMargins(18, 16, 18, 14)
         layout.setSpacing(8)
 
-        # Top row: subject pill + countdown pill
+        # Top row: subject pill + countdown pill + overflow edit
         top = QHBoxLayout()
         top.setSpacing(6)
         top.addWidget(Pill(event_data.subject.upper(), subject_variant(event_data.subject)))
         top.addWidget(Pill(_countdown_text(event_data.days_until), _countdown_variant(event_data.days_until)))
         top.addStretch(1)
+        edit = QPushButton("…")
+        edit.setObjectName("text")
+        edit.setFixedSize(32, 32)
+        edit.setToolTip("Termin bearbeiten")
+        edit.clicked.connect(lambda: self.edit_clicked.emit(self.event_id))
+        top.addWidget(edit)
         layout.addLayout(top)
 
         # Title: kind label
@@ -85,9 +93,10 @@ class ExamCard(ClickableCard):
 
         layout.addStretch(1)
 
-        # Bottom row: actions
-        actions = QHBoxLayout()
-        actions.setSpacing(8)
+        # Bottom row: actions — FlowLayout wraps buttons to a new line when the
+        # card is too narrow, instead of clipping their text.
+        actions_host = QWidget()
+        actions = FlowLayout(actions_host, h_spacing=8, v_spacing=6)
         if event_data.linked_assessment_id is None:
             practice_btn = QPushButton("Test bauen")
             practice_btn.setObjectName("primary")
@@ -106,11 +115,4 @@ class ExamCard(ClickableCard):
         else:
             done = Pill("Note erfasst ✓", "tea")
             actions.addWidget(done)
-        actions.addStretch(1)
-        edit = QPushButton("…")
-        edit.setObjectName("text")
-        edit.setMinimumWidth(44)
-        edit.setMinimumHeight(44)
-        edit.clicked.connect(lambda: self.edit_clicked.emit(self.event_id))
-        actions.addWidget(edit)
-        layout.addLayout(actions)
+        layout.addWidget(actions_host)

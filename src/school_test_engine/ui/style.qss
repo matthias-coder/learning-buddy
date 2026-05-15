@@ -666,3 +666,23 @@ ClickableCard#dailyCard {
 ClickableCard#dailyCard:hover {
     background: #f6efde;
 }
+
+/* Sticky action bar at the bottom of long edit pages.
+   Lives outside the ScrollArea so save/delete stay reachable while scrolling. */
+QFrame#stickyFooter {
+    background: #fffdf8;
+    border-top: 1px solid #ebe3d5;
+}
+
+/* Form-section header (e.g. "Schul-Kontext", "Schulkalender") */
+QLabel#sectionHeader {
+    color: #1e1b15;
+    font-weight: 600;
+    padding-top: 8px;
+}
+
+/* Field hint below an input ("Findest du im Schulportal unter …") */
+QLabel#fieldHint {
+    color: #a89e89;
+    font-size: 9pt;
+}

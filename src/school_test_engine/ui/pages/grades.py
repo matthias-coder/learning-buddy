@@ -19,6 +19,7 @@ from ...cockpit import service as cockpit
 from ...storage import assessments_repo
 from ..design import Color, FontFamily, Semantic
 from ..widgets.comparison_view import ComparisonView
+from ..widgets.flow_layout import FlowLayout
 from ..widgets.grade_chart import GradeChart
 from ..widgets.grade_pill import GradePill
 from ..widgets.pill import Pill
@@ -69,9 +70,11 @@ class GradesPage(QWidget):
         title.setFont(QFont(FontFamily.DISPLAY, 28, QFont.Weight.Normal))
         outer.addWidget(title)
 
-        # Subject pill row
-        self._subject_row = QHBoxLayout()
-        self._subject_row.setSpacing(6)
+        # Subject pill row — FlowLayout wraps tabs to a new line when the
+        # window is too narrow, instead of clipping their labels (e.g.
+        # "eschich" instead of "Geschichte").
+        subject_host = QWidget()
+        self._subject_row = FlowLayout(subject_host, h_spacing=6, v_spacing=6)
         self._subject_buttons: dict[str, QPushButton] = {}
         for s in SUBJECTS_ALL:
             b = QPushButton(s)
@@ -80,8 +83,7 @@ class GradesPage(QWidget):
             b.clicked.connect(lambda _, sub=s: self._select_subject(sub))
             self._subject_buttons[s] = b
             self._subject_row.addWidget(b)
-        self._subject_row.addStretch(1)
-        outer.addLayout(self._subject_row)
+        outer.addWidget(subject_host)
 
         # Scrollable content
         self._scroll = QScrollArea()
@@ -124,37 +126,41 @@ class GradesPage(QWidget):
             if w:
                 w.deleteLater()
 
-        # Hero: subject average
-        avg = cockpit.subject_grade_average(self.conn, uid, self._current_subject)
-        self._content_layout.addWidget(self._build_average_hero(avg))
-
-        # List of assessments
+        # List of assessments — drives whether we show the Zeugnis hero & chart
+        # at all. With no grades, both would be empty placeholders.
         rows = assessments_repo.list_by_subject(self.conn, uid, self._current_subject)
 
-        # Phase 14: Notenverlauf-Chart
-        from datetime import date as _date
-        chart_eyebrow = QLabel("NOTENVERLAUF")
-        chart_eyebrow.setObjectName("eyebrow")
-        self._content_layout.addWidget(chart_eyebrow)
-        schriftlich_pts = [
-            (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
-            for r in rows if r["category"] == "schriftlich"
-        ]
-        muendlich_pts = [
-            (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
-            for r in rows if r["category"] == "muendlich"
-        ]
-        chart = GradeChart()
-        chart.set_data(schriftlich=schriftlich_pts, muendlich=muendlich_pts)
-        self._content_layout.addWidget(chart)
-
         if not rows:
+            # Single, centered empty state — no hero card with "—" placeholder,
+            # no chart, no Notenverlauf eyebrow. The hero card returns once the
+            # first grade is entered.
             empty = QLabel("Noch keine Noten in diesem Fach.\nKlick auf „+ Note“ um deine erste einzutragen.")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 30px;")
             empty.setWordWrap(True)
             self._content_layout.addWidget(empty)
         else:
+            # Hero: subject average
+            avg = cockpit.subject_grade_average(self.conn, uid, self._current_subject)
+            self._content_layout.addWidget(self._build_average_hero(avg))
+
+            # Phase 14: Notenverlauf-Chart — only when there's data to plot.
+            from datetime import date as _date
+            chart_eyebrow = QLabel("NOTENVERLAUF")
+            chart_eyebrow.setObjectName("eyebrow")
+            self._content_layout.addWidget(chart_eyebrow)
+            schriftlich_pts = [
+                (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
+                for r in rows if r["category"] == "schriftlich"
+            ]
+            muendlich_pts = [
+                (_date.fromisoformat(r["assessment_date"]), float(r["grade"]))
+                for r in rows if r["category"] == "muendlich"
+            ]
+            chart = GradeChart()
+            chart.set_data(schriftlich=schriftlich_pts, muendlich=muendlich_pts)
+            self._content_layout.addWidget(chart)
+
             for r in rows:
                 self._content_layout.addWidget(self._build_assessment_card(r))
 
