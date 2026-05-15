@@ -89,6 +89,9 @@ class MenuPage(QWidget):
         top_row.addWidget(self.chip)
         outer.addLayout(top_row)
 
+        if hasattr(window, "events_synced"):
+            window.events_synced.connect(self.reload)
+
         # Eyebrow + Greeting
         self.eyebrow = QLabel("HEUTE")
         self.eyebrow.setObjectName("eyebrow")

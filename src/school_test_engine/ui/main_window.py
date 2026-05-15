@@ -30,6 +30,7 @@ from .pages.runner import RunnerPage
 
 class MainWindow(QMainWindow):
     user_changed = Signal(int)
+    events_synced = Signal()    # NEW — emitted after sync mutates scheduled_events
 
     def __init__(self, conn: sqlite3.Connection):
         super().__init__()
@@ -82,6 +83,8 @@ class MainWindow(QMainWindow):
             self.stack.addWidget(page)
 
         self._return_to_history = False
+        self._bg_sync_thread = None
+        self._bg_sync_worker = None
 
     # ------------------------------------------------------------------
     # User switching
@@ -91,6 +94,7 @@ class MainWindow(QMainWindow):
         self.active_user_id = user_id
         self.user_changed.emit(user_id)
         self.show_menu()
+        self._maybe_trigger_background_sync(user_id)
 
     # ------------------------------------------------------------------
     # Navigation
@@ -226,3 +230,49 @@ class MainWindow(QMainWindow):
             self.show_history()
         else:
             self.show_menu()
+
+    # ------------------------------------------------------------------
+    # Background iCal sync (Phase 15)
+    # ------------------------------------------------------------------
+
+    def _maybe_trigger_background_sync(self, user_id: int) -> None:
+        from datetime import timedelta
+        from ..config import db_path
+        from ..storage import users_repo
+        from .sync_worker import SyncWorker
+        from PySide6.QtCore import QThread
+
+        if self._bg_sync_thread is not None:
+            return
+        row = users_repo.get_user(self.conn, user_id)
+        if not row or not row["ical_feed_url"]:
+            return
+        last = row["ical_last_sync_at"]
+        if last:
+            try:
+                last_dt = datetime.fromisoformat(last)
+                if datetime.now(timezone.utc) - last_dt < timedelta(hours=24):
+                    return
+            except ValueError:
+                pass  # malformed timestamp → resync
+
+        self._bg_sync_thread = QThread()
+        self._bg_sync_worker = SyncWorker(db_path(), user_id)
+        self._bg_sync_worker.moveToThread(self._bg_sync_thread)
+        self._bg_sync_thread.started.connect(self._bg_sync_worker.run)
+        self._bg_sync_worker.finished.connect(self._on_bg_sync_done)
+        self._bg_sync_worker.finished.connect(self._bg_sync_thread.quit)
+        self._bg_sync_thread.finished.connect(self._bg_sync_thread.deleteLater)
+        self._bg_sync_thread.start()
+
+    def _on_bg_sync_done(self, result) -> None:
+        self._bg_sync_thread = None
+        self._bg_sync_worker = None
+        if not result.error and (result.added or result.updated or result.deleted):
+            self.events_synced.emit()
+
+    def closeEvent(self, event):
+        if self._bg_sync_thread is not None:
+            self._bg_sync_thread.quit()
+            self._bg_sync_thread.wait(2000)
+        super().closeEvent(event)

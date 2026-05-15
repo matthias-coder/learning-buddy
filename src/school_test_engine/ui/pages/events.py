@@ -242,6 +242,8 @@ class EventsPage(QWidget):
         if result.deleted: parts.append(f"{result.deleted} entfernt")
         suffix = ", ".join(parts) if parts else "bereits aktuell"
         self.sync_status_label.setText(f"Zuletzt synchronisiert · {suffix}")
+        if hasattr(self.window, "events_synced"):
+            self.window.events_synced.emit()
 
     def _rebuild_event_list(self) -> None:
         """reload() without touching the sync status label."""

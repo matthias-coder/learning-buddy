@@ -94,6 +94,9 @@ class GradesPage(QWidget):
         self._scroll.setWidget(self._content)
         outer.addWidget(self._scroll, 1)
 
+        if hasattr(window, "events_synced"):
+            window.events_synced.connect(self.reload)
+
     # ------------------------------------------------------------------
     # Lifecycle
     # ------------------------------------------------------------------
