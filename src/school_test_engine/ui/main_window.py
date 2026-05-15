@@ -279,7 +279,13 @@ class MainWindow(QMainWindow):
             self.events_synced.emit()
 
     def closeEvent(self, event):
-        if self._bg_sync_thread is not None:
-            self._bg_sync_thread.quit()
-            self._bg_sync_thread.wait(2000)
+        # Clean up both auto-sync (MainWindow) and manual-sync (EventsPage) threads
+        # to prevent "QThread: Destroyed while thread is still running" SIGABRT.
+        for thread in (
+            self._bg_sync_thread,
+            getattr(self.events_page, "_sync_thread", None),
+        ):
+            if thread is not None:
+                thread.quit()
+                thread.wait(2000)
         super().closeEvent(event)
