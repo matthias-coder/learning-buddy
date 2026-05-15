@@ -15,10 +15,15 @@ SUBJECTS_ALL = [
 _SUBJECT_VARIANT = {
     "Mathe": "clay",
     "Englisch": "tea",
+    "Deutsch": "rose",
     "Bio": "tea",
     "Physik": "sky",
     "Chemie": "honey",
     "Geschichte": "paper",
+    "Geographie": "tea",
+    "Politik und Wirtschaft": "clay",
+    "Religion": "paper",
+    "Musik": "honey",
 }
 
 
