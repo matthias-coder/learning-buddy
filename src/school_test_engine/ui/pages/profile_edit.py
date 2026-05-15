@@ -188,6 +188,23 @@ class ProfileEditPage(QWidget):
 
         layout.addLayout(ctx_form)
 
+        # Schulkalender (Phase 15)
+        ical_label = QLabel("Schulkalender")
+        ical_label.setStyleSheet("color: #4a4538; font-weight: 500; padding-top: 8px;")
+        layout.addWidget(ical_label)
+
+        self.ical_feed_url_edit = QPlainTextEdit()
+        self.ical_feed_url_edit.setPlaceholderText(
+            "https://start.schulportal.hessen.de/kalender.php?..."
+        )
+        self.ical_feed_url_edit.setMaximumHeight(80)
+        layout.addWidget(self.ical_feed_url_edit)
+
+        ical_hint = QLabel("Findest du im Schulportal unter „Kalender → Export → iCal\".")
+        ical_hint.setStyleSheet("color: #b3a98e; font-size: 9pt;")
+        ical_hint.setWordWrap(True)
+        layout.addWidget(ical_hint)
+
         # Footer: Delete (visible only in edit mode)
         footer = QHBoxLayout()
         footer.addStretch(1)
@@ -225,6 +242,7 @@ class ProfileEditPage(QWidget):
         self.bundesland_combo.setCurrentIndex(0)
         self.school_name_edit.setText("")
         self.school_year_edit.setText("")
+        self.ical_feed_url_edit.setPlainText("")
 
     def _load_user(self, user_id: int) -> None:
         u = users_repo.get_user(self.conn, user_id)
@@ -274,6 +292,7 @@ class ProfileEditPage(QWidget):
         sy = row_get(u, "school_year")
         if sy:
             self.school_year_edit.setText(sy)
+        self.ical_feed_url_edit.setPlainText(row_get(u, "ical_feed_url") or "")
 
     def _upload_photo(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
@@ -348,6 +367,8 @@ class ProfileEditPage(QWidget):
             bundesland_val = None
         school_name_val = self.school_name_edit.text().strip() or None
         school_year_val = self.school_year_edit.text().strip() or None
+        raw_url = self.ical_feed_url_edit.toPlainText().strip()
+        ical_feed_url_val = raw_url if raw_url else None
 
         if self._user_id is None:
             new_uid = users_repo.create_user(
@@ -363,6 +384,7 @@ class ProfileEditPage(QWidget):
                 bundesland=bundesland_val,
                 school_name=school_name_val,
                 school_year=school_year_val,
+                ical_feed_url=ical_feed_url_val,
             )
         else:
             users_repo.update_user(
@@ -376,6 +398,7 @@ class ProfileEditPage(QWidget):
                 bundesland=bundesland_val,
                 school_name=school_name_val,
                 school_year=school_year_val,
+                ical_feed_url=ical_feed_url_val,
             )
             if self.window.active_user_id == self._user_id and hasattr(self.window, "user_changed"):
                 self.window.user_changed.emit(self._user_id)
