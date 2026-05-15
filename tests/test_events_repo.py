@@ -18,6 +18,11 @@ def uid(conn):
     return users_repo.create_user(conn, "Clemens", "🧒")
 
 
+@pytest.fixture
+def user_id(conn):
+    return users_repo.create_user(conn, name="Tester")
+
+
 def test_create_minimal(conn, uid):
     eid = events_repo.create(conn, uid, "Mathe", "klassenarbeit", "2026-05-20", topics=["Funktionen"])
     row = events_repo.get(conn, eid)
@@ -84,3 +89,42 @@ def test_user_isolation(conn):
     events_repo.create(conn, a, "Mathe", "klassenarbeit", "2026-06-01", topics=[])
     assert len(events_repo.list_all(conn, a)) == 1
     assert len(events_repo.list_all(conn, b)) == 0
+
+
+def test_create_persists_external_uid_and_source(conn, user_id):
+    eid = events_repo.create(
+        conn, user_id, "Mathe", "klassenarbeit", "2026-06-01",
+        external_uid="abc-klausur-1@host", external_source="schulportal_hessen",
+    )
+    row = events_repo.get(conn, eid)
+    assert row["external_uid"] == "abc-klausur-1@host"
+    assert row["external_source"] == "schulportal_hessen"
+
+
+def test_list_with_external_uid_returns_only_synced_events(conn, user_id):
+    events_repo.create(conn, user_id, "Mathe", "klassenarbeit", "2026-06-01")  # manual, no uid
+    events_repo.create(
+        conn, user_id, "Englisch", "klassenarbeit", "2026-06-08",
+        external_uid="x-klausur-1@h", external_source="schulportal_hessen",
+    )
+    rows = events_repo.list_with_external_uid(conn, user_id)
+    assert len(rows) == 1
+    assert rows[0]["external_uid"] == "x-klausur-1@h"
+
+
+def test_update_by_external_uid_changes_only_synced_fields(conn, user_id):
+    import json
+    eid = events_repo.create(
+        conn, user_id, "Englisch", "klassenarbeit", "2026-06-08",
+        topics=["Vocab", "Grammar"], note="manuell ergänzt",
+        external_uid="x-klausur-1@h", external_source="schulportal_hessen",
+    )
+    events_repo.update_by_external_uid(
+        conn, user_id, "x-klausur-1@h",
+        subject="Englisch", kind="klassenarbeit", event_date="2026-06-15",
+    )
+    row = events_repo.get(conn, eid)
+    assert row["event_date"] == "2026-06-15"
+    # topics + note unangetastet
+    assert json.loads(row["topics"]) == ["Vocab", "Grammar"]
+    assert row["note"] == "manuell ergänzt"

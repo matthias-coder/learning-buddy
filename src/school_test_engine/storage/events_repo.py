@@ -14,14 +14,17 @@ def create(
     *,
     topics: Iterable[str] | None = None,
     note: str | None = None,
+    external_uid: str | None = None,
+    external_source: str | None = None,
 ) -> int:
     topics_json = json.dumps(list(topics) if topics else [])
     cur = conn.execute(
         """
-        INSERT INTO scheduled_events (user_id, subject, kind, event_date, topics, note)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO scheduled_events
+            (user_id, subject, kind, event_date, topics, note, external_uid, external_source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, subject, kind, event_date, topics_json, note),
+        (user_id, subject, kind, event_date, topics_json, note, external_uid, external_source),
     )
     conn.commit()
     eid = cur.lastrowid
@@ -95,4 +98,37 @@ def update(
 
 def delete(conn: sqlite3.Connection, event_id: int) -> None:
     conn.execute("DELETE FROM scheduled_events WHERE id = ?", (event_id,))
+    conn.commit()
+
+
+def list_with_external_uid(
+    conn: sqlite3.Connection, user_id: int
+) -> list[sqlite3.Row]:
+    cur = conn.execute(
+        """
+        SELECT * FROM scheduled_events
+        WHERE user_id = ? AND external_uid IS NOT NULL
+        """,
+        (user_id,),
+    )
+    return cur.fetchall()
+
+
+def update_by_external_uid(
+    conn: sqlite3.Connection,
+    user_id: int,
+    external_uid: str,
+    *,
+    subject: str,
+    kind: str,
+    event_date: str,
+) -> None:
+    conn.execute(
+        """
+        UPDATE scheduled_events
+        SET subject = ?, kind = ?, event_date = ?
+        WHERE user_id = ? AND external_uid = ?
+        """,
+        (subject, kind, event_date, user_id, external_uid),
+    )
     conn.commit()
