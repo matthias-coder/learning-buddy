@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..storage import assessments_repo, events_repo, users_repo
 from . import classifier, extractor, fetcher, parser
@@ -101,7 +101,7 @@ def _apply(conn, user_id, adds, updates, deletes):
 
 
 def _persist_summary(conn, user_id, added, updated, deleted, skipped) -> SyncResult:
-    now = datetime.now().isoformat(timespec="seconds")
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     summary_json = json.dumps({
         "added": added, "updated": updated, "deleted": deleted, "skipped": skipped, "error": None,
     })
@@ -114,7 +114,7 @@ def _persist_summary(conn, user_id, added, updated, deleted, skipped) -> SyncRes
 
 
 def _persist_error(conn, user_id, error_msg: str) -> SyncResult:
-    now = datetime.now().isoformat(timespec="seconds")
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     summary_json = json.dumps({"added": 0, "updated": 0, "deleted": 0, "skipped": 0, "error": error_msg})
     users_repo.update_user(
         conn, user_id,

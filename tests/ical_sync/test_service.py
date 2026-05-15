@@ -93,7 +93,7 @@ def test_sync_deletes_removed_event_without_note(conn, user_with_feed, monkeypat
     assert "Religion" not in [r["subject"] for r in rows]
 
 
-def test_sync_keeps_removed_event_with_note(conn, user_with_feed, monkeypatch):
+def test_sync_keeps_removed_event_with_linked_assessment(conn, user_with_feed, monkeypatch):
     monkeypatch.setattr(service, "_fetch", _make_fetcher(FIXTURE.read_bytes()))
     service.sync_feed(conn, user_with_feed)
     # Attach an assessment to the Religion-KA

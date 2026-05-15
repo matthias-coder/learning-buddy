@@ -56,3 +56,17 @@ def test_record_keeps_full_uid():
     ))
     assert rec is not None
     assert rec.external_uid.endswith("@6115.start.schulportal.hessen.de")
+
+
+def test_free_text_between_class_designator_and_code_does_not_bleed_into_subject():
+    """Regression for line-folded DESCRIPTION where free-text follows R8b
+    before the parenthetical course code. The regex must consume the free
+    text into the optional class-designator group, not into subject."""
+    desc = (
+        "Arbeit in Geographie R8b mit besonders langem Hinweis-Text "
+        "der ueber die Standard-Zeilenlaenge hinausgeht und gefoldet wird (082GEO02-R)"
+    )
+    rec = to_event_record(_ev(desc))
+    assert rec is not None
+    assert rec.subject == "Geographie"
+    assert rec.kind == "klassenarbeit"
