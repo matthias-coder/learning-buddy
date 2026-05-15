@@ -227,12 +227,15 @@ class EventsPage(QWidget):
             self._sync_thread.start()
 
     def _on_sync_done(self, result: SyncResult) -> None:
+        worker_user_id = self._sync_worker.user_id if self._sync_worker else self.window.active_user_id
         self._sync_thread = None
         self._sync_worker = None
+        self.sync_button.setEnabled(True)
+        if worker_user_id != self.window.active_user_id:
+            return  # user switched; discard UI update
         # Rebuild events list first; the label below is the canonical
         # "just-synced" message and must NOT be overwritten by reload().
         self._rebuild_event_list()
-        self.sync_button.setEnabled(True)
         if result.error:
             self.sync_status_label.setText(f"Sync fehlgeschlagen: {result.error}")
             return

@@ -266,8 +266,11 @@ class MainWindow(QMainWindow):
         self._bg_sync_thread.start()
 
     def _on_bg_sync_done(self, result) -> None:
+        worker_user_id = self._bg_sync_worker.user_id if self._bg_sync_worker else None
         self._bg_sync_thread = None
         self._bg_sync_worker = None
+        if worker_user_id != self.active_user_id:
+            return    # user switched; DB is fine, but UI update would target wrong profile
         if not result.error and (result.added or result.updated or result.deleted):
             self.events_synced.emit()
 

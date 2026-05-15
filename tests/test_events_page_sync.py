@@ -101,3 +101,35 @@ def test_sync_button_disabled_when_no_url(app, conn):
     page.reload()
     assert not page.sync_button.isEnabled()
     assert "nicht verknüpft" in page.sync_status_label.text()
+
+
+def test_user_switch_during_sync_discards_ui_update(app, conn):
+    """If active_user_id changes between sync start and sync done,
+    the UI update is discarded (DB write was for the original user)."""
+    uid_a = users_repo.create_user(conn, name="Clemens")
+    uid_b = users_repo.create_user(conn, name="Matthias")
+    users_repo.update_user(conn, uid_a, ical_feed_url="https://x/feed")
+    users_repo.update_user(conn, uid_b, ical_feed_url="https://y/feed")
+    win = FakeWindow(conn)
+    win.active_user_id = uid_a
+    captured = []
+    def fake_runner(callback):
+        captured.append(callback)
+    page = EventsPage(win, conn, sync_runner=fake_runner)
+    page.reload()
+    page.sync_button.click()  # sync started for uid_a
+    # Now user switches to B
+    win.active_user_id = uid_b
+    # Sync completes — but for uid_a's worker
+    # In the injected-runner path, _sync_worker is None, so we fall back to active_user_id
+    # which is now uid_b — the result IS applied to UI. That's the limitation of the
+    # injected-runner test path. In production, the real SyncWorker has user_id frozen
+    # and the guard works.
+    # To make this test meaningful, we set page._sync_worker manually to simulate the
+    # real-worker path:
+    class _FakeWorker:
+        user_id = uid_a
+    page._sync_worker = _FakeWorker()
+    captured[0](SyncResult(added=99))
+    # The 99 should NOT appear in the status label since uid_b is active
+    assert "99" not in page.sync_status_label.text()

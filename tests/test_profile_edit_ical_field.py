@@ -93,3 +93,18 @@ def test_reset_clears_field_in_create_mode(app, conn):
     p = ProfileEditPage(FakeWindow(conn), conn)
     p.show_for(user_id=None, return_to="picker")
     assert p.ical_feed_url_edit.toPlainText() == ""
+
+
+def test_field_rejects_non_https_url(app, conn, monkeypatch):
+    from school_test_engine.ui.pages.profile_edit import ProfileEditPage
+    warnings = []
+    monkeypatch.setattr(QMessageBox, "warning",
+        staticmethod(lambda *a, **kw: warnings.append(a) or QMessageBox.StandardButton.Ok))
+    uid = users_repo.create_user(conn, name="Clemens")
+    p = ProfileEditPage(FakeWindow(conn), conn)
+    p.show_for(user_id=uid, return_to="manager")
+    p.ical_feed_url_edit.setPlainText("ftp://nope.example/feed")
+    p._save()
+    row = users_repo.get_user(conn, uid)
+    assert row["ical_feed_url"] is None
+    assert len(warnings) == 1

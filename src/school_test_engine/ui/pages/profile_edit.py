@@ -368,6 +368,12 @@ class ProfileEditPage(QWidget):
         school_name_val = self.school_name_edit.text().strip() or None
         school_year_val = self.school_year_edit.text().strip() or None
         raw_url = self.ical_feed_url_edit.toPlainText().strip()
+        if raw_url and not raw_url.startswith("https://"):
+            QMessageBox.warning(
+                self, "Ungültige URL",
+                "Die Feed-URL muss mit „https://\" beginnen oder leer bleiben.",
+            )
+            return
         ical_feed_url_val = raw_url if raw_url else None
 
         if self._user_id is None:
