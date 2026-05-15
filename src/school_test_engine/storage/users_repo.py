@@ -68,6 +68,9 @@ def update_user(
     school_year=_SENTINEL,
     sort_order: int | None = None,
     show_keyboard_hints: int | None = None,
+    ical_feed_url=_SENTINEL,
+    ical_last_sync_at=_SENTINEL,
+    ical_last_sync_summary=_SENTINEL,
 ) -> None:
     fields: list[str] = []
     values: list = []
@@ -95,6 +98,12 @@ def update_user(
         fields.append("sort_order = ?"); values.append(sort_order)
     if show_keyboard_hints is not None:
         fields.append("show_keyboard_hints = ?"); values.append(int(show_keyboard_hints))
+    if ical_feed_url is not _SENTINEL:
+        fields.append("ical_feed_url = ?"); values.append(ical_feed_url)
+    if ical_last_sync_at is not _SENTINEL:
+        fields.append("ical_last_sync_at = ?"); values.append(ical_last_sync_at)
+    if ical_last_sync_summary is not _SENTINEL:
+        fields.append("ical_last_sync_summary = ?"); values.append(ical_last_sync_summary)
     if not fields:
         return
     values.append(user_id)

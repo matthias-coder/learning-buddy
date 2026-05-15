@@ -78,3 +78,27 @@ def test_unique_index_blocks_duplicate_external_uid(conn):
             (uid,),
         )
         conn.commit()
+
+
+def test_users_repo_update_user_persists_ical_fields(conn):
+    from school_test_engine.storage import users_repo
+    uid = users_repo.create_user(conn, name="Test")
+    users_repo.update_user(
+        conn, uid,
+        ical_feed_url="https://example.com/feed",
+        ical_last_sync_at="2026-05-15T10:00:00",
+        ical_last_sync_summary='{"added":1}',
+    )
+    row = users_repo.get_user(conn, uid)
+    assert row["ical_feed_url"] == "https://example.com/feed"
+    assert row["ical_last_sync_at"] == "2026-05-15T10:00:00"
+    assert row["ical_last_sync_summary"] == '{"added":1}'
+
+
+def test_users_repo_update_user_clears_ical_fields_with_none(conn):
+    from school_test_engine.storage import users_repo
+    uid = users_repo.create_user(conn, name="Test")
+    users_repo.update_user(conn, uid, ical_feed_url="https://x.com/feed")
+    users_repo.update_user(conn, uid, ical_feed_url=None)
+    row = users_repo.get_user(conn, uid)
+    assert row["ical_feed_url"] is None
