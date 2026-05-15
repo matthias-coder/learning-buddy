@@ -133,3 +133,39 @@ def test_user_switch_during_sync_discards_ui_update(app, conn):
     captured[0](SyncResult(added=99))
     # The 99 should NOT appear in the status label since uid_b is active
     assert "99" not in page.sync_status_label.text()
+
+
+def test_events_page_subscribes_to_events_synced(app, conn):
+    """When MainWindow's background auto-sync emits events_synced,
+    EventsPage must reload its list — otherwise the UI is stale on Page."""
+    from PySide6.QtCore import QObject, Signal
+
+    class _RealWindow(QObject):
+        events_synced = Signal()
+        def __init__(self, conn):
+            super().__init__()
+            self.conn = conn
+            self.active_user_id = None
+        def show_menu(self): pass
+        def show_event_edit(self, event_id, return_to): pass
+
+    uid = users_repo.create_user(conn, name="Clemens")
+    win = _RealWindow(conn)
+    win.active_user_id = uid
+    page = EventsPage(win, conn)
+    page.reload()
+    # Simulate: a background sync added a new event under the hood, then signal fires.
+    from school_test_engine.storage import events_repo
+    events_repo.create(conn, uid, "Mathe", "klassenarbeit", "2099-01-01",
+                       external_uid="bg-sync-uid-1@host",
+                       external_source="schulportal_hessen")
+    # Now emit events_synced — the list should reload and pick up the new event.
+    win.events_synced.emit()
+    # The list must contain the synced event:
+    rows = events_repo.list_all(conn, uid)
+    assert any(r["external_uid"] == "bg-sync-uid-1@host" for r in rows)
+    # And EventsPage's list-rebuild path must have been taken (count > 0 with the new row).
+    # Easiest verification: the list_layout has >= 1 ClickableCard widget.
+    from school_test_engine.ui.widgets.clickable_card import ClickableCard
+    cards = [page._list_layout.itemAt(i).widget() for i in range(page._list_layout.count())]
+    assert any(isinstance(w, ClickableCard) for w in cards)

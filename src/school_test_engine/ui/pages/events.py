@@ -98,6 +98,10 @@ class EventsPage(QWidget):
         self._scroll.setWidget(self._list_container)
         outer.addWidget(self._scroll, 1)
 
+        # React to background sync (MainWindow.events_synced) — keep list fresh
+        if hasattr(window, "events_synced"):
+            window.events_synced.connect(self.reload)
+
     def reload(self) -> None:
         uid = self.window.active_user_id
         if uid is None:
