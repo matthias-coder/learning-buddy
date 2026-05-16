@@ -78,14 +78,7 @@ class HistoryPage(QWidget):
         self.list_layout.setSpacing(10)
         self.scroll.setWidget(self.list_container)
         outer.addWidget(self.scroll, stretch=1)
-
-        bottom = QHBoxLayout()
-        bottom.addStretch(1)
-        export_btn = QPushButton("CSV exportieren")
-        export_btn.setObjectName("text")
-        export_btn.clicked.connect(self._export_csv)
-        bottom.addWidget(export_btn)
-        outer.addLayout(bottom)
+        # "CSV exportieren" lives in the global header now.
 
     def reload(self) -> None:
         self._attempts = attempts_repo.list_all_attempts(
@@ -149,7 +142,7 @@ class HistoryPage(QWidget):
             self.list_layout.addWidget(card)
         self.list_layout.addStretch(1)
 
-    def _export_csv(self) -> None:
+    def export_csv(self) -> None:
         if not self._attempts:
             QMessageBox.information(
                 self, "Nichts zu exportieren", "Es gibt noch keine abgeschlossenen Tests."

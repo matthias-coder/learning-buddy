@@ -45,18 +45,7 @@ class GradesPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(16)
 
-        # Header — page actions only (back route lives in the global header)
-        head = QHBoxLayout()
-        head.addStretch(1)
-        pdf_btn = QPushButton("Als PDF")
-        pdf_btn.setObjectName("text")
-        pdf_btn.clicked.connect(self._export_pdf)
-        head.addWidget(pdf_btn)
-        add = QPushButton("+ Note")
-        add.setObjectName("primary")
-        add.clicked.connect(self._add_assessment)
-        head.addWidget(add)
-        outer.addLayout(head)
+        # "Als PDF" and "+ Note" buttons live in the global header now.
 
         eyebrow = QLabel("NOTEN")
         eyebrow.setObjectName("eyebrow")
@@ -258,7 +247,7 @@ class GradesPage(QWidget):
     # Actions
     # ------------------------------------------------------------------
 
-    def _export_pdf(self) -> None:
+    def export_pdf(self) -> None:
         uid = self.window.active_user_id
         if uid is None:
             return
@@ -269,7 +258,7 @@ class GradesPage(QWidget):
         default = f"learning-buddy-notenuebersicht-{date.today().isoformat()}.pdf"
         save_pdf_with_dialog(self, html, default)
 
-    def _add_assessment(self):
+    def add_assessment(self):
         self.window.show_assessment_edit(
             assessment_id=None,
             return_to="grades",

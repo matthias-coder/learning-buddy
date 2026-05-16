@@ -90,9 +90,11 @@ class _ProfileChip(QFrame):
 
 
 class GlobalHeader(QWidget):
-    """Top bar with logo-menu (navigation) and profile chip (status).
+    """Top bar with logo-menu (navigation), page-action slot and profile chip.
 
     MainWindow hides this when there is no active user (Profile-Picker).
+    Pages register their action buttons via set_page_actions() — keeps a
+    single Action row instead of two stacked Action rows on inner pages.
     """
 
     def __init__(self, window):
@@ -115,8 +117,25 @@ class GlobalHeader(QWidget):
 
         layout.addStretch(1)
 
+        # Page-action slot — pages drop their primary buttons here so the
+        # global header is the single action strip on every inner page.
+        self._action_row = QHBoxLayout()
+        self._action_row.setSpacing(8)
+        layout.addLayout(self._action_row)
+
         self.chip = _ProfileChip()
         layout.addWidget(self.chip)
 
     def set_user(self, name: str, image_bytes: bytes | None = None) -> None:
         self.chip.set_user(name, image_bytes)
+
+    def set_page_actions(self, widgets: list) -> None:
+        """Replace the page-action slot's contents. Call with [] to clear."""
+        while self._action_row.count():
+            item = self._action_row.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+        for w in widgets:
+            self._action_row.addWidget(w)

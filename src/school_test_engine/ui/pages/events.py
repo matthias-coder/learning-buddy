@@ -52,14 +52,7 @@ class EventsPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(16)
 
-        # Header row: page action (back route lives in the global header)
-        head = QHBoxLayout()
-        head.addStretch(1)
-        add = QPushButton("+ Termin")
-        add.setObjectName("primary")
-        add.clicked.connect(self._add_event)
-        head.addWidget(add)
-        outer.addLayout(head)
+        # +Termin button lives in the global header's page-action slot now.
 
         # Sync row (Phase 15)
         sync_row = QHBoxLayout()
@@ -284,7 +277,7 @@ class EventsPage(QWidget):
     # Actions
     # ------------------------------------------------------------------
 
-    def _add_event(self):
+    def add_event(self):
         self.window.show_event_edit(event_id=None, return_to="events")
 
     def _edit_event(self, event_id: int):

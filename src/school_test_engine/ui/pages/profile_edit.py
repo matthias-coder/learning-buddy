@@ -115,7 +115,7 @@ class ProfileEditPage(QWidget):
         # Birthday: year range 1900 → today. 1900-01-01 is the "not set" sentinel.
         self.birthday_edit = DatePicker(year_range=(1900, datetime.now().year))
         self.birthday_edit.setDate(QDate(1900, 1, 1))
-        clear_bd = QPushButton("löschen")
+        clear_bd = QPushButton("Löschen")
         clear_bd.setObjectName("text")
         clear_bd.clicked.connect(self._clear_birthday)
         bd_row = QHBoxLayout()

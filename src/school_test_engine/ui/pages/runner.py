@@ -348,10 +348,16 @@ class RunnerPage(QWidget):
 
         self.answer_area.addStretch(1)
 
-        self.back_btn.setEnabled(self._index > 0)
+        # On the first question there is no "previous" — hide instead of
+        # showing a greyed-out button. The Pausieren button and the global
+        # logo menu cover the "leave to start" path.
+        self.back_btn.setVisible(self._index > 0)
         self.mark_btn.setText("Markierung entfernen" if mark_state else "Markieren")
         is_last = self._index == len(self._questions) - 1
         self.next_btn.setText("Zur Übersicht →" if is_last else "Weiter →")
+        # On the last question the primary CTA already says "Zur Übersicht →" —
+        # hide the top-right Übersicht link to avoid duplicate paths.
+        self.overview_btn.setVisible(not is_last)
 
     # ------------------------------------------------------------------
     # Answer collection + persistence

@@ -5,7 +5,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
 from ..daily import builder as daily_builder
 from ..daily import finalize as daily_finalize
@@ -132,49 +132,73 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.profile_picker_page)
 
     def show_profile_manager(self, return_to: str = "picker") -> None:
+        self.header.set_page_actions([])
         self.profile_manager_page.show_for(return_to)
         self.stack.setCurrentWidget(self.profile_manager_page)
 
     def show_profile_edit(self, user_id: int | None = None, return_to: str = "picker") -> None:
+        self.header.set_page_actions([])
         self.profile_edit_page.show_for(user_id, return_to)
         self.stack.setCurrentWidget(self.profile_edit_page)
 
     def show_menu(self) -> None:
         self._return_to_history = False
+        self.header.set_page_actions([])
         self.menu_page.reload()
         self.stack.setCurrentWidget(self.menu_page)
 
     def show_library(self) -> None:
+        self.header.set_page_actions([])
         self.library_page.reload()
         self.stack.setCurrentWidget(self.library_page)
 
     def show_import(self) -> None:
+        self.header.set_page_actions([])
         self.stack.setCurrentWidget(self.import_page)
 
     def show_gaps(self) -> None:
+        self.header.set_page_actions([])
         self.gaps_page.reload()
         self.stack.setCurrentWidget(self.gaps_page)
 
     def show_history(self) -> None:
+        csv_btn = QPushButton("CSV exportieren")
+        csv_btn.setObjectName("text")
+        csv_btn.clicked.connect(self.history_page.export_csv)
+        self.header.set_page_actions([csv_btn])
         self.history_page.reload()
         self.stack.setCurrentWidget(self.history_page)
 
     def show_events(self) -> None:
+        add_btn = QPushButton("+ Termin")
+        add_btn.setObjectName("primary")
+        add_btn.clicked.connect(self.events_page.add_event)
+        self.header.set_page_actions([add_btn])
         self.events_page.reload()
         self.stack.setCurrentWidget(self.events_page)
 
     def show_grades(self) -> None:
+        pdf_btn = QPushButton("Als PDF")
+        pdf_btn.setObjectName("text")
+        pdf_btn.clicked.connect(self.grades_page.export_pdf)
+        add_btn = QPushButton("+ Note")
+        add_btn.setObjectName("primary")
+        add_btn.clicked.connect(self.grades_page.add_assessment)
+        self.header.set_page_actions([pdf_btn, add_btn])
         self.grades_page.reload()
         self.stack.setCurrentWidget(self.grades_page)
 
     def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
+        self.header.set_page_actions([])
         self.prompt_builder_page.show_for(subject, topics)
         self.stack.setCurrentWidget(self.prompt_builder_page)
 
     def show_test_create(self) -> None:
+        self.header.set_page_actions([])
         self.stack.setCurrentWidget(self.test_create_page)
 
     def show_event_edit(self, event_id: int | None = None, return_to: str = "events") -> None:
+        self.header.set_page_actions([])
         self.event_edit_page.show_for(event_id, return_to)
         self.stack.setCurrentWidget(self.event_edit_page)
 
@@ -185,6 +209,7 @@ class MainWindow(QMainWindow):
         prefill_subject: str | None = None,
         prefill_event_id: int | None = None,
     ) -> None:
+        self.header.set_page_actions([])
         self.assessment_edit_page.show_for(
             assessment_id, return_to, prefill_subject, prefill_event_id,
         )

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -79,7 +79,8 @@ class MenuPage(QWidget):
         if user is None:
             return
         # Header chip is owned by MainWindow; only the local greeting updates here.
-        self.greeting.setText(f"Hallo, {user['name']}")
+        first_name = (user["name"] or "").split()[0] if user["name"] else ""
+        self.greeting.setText(f"{_greeting_for_hour(datetime.now().hour)}, {first_name}")
 
         # Rebuild dynamic content — recursive clear so nested QHBoxLayouts/QGridLayouts
         # don't leak their child widgets across reloads (Phase 12.1 fix).
@@ -300,6 +301,14 @@ class MenuPage(QWidget):
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
+
+
+def _greeting_for_hour(hour: int) -> str:
+    if 5 <= hour < 11:
+        return "Guten Morgen"
+    if 11 <= hour < 18:
+        return "Hallo"
+    return "Guten Abend"
 
 
 def _make_compact_tile(eyebrow_text: str, title_text: str) -> ClickableCard:

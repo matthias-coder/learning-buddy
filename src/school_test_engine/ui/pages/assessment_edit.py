@@ -31,7 +31,7 @@ from ..widgets.date_picker import DatePicker
 
 CATEGORY_LABELS = [
     ("schriftlich", "schriftlich"),
-    ("muendlich", "muendlich"),
+    ("muendlich", "mündlich"),
     ("sonstige", "sonstige"),
 ]
 
@@ -309,7 +309,7 @@ class AssessmentEditPage(QWidget):
     def _save(self) -> None:
         data = self._collect_data()
         if not data["subject"]:
-            QMessageBox.information(self, "Fach fehlt", "Bitte ein Fach waehlen.")
+            QMessageBox.information(self, "Fach fehlt", "Bitte ein Fach wählen.")
             return
         if self._assessment_id is None:
             assessments_repo.create(
