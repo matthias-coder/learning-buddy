@@ -28,9 +28,11 @@ from ..widgets.exam_card import ExamCard
 
 
 class MenuPage(QWidget):
-    def __init__(self, window):
+    def __init__(self, window, today: date | None = None):
         super().__init__()
         self.window = window
+        self._today_override = today
+        self._ferien_banner = None
 
         outer = QVBoxLayout(self)
         outer.setSpacing(20)
@@ -54,6 +56,11 @@ class MenuPage(QWidget):
         self.greeting.setAlignment(Qt.AlignmentFlag.AlignCenter)
         outer.addWidget(self.greeting)
         outer.addSpacing(12)
+
+        # Ferien-Banner slot (refreshed in reload())
+        self._ferien_banner_slot = QVBoxLayout()
+        self._ferien_banner_slot.setContentsMargins(0, 0, 0, 0)
+        outer.addLayout(self._ferien_banner_slot)
 
         # Dynamic content area — rebuilt on reload()
         self._dynamic_container = QWidget()
@@ -93,6 +100,7 @@ class MenuPage(QWidget):
         else:
             self._build_empty_state()
             self._build_full_grid()
+        self._refresh_ferien_banner()
 
     @staticmethod
     def _clear_layout_recursive(layout) -> None:
@@ -259,6 +267,30 @@ class MenuPage(QWidget):
             return ("no_library", streak)
 
         return ("due", streak)
+
+    def _refresh_ferien_banner(self) -> None:
+        from ...school_calendar.service import ferien_banner_state
+        from ..widgets.ferien_banner import FerienBanner
+
+        # Clear previous banner (Phase-16 setParent(None) lesson)
+        while self._ferien_banner_slot.count():
+            item = self._ferien_banner_slot.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+        self._ferien_banner = None
+
+        if self.window.active_user_id is None:
+            return
+        today = self._today_override or date.today()
+        state = ferien_banner_state(self.window.conn, self.window.active_user_id, today)
+        if state.mode == "hidden":
+            return
+        self._ferien_banner = FerienBanner(
+            state, parent=self, get_window=lambda: self.window,
+        )
+        self._ferien_banner_slot.addWidget(self._ferien_banner)
 
     # ------------------------------------------------------------------
     # ExamCard actions
