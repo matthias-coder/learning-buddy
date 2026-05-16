@@ -34,6 +34,7 @@ class ErrorBookPage(QWidget):
         self.conn = conn
         self._current_subject: str | None = None
         self._subject_buttons: dict[str, QPushButton] = {}
+        self._last_counts: dict[str, int] = {}
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(48, 36, 48, 36)
@@ -46,8 +47,8 @@ class ErrorBookPage(QWidget):
         outer.addWidget(title)
 
         # Subject-Pill-Row mit FlowLayout (analog grades.py)
-        subject_host = QWidget()
-        self._subject_row = FlowLayout(subject_host, h_spacing=6, v_spacing=6)
+        self._subject_host = QWidget()
+        self._subject_row = FlowLayout(self._subject_host, h_spacing=6, v_spacing=6)
         for s in SUBJECTS_ALL:
             b = QPushButton(s)
             b.setCheckable(True)
@@ -55,7 +56,7 @@ class ErrorBookPage(QWidget):
             b.clicked.connect(lambda _, sub=s: self._select_subject(sub))
             self._subject_buttons[s] = b
             self._subject_row.addWidget(b)
-        outer.addWidget(subject_host)
+        outer.addWidget(self._subject_host)
 
         # Globale Empty-State Card
         self.empty_label = QLabel("Noch keine offenen Fehler — sauber.")
@@ -94,6 +95,7 @@ class ErrorBookPage(QWidget):
         if uid is None:
             return
         counts = error_book_queries.count_open(self.conn, uid)
+        self._last_counts = counts
         total = sum(counts.values())
 
         # Refresh subject pill labels + enabled state
@@ -105,8 +107,7 @@ class ErrorBookPage(QWidget):
         if total == 0:
             self.empty_label.show()
             self.subject_empty_label.hide()
-            for btn in self._subject_buttons.values():
-                btn.setVisible(False)
+            self._subject_host.setVisible(False)
             self._scroll.hide()
             self._current_subject = None
             self._refresh_action_button()
@@ -120,8 +121,7 @@ class ErrorBookPage(QWidget):
             )
 
         self.empty_label.hide()
-        for btn in self._subject_buttons.values():
-            btn.setVisible(True)
+        self._subject_host.setVisible(True)
         for sub, btn in self._subject_buttons.items():
             btn.setChecked(sub == self._current_subject)
 
@@ -142,14 +142,12 @@ class ErrorBookPage(QWidget):
         self._refresh_action_button()
 
     def practice_button_count(self) -> int:
-        """Anzahl Fragen für den Üben-Button im aktiven Fach (gekappt bei 10)."""
+        """Anzahl Fragen für den Üben-Button im aktiven Fach (gekappt bei 10).
+        Liest aus dem Cache, der von reload() befüllt wird — vermeidet einen zweiten
+        DB-Scan beim Refreshen des Action-Buttons im Global-Header."""
         if self._current_subject is None:
             return 0
-        uid = self.window.active_user_id
-        if uid is None:
-            return 0
-        n = error_book_queries.count_open(self.conn, uid).get(self._current_subject, 0)
-        return min(n, 10)
+        return min(self._last_counts.get(self._current_subject, 0), 10)
 
     def trigger_practice(self) -> None:
         if self._current_subject is None:
