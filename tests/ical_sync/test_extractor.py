@@ -8,7 +8,7 @@ from school_test_engine.ical_sync.parser import RawVEvent
 def _ev(description: str, uid: str = "x-klausur-1@h") -> RawVEvent:
     return RawVEvent(
         uid=uid, summary="", description=description,
-        dtstart_date="2026-03-10", categories=(),
+        dtstart_date="2026-03-10", dtend_date="2026-03-10", categories=(),
     )
 
 

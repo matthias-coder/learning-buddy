@@ -6,7 +6,7 @@ ever needs to be swapped, only this file changes.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import icalendar
 
@@ -17,7 +17,12 @@ class RawVEvent:
     summary: str
     description: str
     dtstart_date: str          # always ISO YYYY-MM-DD, normalized
+    dtend_date: str            # always ISO YYYY-MM-DD, normalized, inclusive
     categories: tuple[str, ...]
+
+    @property
+    def is_multi_day(self) -> bool:
+        return self.dtend_date > self.dtstart_date
 
 
 def parse_events(ics_bytes: bytes) -> list[RawVEvent]:
@@ -35,14 +40,27 @@ def parse_events(ics_bytes: bytes) -> list[RawVEvent]:
         if dtstart is None:
             continue
         dt = dtstart.dt
-        iso_date = (
+        start_iso = (
             dt.date().isoformat() if isinstance(dt, datetime) else dt.isoformat()
         )
+
+        dtend = comp.get("DTEND")
+        if dtend is None:
+            end_iso = start_iso
+        else:
+            de = dtend.dt
+            if isinstance(de, datetime):
+                end_iso = de.date().isoformat()
+            else:
+                # DATE-only DTEND is exclusive → step back one day
+                end_iso = (de - timedelta(days=1)).isoformat()
+
         out.append(RawVEvent(
             uid=str(comp.get("UID", "")),
             summary=str(comp.get("SUMMARY", "")),
             description=str(comp.get("DESCRIPTION", "")),
-            dtstart_date=iso_date,
+            dtstart_date=start_iso,
+            dtend_date=end_iso,
             categories=_categories(comp),
         ))
     return out

@@ -6,7 +6,7 @@ from school_test_engine.ical_sync.parser import RawVEvent
 
 
 def _ev(uid: str) -> RawVEvent:
-    return RawVEvent(uid=uid, summary="", description="", dtstart_date="2026-01-01", categories=())
+    return RawVEvent(uid=uid, summary="", description="", dtstart_date="2026-01-01", dtend_date="2026-01-01", categories=())
 
 
 def test_klausur_uid_returns_true():
