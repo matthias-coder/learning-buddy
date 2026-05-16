@@ -9,7 +9,6 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
-    QDateEdit,
     QFormLayout,
     QFrame,
     QHBoxLayout,
@@ -27,6 +26,7 @@ from PySide6.QtWidgets import (
 from ...storage import events_repo
 from .._subjects import SUBJECTS_ALL
 from ..design import FontFamily, Spacing
+from ..widgets.date_picker import DatePicker
 
 
 KIND_LABELS = [
@@ -93,9 +93,7 @@ class EventEditPage(QWidget):
         self._kind_buttons["klassenarbeit"].setChecked(True)
         form.addRow("Typ:", kind_row)
 
-        self.date_edit = QDateEdit()
-        self.date_edit.setCalendarPopup(True)
-        self.date_edit.setDisplayFormat("dd.MM.yyyy")
+        self.date_edit = DatePicker()
         form.addRow("Datum:", self.date_edit)
 
         self.topics_edit = QPlainTextEdit()

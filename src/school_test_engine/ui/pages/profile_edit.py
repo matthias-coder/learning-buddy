@@ -8,7 +8,6 @@ from PySide6.QtCore import QBuffer, QByteArray, QDate, QIODevice, Qt
 from PySide6.QtGui import QFont, QPixmap
 from PySide6.QtWidgets import (
     QComboBox,
-    QDateEdit,
     QFileDialog,
     QFormLayout,
     QFrame,
@@ -30,6 +29,7 @@ from ...storage import users_repo
 from .._layouts import row_get
 from ..design import FontFamily, Spacing
 from ..widgets.avatar_badge import AvatarBadge
+from ..widgets.date_picker import DatePicker
 
 
 def _pixmap_to_png_bytes(pm: QPixmap, max_dim: int = 256) -> bytes:
@@ -112,9 +112,8 @@ class ProfileEditPage(QWidget):
         self.name_edit.setPlaceholderText("z. B. Clemens")
         form.addRow("Name:", self.name_edit)
 
-        self.birthday_edit = QDateEdit()
-        self.birthday_edit.setCalendarPopup(True)
-        self.birthday_edit.setDisplayFormat("dd.MM.yyyy")
+        # Birthday: year range 1900 → today. 1900-01-01 is the "not set" sentinel.
+        self.birthday_edit = DatePicker(year_range=(1900, datetime.now().year))
         self.birthday_edit.setDate(QDate(1900, 1, 1))
         clear_bd = QPushButton("löschen")
         clear_bd.setObjectName("text")

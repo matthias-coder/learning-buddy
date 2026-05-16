@@ -8,7 +8,6 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
-    QDateEdit,
     QDoubleSpinBox,
     QFormLayout,
     QFrame,
@@ -27,6 +26,7 @@ from PySide6.QtWidgets import (
 from ...storage import assessments_repo, events_repo
 from .._subjects import SUBJECTS_ALL, note_color
 from ..design import FontFamily, Spacing
+from ..widgets.date_picker import DatePicker
 
 
 CATEGORY_LABELS = [
@@ -177,9 +177,7 @@ class AssessmentEditPage(QWidget):
         self._cat_buttons["schriftlich"].setChecked(True)
         form.addRow("Art:", cat_row)
 
-        self.date_edit = QDateEdit()
-        self.date_edit.setCalendarPopup(True)
-        self.date_edit.setDisplayFormat("dd.MM.yyyy")
+        self.date_edit = DatePicker()
         form.addRow("Datum:", self.date_edit)
 
         self.points = QDoubleSpinBox()
