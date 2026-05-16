@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import sqlite3
+from dataclasses import dataclass
 from datetime import date
+from typing import Literal
 
 from ..storage import calendar_events_repo, events_repo
 from .filters import CalendarFilters
@@ -102,4 +104,51 @@ def _from_calendar_row(row: sqlite3.Row) -> CalendarEntry:
         end_date=date.fromisoformat(row["end_date"]),
         subject=None,
         entry_id=row["id"],
+    )
+
+
+@dataclass(frozen=True)
+class FerienBannerState:
+    mode: Literal["hidden", "countdown", "in_vacation"]
+    label: str
+    days: int | None
+    target_date: date | None
+    vacation_title: str | None
+
+
+def ferien_banner_state(
+    conn: sqlite3.Connection, user_id: int, today: date
+) -> FerienBannerState:
+    today_iso = today.isoformat()
+
+    active = calendar_events_repo.find_active_vacation(conn, user_id, today_iso)
+    if active is not None:
+        end = date.fromisoformat(active["end_date"])
+        remaining = (end - today).days
+        title = active["title"]
+        if remaining == 0:
+            label = "Letzter Ferientag — morgen geht's wieder los."
+        else:
+            label = f"Noch {remaining} Tage {title} — genieß sie! 🌞"
+        return FerienBannerState(
+            mode="in_vacation", label=label, days=remaining,
+            target_date=end, vacation_title=title,
+        )
+
+    upcoming = calendar_events_repo.find_next_vacation(conn, user_id, today_iso)
+    if upcoming is not None:
+        start = date.fromisoformat(upcoming["start_date"])
+        days = (start - today).days
+        title = upcoming["title"]
+        if days == 1:
+            label = f"Morgen geht's los: {title} starten!"
+        else:
+            label = f"Noch {days} Tage bis {title} — {start.strftime('%d.%m.%Y')}"
+        return FerienBannerState(
+            mode="countdown", label=label, days=days,
+            target_date=start, vacation_title=title,
+        )
+
+    return FerienBannerState(
+        mode="hidden", label="", days=None, target_date=None, vacation_title=None,
     )
