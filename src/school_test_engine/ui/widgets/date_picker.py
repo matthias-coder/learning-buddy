@@ -46,17 +46,19 @@ class DatePicker(QWidget):
         self._day.setRange(1, 31)
         self._day.setFixedWidth(56)
         self._day.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self._day.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
 
         self._month = QComboBox()
         for label in _MONTHS_DE:
             self._month.addItem(label)
-        self._month.setFixedWidth(120)
+        self._month.setFixedWidth(140)
 
         self._year = QSpinBox()
         self._year.setRange(self._year_range[0], self._year_range[1])
-        self._year.setFixedWidth(80)
+        self._year.setFixedWidth(84)
         self._year.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self._year.setGroupSeparatorShown(False)
+        self._year.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
 
         layout.addWidget(self._day)
         layout.addWidget(self._month)

@@ -341,12 +341,32 @@ QComboBox {
     background: #fffdf8;
     border: 1px solid #d8cdb8;
     border-radius: 10px;
-    padding: 6px 12px;
+    padding: 6px 28px 6px 12px;
     min-height: 22px;
 }
 
 QComboBox:hover {
     border-color: #a89e89;
+}
+
+/* Dropdown trigger — sits inside the padding so it never overlaps the
+   rounded outer border. Subtle divider line on the left. */
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 22px;
+    border-left: 1px solid #ebe3d5;
+    background: transparent;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+}
+QComboBox::drop-down:hover {
+    background: #f4efe6;
+}
+QComboBox::down-arrow {
+    image: url({ASSETS}/caret-down.svg);
+    width: 10px;
+    height: 6px;
 }
 
 QComboBox QAbstractItemView {
@@ -355,6 +375,28 @@ QComboBox QAbstractItemView {
     selection-background-color: #f4efe6;
     selection-color: #1e1b15;
     padding: 4px;
+}
+
+/* SpinBox + DoubleSpinBox — match LineEdit shell. Spinner buttons are
+   hidden; users type or scroll the wheel. Cleaner desktop look. */
+QSpinBox, QDoubleSpinBox {
+    background: #fffdf8;
+    color: #1e1b15;
+    border: 1px solid #d8cdb8;
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-height: 22px;
+    font-family: "Inter", sans-serif;
+}
+QSpinBox:hover, QDoubleSpinBox:hover {
+    border-color: #a89e89;
+}
+QSpinBox::up-button, QDoubleSpinBox::up-button,
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    width: 0;
+    height: 0;
+    border: none;
+    background: transparent;
 }
 
 /* Listen & Tabellen */

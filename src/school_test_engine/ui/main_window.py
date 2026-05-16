@@ -44,7 +44,11 @@ class MainWindow(QMainWindow):
 
         qss_path = Path(__file__).parent / "style.qss"
         if qss_path.exists():
-            self.setStyleSheet(qss_path.read_text(encoding="utf-8"))
+            assets_dir = Path(__file__).resolve().parents[3] / "assets"
+            qss = qss_path.read_text(encoding="utf-8").replace(
+                "{ASSETS}", assets_dir.as_posix()
+            )
+            self.setStyleSheet(qss)
 
         # Global header (logo menu + profile chip) above the page stack.
         # Visibility is bound to active_user_id: hidden on the Profile-Picker.
