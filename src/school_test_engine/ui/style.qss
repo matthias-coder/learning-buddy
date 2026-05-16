@@ -770,3 +770,43 @@ QLabel#fieldHint {
     color: #a89e89;
     font-size: 9pt;
 }
+
+/* === Phase 17: Schulkalender === */
+QPushButton#filterChip {
+    background: #fffdf8;
+    color: #3a2d18;
+    border: 1px solid #d8cdb8;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 10pt;
+    min-height: 20px;
+}
+QPushButton#filterChip:checked {
+    background: #e8eddc;
+    border-color: #b1c190;
+    color: #3e552d;
+}
+QPushButton#filterChip:hover {
+    border-color: #c0b497;
+}
+
+QFrame#calendarEntryCard {
+    background: #fffdf8;
+    border: 1px solid #ecd9bf;
+    border-radius: 10px;
+}
+QLabel#dateBadge {
+    color: #57462b;
+    font-weight: 600;
+}
+
+QFrame#ferienBanner {
+    background: #fcf7e8;
+    border: 1px solid #ecd9bf;
+    border-radius: 10px;
+}
+QFrame#ferienBannerStrip {
+    background: #b1c190;
+    border: none;
+    border-radius: 2px;
+}
