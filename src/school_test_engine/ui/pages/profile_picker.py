@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
 
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
@@ -14,13 +13,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...resources import assets_dir
 from ...storage import attempts_repo, users_repo
 from ..design import FontFamily
 from ..widgets.flow_layout import FlowLayout
 from ..widgets.profile_card import ProfileCard
 
 
-LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomark.svg"
+LOGOMARK_PATH = assets_dir() / "logomark.svg"
 
 
 class ProfilePickerPage(QWidget):

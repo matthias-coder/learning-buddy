@@ -47,7 +47,8 @@ class MainWindow(QMainWindow):
 
         qss_path = Path(__file__).parent / "style.qss"
         if qss_path.exists():
-            assets_dir = Path(__file__).resolve().parents[3] / "assets"
+            from ..resources import assets_dir as _assets_dir
+            assets_dir = _assets_dir()
             qss = qss_path.read_text(encoding="utf-8").replace(
                 "{ASSETS}", assets_dir.as_posix()
             )

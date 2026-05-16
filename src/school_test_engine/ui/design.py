@@ -6,10 +6,10 @@ paper-and-ink Wärme mit Clay-Terracotta-Primary und Tea-Green-Accent).
 from __future__ import annotations
 
 from PySide6.QtGui import QColor, QFont, QFontDatabase
-from pathlib import Path
 
+from ..resources import assets_dir
 
-FONTS_DIR = Path(__file__).resolve().parents[2].parent / "assets" / "fonts"
+FONTS_DIR = assets_dir() / "fonts"
 
 
 class Color:

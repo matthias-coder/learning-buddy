@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from PySide6.QtCore import QUrl
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-_KATEX_DIR = Path(__file__).resolve().parents[3].parent / "assets" / "katex"
+from ...resources import assets_dir
+
+_KATEX_DIR = assets_dir() / "katex"
 _KATEX_INDEX = _KATEX_DIR / "index.html"
 
 

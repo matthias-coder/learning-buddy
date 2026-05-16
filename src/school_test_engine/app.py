@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from PySide6.QtCore import QSize
 from PySide6.QtGui import QFont, QIcon
@@ -18,7 +17,8 @@ def main() -> int:
     app.setApplicationDisplayName("Learning Buddy")
     app.setOrganizationName("Matthias Kessler")
 
-    icon_path = Path(__file__).resolve().parents[2] / "assets" / "logomark.svg"
+    from .resources import assets_dir
+    icon_path = assets_dir() / "logomark.svg"
     if icon_path.exists():
         app.setWindowIcon(QIcon(str(icon_path)))
 

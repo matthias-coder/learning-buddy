@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
 
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QFont, QPainter, QPainterPath, QPixmap, QPixmapCache
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QLabel, QWidget
 
+from ...resources import assets_dir
 from ..design import Semantic
 
 
 PLACEHOLDER_SVG_PATH = (
-    Path(__file__).resolve().parents[3].parent / "assets" / "avatar-placeholder.svg"
+    assets_dir() / "avatar-placeholder.svg"
 )
 
 

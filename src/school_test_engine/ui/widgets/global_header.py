@@ -6,8 +6,6 @@ the right. Visibility is bound to active_user_id by MainWindow.
 """
 from __future__ import annotations
 
-from pathlib import Path
-
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont
 from PySide6.QtSvgWidgets import QSvgWidget
@@ -20,11 +18,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...resources import assets_dir
 from ..design import Color, FontFamily
 from .avatar_badge import AvatarBadge
 
 
-LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomark.svg"
+LOGOMARK_PATH = assets_dir() / "logomark.svg"
 
 
 class _LogoMenuButton(QFrame):

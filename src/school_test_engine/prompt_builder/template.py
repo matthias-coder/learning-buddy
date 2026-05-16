@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
+from ..resources import examples_dir
 
 _PROMPT_PATH = (
-    Path(__file__).resolve().parents[3] / "examples" / "PROMPT-FOR-AI.md"
+    examples_dir() / "PROMPT-FOR-AI.md"
 )
 
 

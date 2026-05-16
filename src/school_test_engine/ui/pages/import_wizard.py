@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtWidgets import QApplication, QPlainTextEdit
 
 from ...importer.json_import import ImportError as TestImportError
+from ...resources import examples_dir
 from ...importer.json_import import import_from_file, import_from_string
 from ..design import FontFamily
 from ..widgets.eyebrow import Eyebrow
@@ -96,7 +97,7 @@ class ImportPage(QWidget):
 
 
     def _pick_file(self) -> None:
-        examples = Path(__file__).resolve().parents[3] / "examples"
+        examples = examples_dir()
         start_dir = str(examples) if examples.exists() else str(Path.home())
         path_str, _ = QFileDialog.getOpenFileName(
             self, "Test-JSON wählen", start_dir, "JSON-Dateien (*.json)"
