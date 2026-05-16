@@ -1,6 +1,6 @@
 [project]
 name = "school-test-engine"
-version = "0.1.0"
+version = "0.17.0"
 description = "Übungs-Test-Engine für die Realschule (8. Klasse): KI-generierte Fragen importieren, üben, Wissenslücken finden."
 requires-python = ">=3.11"
 dependencies = [
@@ -12,6 +12,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
+]
+build = [
+    "pyinstaller>=6.0",
+    "Pillow>=10.0",
+    "cairosvg>=2.7",
 ]
 
 [project.scripts]
