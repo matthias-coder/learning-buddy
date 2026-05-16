@@ -84,6 +84,15 @@ class GapsPage(QWidget):
         self.scroll.setWidget(self.list_container)
         outer.addWidget(self.scroll, stretch=1)
 
+        # Footer-Link zum Fehlerheft (Phase 16)
+        footer_row = QHBoxLayout()
+        footer_row.addStretch(1)
+        self._error_book_btn = QPushButton("Fehler nochmal üben →")
+        self._error_book_btn.setObjectName("text")
+        self._error_book_btn.clicked.connect(self.window.show_error_book)
+        footer_row.addWidget(self._error_book_btn)
+        outer.addLayout(footer_row)
+
     def reload(self) -> None:
         self._reload_data()
 
