@@ -170,9 +170,11 @@ class ErrorBookPage(QWidget):
                 w.deleteLater()
 
     def _refresh_action_button(self) -> None:
-        # MainWindow setzt den Action-Button via header.set_page_actions(...)
-        # in show_error_book(). reload() informiert nur die Eltern.
-        pass
+        """Sagt MainWindow Bescheid, dass der Üben-Button im Header
+        aktualisiert werden muss (z.B. nach Subject-Wechsel)."""
+        refresh = getattr(self.window, "_refresh_error_book_action", None)
+        if refresh is not None:
+            refresh()
 
 
 def _make_entry_card(e: ErrorBookEntry) -> QFrame:

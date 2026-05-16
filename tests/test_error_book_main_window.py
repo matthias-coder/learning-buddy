@@ -72,3 +72,23 @@ def test_start_error_book_practice_no_errors_does_not_route(qt_app, conn, uid, m
     current_before = window.stack.currentWidget()
     window.start_error_book_practice("Mathe")
     assert window.stack.currentWidget() is current_before
+
+
+def test_subject_switch_refreshes_header_ueben_button(qt_app, conn, uid):
+    """Nach Subject-Pill-Click muss der Üben-Button-Text auf den neuen
+    Subject-Count refreshen — sonst zeigt der Header eine stale Anzahl."""
+    # Setup: 2 Mathe-Fehler, 1 Englisch-Fehler
+    _import_and_fail(conn, uid, subject="Mathe")
+    _import_and_fail(conn, uid, subject="Mathe")
+    _import_and_fail(conn, uid, subject="Englisch")
+    window = MainWindow(conn)
+    window.set_active_user(uid)
+    window.show_error_book()
+
+    # Standardmäßig wird das erste Fach mit count>0 aktiv — Mathe
+    btn = window._error_book_ueben_btn
+    assert btn.text() == "Üben (2)"
+
+    # User klickt auf Englisch-Pill → Subject wechselt
+    window.error_book_page._select_subject("Englisch")
+    assert btn.text() == "Üben (1)"

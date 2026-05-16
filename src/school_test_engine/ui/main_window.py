@@ -196,15 +196,23 @@ class MainWindow(QMainWindow):
         uid = self.active_user_id
         if uid is None:
             return
-        ueben_btn = QPushButton("Üben")
-        ueben_btn.setObjectName("primary")
-        ueben_btn.clicked.connect(self.error_book_page.trigger_practice)
-        self.header.set_page_actions([ueben_btn])
+        self._error_book_ueben_btn = QPushButton("Üben")
+        self._error_book_ueben_btn.setObjectName("primary")
+        self._error_book_ueben_btn.clicked.connect(self.error_book_page.trigger_practice)
+        self.header.set_page_actions([self._error_book_ueben_btn])
         self.error_book_page.reload()
-        n = self.error_book_page.practice_button_count()
-        ueben_btn.setText(f"Üben ({n})" if n > 0 else "Üben")
-        ueben_btn.setEnabled(n > 0)
+        self._refresh_error_book_action()
         self.stack.setCurrentWidget(self.error_book_page)
+
+    def _refresh_error_book_action(self) -> None:
+        """Reads `practice_button_count()` und aktualisiert den Üben-Button im Header.
+        Wird von der ErrorBookPage nach Subject-Wechsel gerufen."""
+        btn = getattr(self, "_error_book_ueben_btn", None)
+        if btn is None:
+            return
+        n = self.error_book_page.practice_button_count()
+        btn.setText(f"Üben ({n})" if n > 0 else "Üben")
+        btn.setEnabled(n > 0)
 
     def start_error_book_practice(self, subject: str) -> None:
         from PySide6.QtWidgets import QMessageBox
