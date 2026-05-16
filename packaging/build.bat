@@ -13,6 +13,19 @@ set REPO=%~dp0..
 cd /d "%REPO%"
 
 REM ---------------------------------------------------------------------
+REM 0. Activate venv if not already active
+REM ---------------------------------------------------------------------
+if "%VIRTUAL_ENV%"=="" (
+    if exist ".venv\Scripts\activate.bat" (
+        call ".venv\Scripts\activate.bat"
+    ) else (
+        echo [error] No active venv and .venv\Scripts\activate.bat not found.
+        echo Run: python -m venv .venv ^&^& .venv\Scripts\pip install -e .[build]
+        exit /b 1
+    )
+)
+
+REM ---------------------------------------------------------------------
 REM 1. Read __version__ from school_test_engine
 REM ---------------------------------------------------------------------
 for /f "delims=" %%v in ('python -c "from school_test_engine import __version__; print(__version__)"') do set APPVERSION=%%v
