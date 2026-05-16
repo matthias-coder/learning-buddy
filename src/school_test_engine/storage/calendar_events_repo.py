@@ -110,3 +110,37 @@ def delete_by_external_uid(
     )
     conn.commit()
     return cur.rowcount > 0
+
+
+def find_active_vacation(
+    conn: sqlite3.Connection, user_id: int, today: str
+) -> sqlite3.Row | None:
+    """The current vacation (kind='ferien') today is inside — or None."""
+    cur = conn.execute(
+        """
+        SELECT * FROM calendar_events
+        WHERE user_id = ? AND kind = 'ferien'
+          AND start_date <= ? AND end_date >= ?
+        ORDER BY start_date DESC
+        LIMIT 1
+        """,
+        (user_id, today, today),
+    )
+    return cur.fetchone()
+
+
+def find_next_vacation(
+    conn: sqlite3.Connection, user_id: int, today: str
+) -> sqlite3.Row | None:
+    """The earliest vacation (kind='ferien') strictly after today — or None."""
+    cur = conn.execute(
+        """
+        SELECT * FROM calendar_events
+        WHERE user_id = ? AND kind = 'ferien'
+          AND start_date > ?
+        ORDER BY start_date ASC
+        LIMIT 1
+        """,
+        (user_id, today),
+    )
+    return cur.fetchone()

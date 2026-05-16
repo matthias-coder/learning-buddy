@@ -125,3 +125,45 @@ def test_update_by_external_uid_returns_false_when_uid_missing(conn, uid):
 
 def test_delete_by_external_uid_returns_false_when_uid_missing(conn, uid):
     assert calendar_events_repo.delete_by_external_uid(conn, uid, "nonexistent") is False
+
+
+def test_find_active_vacation_returns_current_ferien(conn, uid):
+    calendar_events_repo.create(conn, user_id=uid, kind="ferien", title="Sommer",
+                                start_date="2026-07-07", end_date="2026-08-15")
+    row = calendar_events_repo.find_active_vacation(conn, uid, "2026-07-20")
+    assert row is not None
+    assert row["title"] == "Sommer"
+
+
+def test_find_active_vacation_ignores_single_day_frei(conn, uid):
+    """Bewegliche Feiertage (kind='frei') triggern den Banner nicht."""
+    calendar_events_repo.create(conn, user_id=uid, kind="frei", title="Päd. Tag",
+                                start_date="2026-05-15", end_date="2026-05-15")
+    row = calendar_events_repo.find_active_vacation(conn, uid, "2026-05-15")
+    assert row is None
+
+
+def test_find_active_vacation_returns_none_outside_range(conn, uid):
+    calendar_events_repo.create(conn, user_id=uid, kind="ferien", title="Sommer",
+                                start_date="2026-07-07", end_date="2026-08-15")
+    row = calendar_events_repo.find_active_vacation(conn, uid, "2026-09-01")
+    assert row is None
+
+
+def test_find_next_vacation_returns_earliest_future(conn, uid):
+    calendar_events_repo.create(conn, user_id=uid, kind="ferien", title="Herbst",
+                                start_date="2026-10-19", end_date="2026-10-31")
+    calendar_events_repo.create(conn, user_id=uid, kind="ferien", title="Weihnachten",
+                                start_date="2026-12-22", end_date="2027-01-06")
+    row = calendar_events_repo.find_next_vacation(conn, uid, "2026-05-15")
+    assert row is not None
+    assert row["title"] == "Herbst"
+
+
+def test_find_next_vacation_ignores_frei_kind(conn, uid):
+    calendar_events_repo.create(conn, user_id=uid, kind="frei", title="Brückentag",
+                                start_date="2026-05-29", end_date="2026-05-29")
+    calendar_events_repo.create(conn, user_id=uid, kind="ferien", title="Sommer",
+                                start_date="2026-07-07", end_date="2026-08-15")
+    row = calendar_events_repo.find_next_vacation(conn, uid, "2026-05-15")
+    assert row["title"] == "Sommer"
