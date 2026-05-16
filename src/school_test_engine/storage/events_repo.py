@@ -132,3 +132,18 @@ def update_by_external_uid(
         (subject, kind, event_date, user_id, external_uid),
     )
     conn.commit()
+
+
+def list_for_calendar(
+    conn: sqlite3.Connection, user_id: int
+) -> list[sqlite3.Row]:
+    """All KAs of one user, sorted ASC by event_date for the calendar view."""
+    cur = conn.execute(
+        """
+        SELECT * FROM scheduled_events
+        WHERE user_id = ?
+        ORDER BY event_date ASC, created_at ASC
+        """,
+        (user_id,),
+    )
+    return cur.fetchall()
