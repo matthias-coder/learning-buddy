@@ -53,3 +53,31 @@ def test_has_open_errors_true_after_fail(conn, uid):
     assert has_open_errors(conn, uid) is True
     assert has_open_errors(conn, uid, subject="Mathe") is True
     assert has_open_errors(conn, uid, subject="Englisch") is False
+
+
+from school_test_engine.error_book.builder import _root_question_id
+
+
+class _Row(dict):
+    def __getitem__(self, k):
+        return super().__getitem__(k) if k in self else None
+
+
+def test_root_question_id_direct():
+    row = _Row(id=42, ext_id="q1")
+    assert _root_question_id(row) == 42
+
+
+def test_root_question_id_from_err_copy():
+    row = _Row(id=99, ext_id="err:42")
+    assert _root_question_id(row) == 42
+
+
+def test_root_question_id_handles_none_ext_id():
+    row = _Row(id=42, ext_id=None)
+    assert _root_question_id(row) == 42
+
+
+def test_root_question_id_ignores_other_prefixes():
+    row = _Row(id=42, ext_id="dq1")
+    assert _root_question_id(row) == 42
