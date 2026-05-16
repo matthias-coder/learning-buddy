@@ -111,7 +111,8 @@ class GlobalHeader(QWidget):
         self._logo_menu.add_action("Test erstellen", window.show_test_create)
         self._logo_menu.add_action("Termine", window.show_events)
         self._logo_menu.add_action("Noten", window.show_grades)
-        self._logo_menu.add_action("Fehlerheft", window.show_error_book)  # NEU
+        self._logo_menu.add_action("Fehlerheft", window.show_error_book)
+        self._logo_menu.add_action("Schulkalender", window.show_school_calendar)
         self._logo_menu.add_separator()
         self._logo_menu.add_action("Profil wechseln", window.show_profile_picker)
         layout.addWidget(self._logo_menu)

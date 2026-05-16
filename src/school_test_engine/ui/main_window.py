@@ -28,6 +28,7 @@ from .pages.prompt_builder import PromptBuilderPage
 from .pages.results import ResultsPage
 from .pages.review import ReviewPage
 from .pages.runner import RunnerPage
+from .pages.school_calendar import SchoolCalendarPage
 from .pages.test_create import TestCreatePage
 from .widgets.global_header import GlobalHeader
 from ..storage import users_repo
@@ -80,6 +81,7 @@ class MainWindow(QMainWindow):
         self.events_page = EventsPage(self, conn)
         self.grades_page = GradesPage(self, conn)
         self.error_book_page = ErrorBookPage(self, conn)
+        self.school_calendar_page = SchoolCalendarPage(self, conn)
         self.prompt_builder_page = PromptBuilderPage(self, conn)
         self.event_edit_page = EventEditPage(self, conn)
         self.assessment_edit_page = AssessmentEditPage(self, conn)
@@ -100,12 +102,16 @@ class MainWindow(QMainWindow):
             self.events_page,
             self.grades_page,
             self.error_book_page,
+            self.school_calendar_page,
             self.prompt_builder_page,
             self.event_edit_page,
             self.assessment_edit_page,
             self.test_create_page,
         ):
             self.stack.addWidget(page)
+
+        self.user_changed.connect(lambda _uid: self.school_calendar_page.reload())
+        self.events_synced.connect(self.school_calendar_page.reload)
 
         self._return_to_history = False
         self._bg_sync_thread = None
@@ -213,6 +219,14 @@ class MainWindow(QMainWindow):
         n = self.error_book_page.practice_button_count()
         btn.setText(f"Üben ({n})" if n > 0 else "Üben")
         btn.setEnabled(n > 0)
+
+    def show_school_calendar(self) -> None:
+        uid = self.active_user_id
+        if uid is None:
+            return
+        self.header.set_page_actions([])
+        self.school_calendar_page.reload()
+        self.stack.setCurrentWidget(self.school_calendar_page)
 
     def start_error_book_practice(self, subject: str) -> None:
         from PySide6.QtWidgets import QMessageBox

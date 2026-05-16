@@ -18,6 +18,7 @@ class _MockWindow:
     def show_events(self): pass
     def show_grades(self): pass
     def show_error_book(self): pass
+    def show_school_calendar(self): pass
     def show_profile_picker(self): pass
 
 
