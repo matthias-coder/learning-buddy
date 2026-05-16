@@ -400,7 +400,10 @@ class MainWindow(QMainWindow):
         worker_user_id = self._bg_sync_worker.user_id if self._bg_sync_worker else None
         if worker_user_id != self.active_user_id:
             return    # user switched; DB is fine, but UI update would target wrong profile
-        if not result.error and (result.added or result.updated or result.deleted):
+        if not result.error and (
+            result.added or result.updated or result.deleted
+            or result.cal_added or result.cal_updated or result.cal_deleted
+        ):
             self.events_synced.emit()
 
     def closeEvent(self, event):
