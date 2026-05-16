@@ -9,8 +9,10 @@ from PySide6.QtWidgets import QMainWindow, QPushButton, QStackedWidget, QVBoxLay
 
 from ..daily import builder as daily_builder
 from ..daily import finalize as daily_finalize
+from ..error_book import builder as error_book_builder
 from ..storage import attempts_repo, daily_sessions_repo
 from .pages.assessment_edit import AssessmentEditPage
+from .pages.error_book import ErrorBookPage
 from .pages.event_edit import EventEditPage
 from .pages.events import EventsPage
 from .pages.gaps import GapsPage
@@ -77,6 +79,7 @@ class MainWindow(QMainWindow):
         self.history_page = HistoryPage(self, conn)
         self.events_page = EventsPage(self, conn)
         self.grades_page = GradesPage(self, conn)
+        self.error_book_page = ErrorBookPage(self, conn)
         self.prompt_builder_page = PromptBuilderPage(self, conn)
         self.event_edit_page = EventEditPage(self, conn)
         self.assessment_edit_page = AssessmentEditPage(self, conn)
@@ -96,6 +99,7 @@ class MainWindow(QMainWindow):
             self.history_page,
             self.events_page,
             self.grades_page,
+            self.error_book_page,
             self.prompt_builder_page,
             self.event_edit_page,
             self.assessment_edit_page,
@@ -187,6 +191,47 @@ class MainWindow(QMainWindow):
         self.header.set_page_actions([pdf_btn, add_btn])
         self.grades_page.reload()
         self.stack.setCurrentWidget(self.grades_page)
+
+    def show_error_book(self) -> None:
+        uid = self.active_user_id
+        if uid is None:
+            return
+        ueben_btn = QPushButton("Üben")
+        ueben_btn.setObjectName("primary")
+        ueben_btn.clicked.connect(self.error_book_page.trigger_practice)
+        self.header.set_page_actions([ueben_btn])
+        self.error_book_page.reload()
+        n = self.error_book_page.practice_button_count()
+        ueben_btn.setText(f"Üben ({n})" if n > 0 else "Üben")
+        ueben_btn.setEnabled(n > 0)
+        self.stack.setCurrentWidget(self.error_book_page)
+
+    def start_error_book_practice(self, subject: str) -> None:
+        from PySide6.QtWidgets import QMessageBox
+        uid = self.active_user_id
+        if uid is None:
+            return
+        test_id = error_book_builder.build_practice_test(self.conn, uid, subject)
+        if test_id is None:
+            QMessageBox.information(
+                self, "Fehlerheft",
+                f"In {subject} gerade keine offenen Fehler.",
+            )
+            return
+        # Check Resume-Pfad: gibt's einen offenen Attempt?
+        existing_attempt = attempts_repo.find_incomplete_attempt(self.conn, uid, test_id=test_id)
+        if existing_attempt is not None:
+            self.resume_attempt(existing_attempt["id"])
+            return
+        # Fresh attempt
+        points_total = self.conn.execute(
+            "SELECT COALESCE(SUM(points), 0) AS pts FROM questions WHERE test_id = ?",
+            (test_id,),
+        ).fetchone()["pts"]
+        attempt_id = attempts_repo.start_attempt(self.conn, test_id, int(points_total), uid)
+        self._return_to_history = False
+        self.runner_page.resume(attempt_id)
+        self.stack.setCurrentWidget(self.runner_page)
 
     def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
         self.header.set_page_actions([])
