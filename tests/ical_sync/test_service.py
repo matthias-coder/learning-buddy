@@ -135,3 +135,126 @@ def test_sync_persists_last_sync_at_on_success(conn, user_with_feed, monkeypatch
     row = users_repo.get_user(conn, user_with_feed)
     assert row["ical_last_sync_at"] is not None
     assert row["ical_last_sync_at"].startswith("20")
+
+
+def test_sync_persists_multi_day_ferien_to_calendar_events(monkeypatch, conn, user_with_feed):
+    from school_test_engine.storage import calendar_events_repo
+    ics = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\n"
+        b"UID:abc\nSUMMARY:Sommerferien\n"
+        b"DTSTART;VALUE=DATE:20260707\nDTEND;VALUE=DATE:20260817\n"
+        b"CATEGORIES:Ferien\n"
+        b"END:VEVENT\nEND:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics)
+    result = service.sync_feed(conn, user_with_feed)
+    assert result.error is None
+    assert result.cal_added == 1
+    rows = calendar_events_repo.list_for_user(conn, user_with_feed,
+                                              today="2026-01-01",
+                                              timeframe="all", kinds={"ferien"})
+    assert len(rows) == 1
+    assert rows[0]["title"] == "Sommerferien"
+    assert rows[0]["start_date"] == "2026-07-07"
+    assert rows[0]["end_date"] == "2026-08-16"
+
+
+def test_sync_persists_single_day_frei(monkeypatch, conn, user_with_feed):
+    from school_test_engine.storage import calendar_events_repo
+    ics = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\n"
+        b"UID:p1\nSUMMARY:Paedagogischer Tag\n"
+        b"DTSTART;VALUE=DATE:20260512\nDTEND;VALUE=DATE:20260513\n"
+        b"CATEGORIES:Ferien\n"
+        b"END:VEVENT\nEND:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics)
+    service.sync_feed(conn, user_with_feed)
+    rows = calendar_events_repo.list_for_user(conn, user_with_feed,
+                                              today="2026-01-01", timeframe="all",
+                                              kinds={"frei"})
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "frei"
+
+
+def test_sync_persists_event_kind_for_wettbewerb(monkeypatch, conn, user_with_feed):
+    from school_test_engine.storage import calendar_events_repo
+    ics = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\n"
+        b"UID:w1\nSUMMARY:Mathewettbewerb\n"
+        b"DTSTART;TZID=Europe/Berlin:20260428T112500\n"
+        b"DTEND;TZID=Europe/Berlin:20260428T125500\n"
+        b"CATEGORIES:Arbeiten\n"
+        b"END:VEVENT\nEND:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics)
+    service.sync_feed(conn, user_with_feed)
+    rows = calendar_events_repo.list_for_user(conn, user_with_feed,
+                                              today="2026-01-01", timeframe="all",
+                                              kinds={"event"})
+    assert len(rows) == 1
+    assert rows[0]["title"] == "Mathewettbewerb"
+
+
+def test_sync_updates_calendar_event_when_date_changes(monkeypatch, conn, user_with_feed):
+    ics_v1 = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\nUID:f1\nSUMMARY:Herbst\n"
+        b"DTSTART;VALUE=DATE:20261019\nDTEND;VALUE=DATE:20261101\n"
+        b"CATEGORIES:Ferien\nEND:VEVENT\nEND:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics_v1)
+    service.sync_feed(conn, user_with_feed)
+
+    ics_v2 = ics_v1.replace(b"20261019", b"20261020").replace(b"20261101", b"20261102")
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics_v2)
+    result = service.sync_feed(conn, user_with_feed)
+    assert result.cal_updated == 1
+
+
+def test_sync_deletes_calendar_event_when_gone_from_feed(monkeypatch, conn, user_with_feed):
+    from school_test_engine.storage import calendar_events_repo
+    ics_v1 = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\nUID:f1\nSUMMARY:Herbst\n"
+        b"DTSTART;VALUE=DATE:20261019\nDTEND;VALUE=DATE:20261101\n"
+        b"CATEGORIES:Ferien\nEND:VEVENT\nEND:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics_v1)
+    service.sync_feed(conn, user_with_feed)
+
+    ics_v2 = b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\nEND:VCALENDAR\n"
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics_v2)
+    result = service.sync_feed(conn, user_with_feed)
+    assert result.cal_deleted == 1
+    assert calendar_events_repo.list_external_uids(conn, user_with_feed) == set()
+
+
+def test_sync_mixed_feed_writes_to_both_tables(monkeypatch, conn, user_with_feed):
+    from school_test_engine.storage import calendar_events_repo, events_repo
+    ics = (
+        b"BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:test\n"
+        b"BEGIN:VEVENT\nUID:f1\nSUMMARY:Sommer\n"
+        b"DTSTART;VALUE=DATE:20260707\nDTEND;VALUE=DATE:20260817\n"
+        b"CATEGORIES:Ferien\nEND:VEVENT\n"
+        b"BEGIN:VEVENT\n"
+        b"UID:20010101T000001-klausur-9084-14627-2026-03-10@x.org\n"
+        b"SUMMARY:Mathe R8b Arbeit\nDESCRIPTION:Arbeit in Mathematik R8b (082M07-R)\n"
+        b"DTSTART;TZID=Europe/Berlin:20260310T093500\n"
+        b"DTEND;TZID=Europe/Berlin:20260310T110500\n"
+        b"CATEGORIES:Arbeiten\nEND:VEVENT\n"
+        b"END:VCALENDAR\n"
+    )
+    monkeypatch.setattr(service, "_fetch", lambda url, timeout=10.0: ics)
+    result = service.sync_feed(conn, user_with_feed)
+    assert result.added == 1
+    assert result.cal_added == 1
+    assert len(events_repo.list_all(conn, user_with_feed)) == 1
+    cal_rows = calendar_events_repo.list_for_user(
+        conn, user_with_feed, today="2026-01-01", timeframe="all",
+        kinds={"ferien", "frei", "event"},
+    )
+    assert len(cal_rows) == 1
