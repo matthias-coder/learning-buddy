@@ -45,7 +45,7 @@ class GradesPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(16)
 
-        # "Als PDF" and "+ Note" buttons live in the global header now.
+        # "Als PDF" and "Note hinzufügen" buttons live in the global header now.
 
         eyebrow = QLabel("NOTEN")
         eyebrow.setObjectName("eyebrow")
@@ -119,7 +119,7 @@ class GradesPage(QWidget):
             # Single, centered empty state — no hero card with "—" placeholder,
             # no chart, no Notenverlauf eyebrow. The hero card returns once the
             # first grade is entered.
-            empty = QLabel("Noch keine Noten in diesem Fach.\nKlick auf „+ Note“ um deine erste einzutragen.")
+            empty = QLabel("Noch keine Noten in diesem Fach.\nKlick oben rechts auf „Note hinzufügen“ um deine erste einzutragen.")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 30px;")
             empty.setWordWrap(True)

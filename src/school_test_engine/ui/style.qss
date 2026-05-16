@@ -195,11 +195,11 @@ QLabel#profileCardMeta {
     color: #6f6757;
 }
 
-/* Profil-Chip in der Top-Bar des Menüs */
+/* Profil-Chip in der Top-Bar des Menüs — randlos, direkt auf Hintergrund
+   wie LogoMenuButton. */
 QFrame#profileChip {
-    background: #fffdf8;
-    border: 1px solid #d8cdb8;
-    border-radius: 999px;
+    background: transparent;
+    border: none;
     padding: 4px 8px;
 }
 
@@ -259,6 +259,14 @@ QPushButton#primary:disabled {
     background: transparent;
     color: #a89e89;
     border: 1px solid #ebe3d5;
+}
+
+/* Buttons im Global-Header-Action-Slot — kompakter als reguläre Primary/Text-
+   Buttons (Edit-Pages etc.), damit sie nicht den Profil-Chip visuell überrollen. */
+GlobalHeader QPushButton {
+    padding: 6px 14px;
+    min-height: 18px;
+    font-size: 10pt;
 }
 
 QPushButton#secondary {

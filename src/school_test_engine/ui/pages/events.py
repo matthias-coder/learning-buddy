@@ -104,7 +104,7 @@ class EventsPage(QWidget):
 
         events = events_repo.list_all(self.conn, uid)
         if not events:
-            empty = QLabel("Noch keine Termine eingetragen.\nKlick auf „+ Termin“ um den ersten anzulegen.")
+            empty = QLabel("Noch keine Termine eingetragen.\nKlick oben rechts auf „Termin hinzufügen“ um den ersten anzulegen.")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 40px;")
             empty.setWordWrap(True)
@@ -262,7 +262,7 @@ class EventsPage(QWidget):
                 w.deleteLater()
         events = events_repo.list_all(self.conn, uid)
         if not events:
-            empty = QLabel("Noch keine Termine eingetragen.\nKlick auf „+ Termin“ um den ersten anzulegen.")
+            empty = QLabel("Noch keine Termine eingetragen.\nKlick oben rechts auf „Termin hinzufügen“ um den ersten anzulegen.")
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt; padding: 40px;")
             empty.setWordWrap(True)

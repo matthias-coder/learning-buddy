@@ -113,3 +113,20 @@ def test_page_trigger_practice_calls_window(qt_app, conn, uid):
     page.reload()
     page.trigger_practice()
     assert window.started_practice == "Mathe"
+
+
+def test_subject_switch_drops_old_subject_cards(qt_app, conn, uid):
+    """Regression: nach _select_subject müssen alte Subject-Cards SOFORT
+    aus dem Layout verschwinden (nicht erst nach Event-Loop-Tick).
+    Sonst zeigt die Page kurz Mathe + Englisch-Cards übereinander."""
+    _import_and_fail(conn, uid, subject="Mathe", topic="A")
+    _import_and_fail(conn, uid, subject="Mathe", topic="B")
+    _import_and_fail(conn, uid, subject="Englisch", topic="C")
+    page = ErrorBookPage(_MockWindow(conn, uid), conn)
+    page.reload()
+    # Mathe default → 2 Cards + 1 Stretch im Layout
+    assert page._list_layout.count() == 3
+    page._select_subject("Englisch")
+    # Nach Switch sollte Layout nur noch 1 Card + 1 Stretch enthalten,
+    # NICHT 3 (2 alte Mathe + 1 neue Englisch).
+    assert page._list_layout.count() == 2

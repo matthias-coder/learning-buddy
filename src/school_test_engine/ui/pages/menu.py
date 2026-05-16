@@ -161,7 +161,7 @@ class MenuPage(QWidget):
         lbl.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 11pt;")
         h.addWidget(lbl)
         h.addStretch(1)
-        btn = QPushButton("+ Termin")
+        btn = QPushButton("Termin hinzufügen")
         btn.setObjectName("text")
         btn.clicked.connect(self._on_add_event_from_menu)
         h.addWidget(btn)

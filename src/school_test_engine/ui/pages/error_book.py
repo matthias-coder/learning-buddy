@@ -167,6 +167,7 @@ class ErrorBookPage(QWidget):
             item = self._list_layout.takeAt(0)
             w = item.widget()
             if w:
+                w.setParent(None)
                 w.deleteLater()
 
     def _refresh_action_button(self) -> None:

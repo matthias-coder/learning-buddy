@@ -174,7 +174,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.history_page)
 
     def show_events(self) -> None:
-        add_btn = QPushButton("+ Termin")
+        add_btn = QPushButton("Termin hinzufügen")
         add_btn.setObjectName("primary")
         add_btn.clicked.connect(self.events_page.add_event)
         self.header.set_page_actions([add_btn])
@@ -185,7 +185,7 @@ class MainWindow(QMainWindow):
         pdf_btn = QPushButton("Als PDF")
         pdf_btn.setObjectName("text")
         pdf_btn.clicked.connect(self.grades_page.export_pdf)
-        add_btn = QPushButton("+ Note")
+        add_btn = QPushButton("Note hinzufügen")
         add_btn.setObjectName("primary")
         add_btn.clicked.connect(self.grades_page.add_assessment)
         self.header.set_page_actions([pdf_btn, add_btn])
