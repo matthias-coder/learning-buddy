@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 from datetime import date
-from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QMenu,
     QPushButton,
     QSizePolicy,
     QVBoxLayout,
@@ -22,17 +19,12 @@ from ...cockpit import service as cockpit
 from ...daily import builder as daily_builder
 from ...daily import streak as daily_streak
 from ...storage import users_repo, events_repo, daily_sessions_repo
-from .._layouts import row_get
 from ..design import Color, FontFamily, Semantic
 from ..responsive import is_narrow
 from ..widgets.action_card import make_action_card
-from ..widgets.avatar_badge import AvatarBadge
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
 from ..widgets.exam_card import ExamCard
-
-
-LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomark.svg"
 
 
 class MenuPage(QWidget):
@@ -42,23 +34,10 @@ class MenuPage(QWidget):
 
         outer = QVBoxLayout(self)
         outer.setSpacing(20)
-        outer.setContentsMargins(48, 36, 48, 36)
+        outer.setContentsMargins(48, 12, 48, 36)
         self._outer = outer
 
-        # Top bar — Logo+Wordmark is itself the navigation trigger
-        top_row = QHBoxLayout()
-        top_row.setSpacing(10)
-        self._logo_menu = _LogoMenuButton()
-        self._logo_menu.add_action("Test erstellen", self.window.show_test_create)
-        self._logo_menu.add_action("Termine", self.window.show_events)
-        self._logo_menu.add_action("Noten", self.window.show_grades)
-        top_row.addWidget(self._logo_menu)
-        top_row.addStretch(1)
-
-        self.chip = _ProfileChip()
-        self.chip.switch_clicked.connect(self._switch_profile)
-        top_row.addWidget(self.chip)
-        outer.addLayout(top_row)
+        # No local header — MainWindow renders the global header above this page.
 
         if hasattr(window, "events_synced"):
             window.events_synced.connect(self.reload)
@@ -99,7 +78,7 @@ class MenuPage(QWidget):
         user = users_repo.get_user(self.window.conn, uid)
         if user is None:
             return
-        self.chip.set_user(user["avatar"], user["name"], row_get(user, "avatar_image"))
+        # Header chip is owned by MainWindow; only the local greeting updates here.
         self.greeting.setText(f"Hallo, {user['name']}")
 
         # Rebuild dynamic content — recursive clear so nested QHBoxLayouts/QGridLayouts
@@ -134,9 +113,6 @@ class MenuPage(QWidget):
             if child_layout is not None:
                 MenuPage._clear_layout_recursive(child_layout)
                 child_layout.deleteLater()
-
-    def _switch_profile(self) -> None:
-        self.window.show_profile_picker()
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
@@ -324,72 +300,6 @@ class MenuPage(QWidget):
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
-
-
-class _LogoMenuButton(QFrame):
-    """Logo + 'Learning Buddy' wordmark + caret — clicking opens the navigation menu."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setObjectName("logoMenu")
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        self._menu = QMenu(self)
-
-        h = QHBoxLayout(self)
-        h.setContentsMargins(6, 4, 12, 4)
-        h.setSpacing(8)
-        if LOGOMARK_PATH.exists():
-            logo = QSvgWidget(str(LOGOMARK_PATH))
-            logo.setFixedSize(QSize(32, 32))
-            h.addWidget(logo)
-        wm = QLabel("Learning Buddy")
-        wm.setFont(QFont(FontFamily.DISPLAY, 14, QFont.Weight.Normal))
-        wm.setStyleSheet(f"color: {Color.PAPER_700};")
-        h.addWidget(wm)
-        caret = QLabel("▾")
-        caret.setStyleSheet(f"color: {Color.PAPER_500}; font-size: 11pt;")
-        h.addWidget(caret)
-
-    def add_action(self, label: str, callback) -> None:
-        action = self._menu.addAction(label)
-        action.triggered.connect(callback)
-
-    def mousePressEvent(self, event) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._menu.popup(self.mapToGlobal(self.rect().bottomLeft()))
-        super().mousePressEvent(event)
-
-
-class _ProfileChip(QFrame):
-    """Kompakte Anzeige des aktiven Profils mit 'Wechseln'-Button."""
-
-    switch_clicked = Signal()
-
-    def __init__(self):
-        super().__init__()
-        self.setObjectName("profileChip")
-        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
-        h = QHBoxLayout(self)
-        h.setContentsMargins(10, 4, 6, 4)
-        h.setSpacing(8)
-
-        self.avatar = AvatarBadge(emoji="ignored", image_bytes=None, diameter=28)
-        self.avatar.setObjectName("profileChipAvatar")
-        h.addWidget(self.avatar)
-
-        self.name = QLabel("…")
-        self.name.setObjectName("profileChipName")
-        h.addWidget(self.name)
-
-        switch = QPushButton("Wechseln")
-        switch.setObjectName("text")
-        switch.clicked.connect(self.switch_clicked)
-        h.addWidget(switch)
-
-    def set_user(self, avatar: str, name: str, image_bytes: bytes | None = None) -> None:
-        self.avatar.set_avatar(emoji="ignored", image_bytes=image_bytes)
-        self.name.setText(name)
 
 
 def _make_compact_tile(eyebrow_text: str, title_text: str) -> ClickableCard:

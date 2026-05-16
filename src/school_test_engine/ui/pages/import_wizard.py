@@ -94,13 +94,6 @@ class ImportPage(QWidget):
         self.log.setMinimumHeight(80)
         layout.addWidget(self.log, stretch=1)
 
-        bottom = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(window.show_menu)
-        bottom.addWidget(back)
-        bottom.addStretch(1)
-        layout.addLayout(bottom)
 
     def _pick_file(self) -> None:
         examples = Path(__file__).resolve().parents[3] / "examples"

@@ -23,15 +23,6 @@ class TestCreatePage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(Spacing.S4)
 
-        # Header
-        head = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self.window.show_menu)
-        head.addWidget(back)
-        head.addStretch(1)
-        outer.addLayout(head)
-
         eyebrow = QLabel("ERSTELLEN")
         eyebrow.setObjectName("eyebrow")
         outer.addWidget(eyebrow)

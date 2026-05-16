@@ -52,12 +52,8 @@ class EventsPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(16)
 
-        # Header row: back + eyebrow/title + add
+        # Header row: page action (back route lives in the global header)
         head = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self.window.show_menu)
-        head.addWidget(back)
         head.addStretch(1)
         add = QPushButton("+ Termin")
         add.setObjectName("primary")

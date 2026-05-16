@@ -5,7 +5,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtWidgets import QMainWindow, QStackedWidget, QVBoxLayout, QWidget
 
 from ..daily import builder as daily_builder
 from ..daily import finalize as daily_finalize
@@ -27,6 +27,9 @@ from .pages.results import ResultsPage
 from .pages.review import ReviewPage
 from .pages.runner import RunnerPage
 from .pages.test_create import TestCreatePage
+from .widgets.global_header import GlobalHeader
+from ..storage import users_repo
+from ._layouts import row_get
 
 
 class MainWindow(QMainWindow):
@@ -43,8 +46,19 @@ class MainWindow(QMainWindow):
         if qss_path.exists():
             self.setStyleSheet(qss_path.read_text(encoding="utf-8"))
 
+        # Global header (logo menu + profile chip) above the page stack.
+        # Visibility is bound to active_user_id: hidden on the Profile-Picker.
+        self.header = GlobalHeader(self)
+        self.header.setVisible(False)
         self.stack = QStackedWidget()
-        self.setCentralWidget(self.stack)
+
+        central = QWidget()
+        v = QVBoxLayout(central)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(0)
+        v.addWidget(self.header)
+        v.addWidget(self.stack, 1)
+        self.setCentralWidget(central)
 
         self.profile_picker_page = ProfilePickerPage(self, conn)
         self.profile_manager_page = ProfileManagerPage(self, conn)
@@ -95,6 +109,10 @@ class MainWindow(QMainWindow):
 
     def set_active_user(self, user_id: int) -> None:
         self.active_user_id = user_id
+        user = users_repo.get_user(self.conn, user_id)
+        if user is not None:
+            self.header.set_user(user["name"], row_get(user, "avatar_image"))
+        self.header.setVisible(True)
         self.user_changed.emit(user_id)
         self.show_menu()
         self._maybe_trigger_background_sync(user_id)
@@ -104,6 +122,8 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def show_profile_picker(self) -> None:
+        self.active_user_id = None
+        self.header.setVisible(False)
         self.profile_picker_page.reload()
         self.stack.setCurrentWidget(self.profile_picker_page)
 

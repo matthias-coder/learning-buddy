@@ -52,15 +52,6 @@ class PromptBuilderPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(14)
 
-        # Header (Phase 12.1: copy button moved to output area below)
-        head = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self.window.show_menu)
-        head.addWidget(back)
-        head.addStretch(1)
-        outer.addLayout(head)
-
         eyebrow = QLabel("TEST BAUEN")
         eyebrow.setObjectName("eyebrow")
         outer.addWidget(eyebrow)

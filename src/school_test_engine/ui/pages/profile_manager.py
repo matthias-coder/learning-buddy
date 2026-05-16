@@ -124,14 +124,6 @@ class ProfileManagerPage(QWidget):
         self.scroll.setWidget(self.list_container)
         outer.addWidget(self.scroll, stretch=1)
 
-        bottom = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self._back)
-        bottom.addWidget(back)
-        bottom.addStretch(1)
-        outer.addLayout(bottom)
-
     def show_for(self, return_to: str) -> None:
         self._return_to = return_to
         self.reload()

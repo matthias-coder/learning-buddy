@@ -80,10 +80,6 @@ class HistoryPage(QWidget):
         outer.addWidget(self.scroll, stretch=1)
 
         bottom = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(window.show_menu)
-        bottom.addWidget(back)
         bottom.addStretch(1)
         export_btn = QPushButton("CSV exportieren")
         export_btn.setObjectName("text")

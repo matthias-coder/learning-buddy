@@ -84,14 +84,6 @@ class GapsPage(QWidget):
         self.scroll.setWidget(self.list_container)
         outer.addWidget(self.scroll, stretch=1)
 
-        bottom = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(window.show_menu)
-        bottom.addWidget(back)
-        bottom.addStretch(1)
-        outer.addLayout(bottom)
-
     def reload(self) -> None:
         self._reload_data()
 

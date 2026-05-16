@@ -45,12 +45,8 @@ class GradesPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         outer.setSpacing(16)
 
-        # Header
+        # Header — page actions only (back route lives in the global header)
         head = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self.window.show_menu)
-        head.addWidget(back)
         head.addStretch(1)
         pdf_btn = QPushButton("Als PDF")
         pdf_btn.setObjectName("text")

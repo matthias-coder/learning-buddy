@@ -89,14 +89,6 @@ class LibraryPage(QWidget):
         outer.addWidget(self.empty_label)
         self.empty_label.hide()
 
-        # Fuß
-        bottom = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(window.show_menu)
-        bottom.addWidget(back)
-        bottom.addStretch(1)
-        outer.addLayout(bottom)
 
     # ------------------------------------------------------------------
 

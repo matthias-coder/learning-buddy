@@ -64,15 +64,8 @@ class EventEditPage(QWidget):
         layout.setContentsMargins(48, 36, 48, 36)
         layout.setSpacing(14)
 
-        # Header (back link only — primary actions live in the sticky footer)
-        head = QHBoxLayout()
-        back = QPushButton("← Zurück")
-        back.setObjectName("text")
-        back.clicked.connect(self._cancel)
-        head.addWidget(back)
-        head.addStretch(1)
-        layout.addLayout(head)
-
+        # Cancel/Save live in the sticky footer; the global header provides
+        # the universal "leave" route.
         eyebrow = QLabel("TERMIN")
         eyebrow.setObjectName("eyebrow")
         layout.addWidget(eyebrow)
