@@ -27,7 +27,7 @@ a = Analysis(
     ],
     hiddenimports=[
         "icalendar",
-        "icalendar.compat",
+        "icalendar.compatibility",
         "icalendar.cal",
         "PySide6.QtSvgWidgets",
         "PySide6.QtPrintSupport",
