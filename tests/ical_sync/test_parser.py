@@ -13,7 +13,7 @@ FIXTURE = Path(__file__).parent.parent / "fixtures" / "schulkalender_mini.ics"
 
 def test_parse_returns_all_vevents():
     events = parser.parse_events(FIXTURE.read_bytes())
-    assert len(events) == 5
+    assert len(events) == 7
 
 
 def test_parse_extracts_uid_summary_description():
