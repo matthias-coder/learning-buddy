@@ -287,6 +287,34 @@ QPushButton#text:hover {
     color: #7e4025;
 }
 
+/* Logo + wordmark + caret in the top bar — acts as the navigation menu trigger. */
+QFrame#logoMenu {
+    background: transparent;
+    border-radius: 10px;
+}
+QFrame#logoMenu:hover {
+    background: #f4efe6;
+}
+
+/* Card overflow trigger ("…") — no underline, no Qt menu-indicator arrow. */
+QPushButton#cardOverflow {
+    background: transparent;
+    color: #6f6757;
+    border: none;
+    padding: 0;
+    font-size: 16pt;
+    font-weight: 600;
+}
+QPushButton#cardOverflow:hover {
+    color: #1e1b15;
+    background: #f4efe6;
+    border-radius: 8px;
+}
+QPushButton#cardOverflow::menu-indicator {
+    image: none;
+    width: 0;
+}
+
 /* Inputs */
 QLineEdit, QTextEdit, QPlainTextEdit {
     background: #fffdf8;

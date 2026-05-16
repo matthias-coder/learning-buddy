@@ -7,14 +7,13 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
+    QMenu,
     QPushButton,
     QVBoxLayout,
-    QWidget,
 )
 
 from ..design import Color, FontFamily, Semantic
 from .clickable_card import ClickableCard
-from .flow_layout import FlowLayout
 from .pill import Pill
 from .._subjects import subject_variant
 
@@ -51,24 +50,19 @@ class ExamCard(ClickableCard):
     def __init__(self, event_data, parent=None):
         super().__init__(object_name="examCard", parent=parent)
         self.event_id = event_data.event_id
-        self.setMinimumSize(260, 200)
+        self.setMinimumWidth(240)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setContentsMargins(18, 14, 14, 14)
         layout.setSpacing(8)
 
-        # Top row: subject pill + countdown pill + overflow edit
+        # Top row: subject pill + countdown pill + overflow menu (always slim)
         top = QHBoxLayout()
         top.setSpacing(6)
         top.addWidget(Pill(event_data.subject.upper(), subject_variant(event_data.subject)))
         top.addWidget(Pill(_countdown_text(event_data.days_until), _countdown_variant(event_data.days_until)))
         top.addStretch(1)
-        edit = QPushButton("…")
-        edit.setObjectName("text")
-        edit.setFixedSize(32, 32)
-        edit.setToolTip("Termin bearbeiten")
-        edit.clicked.connect(lambda: self.edit_clicked.emit(self.event_id))
-        top.addWidget(edit)
+        top.addWidget(self._build_overflow_menu(event_data))
         layout.addLayout(top)
 
         # Title: kind label
@@ -91,28 +85,32 @@ class ExamCard(ClickableCard):
         topics.setWordWrap(True)
         layout.addWidget(topics)
 
-        layout.addStretch(1)
+        # Linked badge — small status line below topics, only when graded.
+        if event_data.linked_assessment_id is not None:
+            badge_row = QHBoxLayout()
+            badge_row.addWidget(Pill("Note erfasst ✓", "tea"))
+            badge_row.addStretch(1)
+            layout.addLayout(badge_row)
 
-        # Bottom row: actions — FlowLayout wraps buttons to a new line when the
-        # card is too narrow, instead of clipping their text.
-        actions_host = QWidget()
-        actions = FlowLayout(actions_host, h_spacing=8, v_spacing=6)
+    def _build_overflow_menu(self, event_data) -> QPushButton:
+        btn = QPushButton("…")
+        btn.setObjectName("cardOverflow")
+        btn.setFixedSize(32, 32)
+        btn.setToolTip("Aktionen")
+        menu = QMenu(btn)
         if event_data.linked_assessment_id is None:
-            practice_btn = QPushButton("Test bauen")
-            practice_btn.setObjectName("primary")
-            practice_btn.clicked.connect(lambda: self.practice_clicked.emit(self.event_id))
-            actions.addWidget(practice_btn)
-
-            grade_btn = QPushButton("Note eintragen")
-            grade_btn.setObjectName("text")
-            grade_btn.clicked.connect(lambda: self.enter_grade_clicked.emit(self.event_id))
-            actions.addWidget(grade_btn)
-
-            plan_btn = QPushButton("Lernplan PDF")
-            plan_btn.setObjectName("text")
-            plan_btn.clicked.connect(lambda: self.study_plan_clicked.emit(self.event_id))
-            actions.addWidget(plan_btn)
-        else:
-            done = Pill("Note erfasst ✓", "tea")
-            actions.addWidget(done)
-        layout.addWidget(actions_host)
+            menu.addAction("Test erstellen").triggered.connect(
+                lambda: self.practice_clicked.emit(self.event_id)
+            )
+            menu.addAction("Note eintragen").triggered.connect(
+                lambda: self.enter_grade_clicked.emit(self.event_id)
+            )
+        menu.addAction("Lernplan erstellen").triggered.connect(
+            lambda: self.study_plan_clicked.emit(self.event_id)
+        )
+        menu.addSeparator()
+        menu.addAction("Termin bearbeiten").triggered.connect(
+            lambda: self.edit_clicked.emit(self.event_id)
+        )
+        btn.setMenu(menu)
+        return btn

@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QMenu,
     QPushButton,
     QSizePolicy,
     QVBoxLayout,
@@ -29,7 +30,6 @@ from ..widgets.avatar_badge import AvatarBadge
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
 from ..widgets.exam_card import ExamCard
-from ..widgets.hamburger_menu import HamburgerMenu
 
 
 LOGOMARK_PATH = Path(__file__).resolve().parents[3].parent / "assets" / "logomark.svg"
@@ -45,45 +45,15 @@ class MenuPage(QWidget):
         outer.setContentsMargins(48, 36, 48, 36)
         self._outer = outer
 
-        # Top bar
+        # Top bar — Logo+Wordmark is itself the navigation trigger
         top_row = QHBoxLayout()
         top_row.setSpacing(10)
-        if LOGOMARK_PATH.exists():
-            logo = QSvgWidget(str(LOGOMARK_PATH))
-            logo.setFixedSize(QSize(36, 36))
-            top_row.addWidget(logo)
-        wordmark = QLabel("Learning Buddy")
-        wordmark.setFont(QFont(FontFamily.DISPLAY, 14, QFont.Weight.Normal))
-        wordmark.setStyleSheet(f"color: {Color.PAPER_700};")
-        top_row.addWidget(wordmark)
+        self._logo_menu = _LogoMenuButton()
+        self._logo_menu.add_action("Test erstellen", self.window.show_test_create)
+        self._logo_menu.add_action("Termine", self.window.show_events)
+        self._logo_menu.add_action("Noten", self.window.show_grades)
+        top_row.addWidget(self._logo_menu)
         top_row.addStretch(1)
-
-        # New top-bar icon buttons
-        builder_btn = QPushButton("Test erstellen")
-        builder_btn.setObjectName("topBarAction")
-        builder_btn.clicked.connect(self.window.show_test_create)
-        top_row.addWidget(builder_btn)
-
-        events_btn = QPushButton("Termine")
-        events_btn.setObjectName("topBarAction")
-        events_btn.clicked.connect(self.window.show_events)
-        top_row.addWidget(events_btn)
-
-        grades_btn = QPushButton("Noten")
-        grades_btn.setObjectName("topBarAction")
-        grades_btn.clicked.connect(self.window.show_grades)
-        top_row.addWidget(grades_btn)
-
-        # Phase 11: store action-button refs for narrow-mode toggling
-        self._top_bar_actions = [builder_btn, events_btn, grades_btn]
-
-        # Hamburger fallback (hidden in wide mode)
-        self._hamburger = HamburgerMenu()
-        self._hamburger.add_action("Test erstellen", self.window.show_test_create)
-        self._hamburger.add_action("Termine", self.window.show_events)
-        self._hamburger.add_action("Noten", self.window.show_grades)
-        self._hamburger.setVisible(False)  # default: wide-mode
-        top_row.addWidget(self._hamburger)
 
         self.chip = _ProfileChip()
         self.chip.switch_clicked.connect(self._switch_profile)
@@ -174,13 +144,8 @@ class MenuPage(QWidget):
 
     def _apply_responsive_layout(self) -> None:
         narrow = is_narrow(self)
-        # Toggle top-bar buttons
-        for btn in self._top_bar_actions:
-            btn.setVisible(not narrow)
-        self._hamburger.setVisible(narrow)
-        # Toggle the action-grid: rebuild dynamic content so columns change
-        # Note: dynamic_layout is rebuilt in reload(); we trigger reload only if
-        # the narrow-state actually changed since the last call.
+        # Rebuild dynamic content when narrow-state flips so the action-grid
+        # changes column count.
         if getattr(self, "_last_narrow_state", None) != narrow:
             self._last_narrow_state = narrow
             self.reload()
@@ -365,6 +330,41 @@ class MenuPage(QWidget):
 # ----------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------
+
+
+class _LogoMenuButton(QFrame):
+    """Logo + 'Learning Buddy' wordmark + caret — clicking opens the navigation menu."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("logoMenu")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self._menu = QMenu(self)
+
+        h = QHBoxLayout(self)
+        h.setContentsMargins(6, 4, 12, 4)
+        h.setSpacing(8)
+        if LOGOMARK_PATH.exists():
+            logo = QSvgWidget(str(LOGOMARK_PATH))
+            logo.setFixedSize(QSize(32, 32))
+            h.addWidget(logo)
+        wm = QLabel("Learning Buddy")
+        wm.setFont(QFont(FontFamily.DISPLAY, 14, QFont.Weight.Normal))
+        wm.setStyleSheet(f"color: {Color.PAPER_700};")
+        h.addWidget(wm)
+        caret = QLabel("▾")
+        caret.setStyleSheet(f"color: {Color.PAPER_500}; font-size: 11pt;")
+        h.addWidget(caret)
+
+    def add_action(self, label: str, callback) -> None:
+        action = self._menu.addAction(label)
+        action.triggered.connect(callback)
+
+    def mousePressEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._menu.popup(self.mapToGlobal(self.rect().bottomLeft()))
+        super().mousePressEvent(event)
 
 
 class _ProfileChip(QFrame):
