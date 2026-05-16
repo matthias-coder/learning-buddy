@@ -20,9 +20,10 @@ class TopicBar(QWidget):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
         rect: QRect = self.rect().adjusted(0, 2, -1, -2)
-        # Hintergrund
+        # Hintergrund — PAPER_300 (#d8cdb8) statt PAPER_200, damit der leere
+        # Track gegen den Paper-Hintergrund klar lesbar ist.
         p.setPen(Qt.PenStyle.NoPen)
-        p.setBrush(QColor("#ebe3d5"))
+        p.setBrush(QColor("#d8cdb8"))
         p.drawRoundedRect(rect, 4, 4)
         # Füllung
         if self._percent > 0:

@@ -180,8 +180,9 @@ def _make_topic_card(s, *, show_subject: bool, on_practice) -> QFrame:
     layout.addLayout(left, stretch=1)
 
     if s.percent < STUDY_THRESHOLD and s.subject:
-        practice = QPushButton("Üben")
-        practice.setObjectName("primary")
+        # Ghost button (no objectName) — quieter than primary clay, so a list
+        # of many weak topics doesn't read as a wall of CTAs.
+        practice = QPushButton("Üben →")
         practice.setToolTip(
             f"Übungs-Session mit Fragen zu '{s.topic}' aus dem Fach {s.subject}."
         )

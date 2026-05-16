@@ -36,7 +36,6 @@ class DailyCard(ClickableCard):
         self,
         state: DailyState,
         streak: int,
-        last_grade: int | None = None,
         parent=None,
     ):
         super().__init__(object_name="dailyCard", parent=parent)
@@ -78,8 +77,6 @@ class DailyCard(ClickableCard):
             streak_str = _streak_text(streak)
             if streak_str:
                 sub_parts.append(streak_str)
-            if last_grade is not None:
-                sub_parts.append(f"Note: {last_grade}")
             sub_parts.append("komm morgen wieder")
             sub = QLabel(" · ".join(sub_parts))
             sub.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")

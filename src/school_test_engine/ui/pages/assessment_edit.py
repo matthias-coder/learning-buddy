@@ -26,7 +26,7 @@ from PySide6.QtWidgets import (
 
 from ...storage import assessments_repo, events_repo
 from .._subjects import SUBJECTS_ALL, note_color
-from ..design import FontFamily
+from ..design import FontFamily, Spacing
 
 
 CATEGORY_LABELS = [
@@ -67,14 +67,16 @@ class _GradeSelector(QFrame):
 
         self._half = QPushButton(",5")
         self._half.setCheckable(True)
-        self._half.setFixedSize(56, 40)
+        self._half.setFixedHeight(36)
         self._half.setStyleSheet(
             "QPushButton { background: #f4efe6; color: #4a4538; "
             "font-family: 'Fraunces'; font-size: 14pt; border: 2px solid transparent; border-radius: 10px; }"
             "QPushButton:checked { background: #c79d44; color: #f6f1e6; }"
         )
         self._half.clicked.connect(self._toggle_half)
-        h.addWidget(self._half, 2, 2)
+        # Span all three columns so the half-step toggle is visually centred
+        # under the six grade buttons instead of floating alone on the right.
+        h.addWidget(self._half, 2, 0, 1, 3)
 
         h.setColumnStretch(0, 1)
         h.setColumnStretch(1, 1)
@@ -129,7 +131,7 @@ class AssessmentEditPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        outer.addWidget(scroll)
+        outer.addWidget(scroll, 1)
 
         content = QWidget()
         scroll.setWidget(content)
@@ -138,17 +140,13 @@ class AssessmentEditPage(QWidget):
         layout.setContentsMargins(48, 36, 48, 36)
         layout.setSpacing(14)
 
-        # Header
+        # Header (back link only — primary actions live in the sticky footer)
         head = QHBoxLayout()
         back = QPushButton("← Zurück")
         back.setObjectName("text")
         back.clicked.connect(self._cancel)
         head.addWidget(back)
         head.addStretch(1)
-        self.save_btn = QPushButton("Speichern")
-        self.save_btn.setObjectName("primary")
-        self.save_btn.clicked.connect(self._save)
-        head.addWidget(self.save_btn)
         layout.addLayout(head)
 
         eyebrow = QLabel("NOTE")
@@ -208,18 +206,37 @@ class AssessmentEditPage(QWidget):
         form.addRow("Notiz:", self.note_edit)
 
         layout.addLayout(form)
+        layout.addStretch(1)
 
-        # Footer: delete (only in edit mode)
-        footer = QHBoxLayout()
+        # Sticky action bar — stays visible while the form scrolls.
+        outer.addWidget(self._build_action_bar())
+
+    def _build_action_bar(self) -> QFrame:
+        bar = QFrame()
+        bar.setObjectName("stickyFooter")
+        h = QHBoxLayout(bar)
+        h.setContentsMargins(Spacing.S6, Spacing.S3, Spacing.S6, Spacing.S3)
+        h.setSpacing(Spacing.S3)
+
         self.delete_btn = QPushButton("Löschen")
         self.delete_btn.setObjectName("danger")
         self.delete_btn.clicked.connect(self._delete)
         self.delete_btn.setVisible(False)
-        footer.addWidget(self.delete_btn)
-        footer.addStretch(1)
-        layout.addLayout(footer)
+        h.addWidget(self.delete_btn)
 
-        layout.addStretch(1)
+        h.addStretch(1)
+
+        cancel = QPushButton("Abbrechen")
+        cancel.setObjectName("text")
+        cancel.clicked.connect(self._cancel)
+        h.addWidget(cancel)
+
+        self.save_btn = QPushButton("Speichern")
+        self.save_btn.setObjectName("primary")
+        self.save_btn.clicked.connect(self._save)
+        h.addWidget(self.save_btn)
+
+        return bar
 
     def show_for(
         self,

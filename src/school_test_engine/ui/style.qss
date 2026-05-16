@@ -255,6 +255,12 @@ QPushButton#primary:pressed {
     background: #7e4025;
 }
 
+QPushButton#primary:disabled {
+    background: transparent;
+    color: #a89e89;
+    border: 1px solid #ebe3d5;
+}
+
 QPushButton#secondary {
     background: #658a47;
     color: #fffdf8;

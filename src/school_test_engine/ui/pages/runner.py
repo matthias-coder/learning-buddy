@@ -110,7 +110,7 @@ class RunnerPage(QWidget):
 
         buttons.addStretch(1)
 
-        self.abort_btn = QPushButton("Zurück zum Menü")
+        self.abort_btn = QPushButton("Pausieren")
         self.abort_btn.setObjectName("text")
         self.abort_btn.setToolTip(
             "Fortschritt wird gespeichert — du kannst später weitermachen"

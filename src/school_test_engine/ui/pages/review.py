@@ -55,8 +55,9 @@ class ReviewPage(QWidget):
         back.clicked.connect(self._back_to_runner)
         bottom.addWidget(back)
 
-        to_menu = QPushButton("← Zurück zum Menü")
+        to_menu = QPushButton("Pausieren")
         to_menu.setObjectName("text")
+        to_menu.setToolTip("Fortschritt wird gespeichert — du kannst später weitermachen")
         to_menu.clicked.connect(self._back_to_menu)
         bottom.addWidget(to_menu)
         bottom.addStretch(1)

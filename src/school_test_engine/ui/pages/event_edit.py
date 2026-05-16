@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QComboBox,
     QDateEdit,
     QFormLayout,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -25,7 +26,7 @@ from PySide6.QtWidgets import (
 
 from ...storage import events_repo
 from .._subjects import SUBJECTS_ALL
-from ..design import FontFamily
+from ..design import FontFamily, Spacing
 
 
 KIND_LABELS = [
@@ -54,7 +55,7 @@ class EventEditPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        outer.addWidget(scroll)
+        outer.addWidget(scroll, 1)
 
         content = QWidget()
         scroll.setWidget(content)
@@ -63,17 +64,13 @@ class EventEditPage(QWidget):
         layout.setContentsMargins(48, 36, 48, 36)
         layout.setSpacing(14)
 
-        # Header
+        # Header (back link only — primary actions live in the sticky footer)
         head = QHBoxLayout()
         back = QPushButton("← Zurück")
         back.setObjectName("text")
         back.clicked.connect(self._cancel)
         head.addWidget(back)
         head.addStretch(1)
-        self.save_btn = QPushButton("Speichern")
-        self.save_btn.setObjectName("primary")
-        self.save_btn.clicked.connect(self._save)
-        head.addWidget(self.save_btn)
         layout.addLayout(head)
 
         eyebrow = QLabel("TERMIN")
@@ -118,23 +115,43 @@ class EventEditPage(QWidget):
         form.addRow("Notiz:", self.note_edit)
 
         layout.addLayout(form)
+        layout.addStretch(1)
 
-        # Footer: delete (only in edit mode)
-        footer = QHBoxLayout()
-        self.plan_btn = QPushButton("Lernplan PDF")
-        self.plan_btn.setObjectName("text")
-        self.plan_btn.clicked.connect(self._export_plan)
-        self.plan_btn.setVisible(False)
-        footer.addWidget(self.plan_btn)
+        # Sticky action bar — stays visible while the form scrolls.
+        outer.addWidget(self._build_action_bar())
+
+    def _build_action_bar(self) -> QFrame:
+        bar = QFrame()
+        bar.setObjectName("stickyFooter")
+        h = QHBoxLayout(bar)
+        h.setContentsMargins(Spacing.S6, Spacing.S3, Spacing.S6, Spacing.S3)
+        h.setSpacing(Spacing.S3)
+
         self.delete_btn = QPushButton("Löschen")
         self.delete_btn.setObjectName("danger")
         self.delete_btn.clicked.connect(self._delete)
         self.delete_btn.setVisible(False)
-        footer.addWidget(self.delete_btn)
-        footer.addStretch(1)
-        layout.addLayout(footer)
+        h.addWidget(self.delete_btn)
 
-        layout.addStretch(1)
+        self.plan_btn = QPushButton("Lernplan PDF")
+        self.plan_btn.setObjectName("text")
+        self.plan_btn.clicked.connect(self._export_plan)
+        self.plan_btn.setVisible(False)
+        h.addWidget(self.plan_btn)
+
+        h.addStretch(1)
+
+        cancel = QPushButton("Abbrechen")
+        cancel.setObjectName("text")
+        cancel.clicked.connect(self._cancel)
+        h.addWidget(cancel)
+
+        self.save_btn = QPushButton("Speichern")
+        self.save_btn.setObjectName("primary")
+        self.save_btn.clicked.connect(self._save)
+        h.addWidget(self.save_btn)
+
+        return bar
 
     def show_for(self, event_id: int | None = None, return_to: str = "events") -> None:
         self._event_id = event_id
