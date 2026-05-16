@@ -113,3 +113,15 @@ def test_delete_by_external_uid_removes_row(conn, uid):
     assert calendar_events_repo.delete_by_external_uid(conn, uid, "uid-X") is True
     rows = conn.execute("SELECT id FROM calendar_events").fetchall()
     assert rows == []
+
+
+def test_update_by_external_uid_returns_false_when_uid_missing(conn, uid):
+    changed = calendar_events_repo.update_by_external_uid(
+        conn, user_id=uid, external_uid="nonexistent",
+        kind="ferien", title="X", start_date="2026-01-01", end_date="2026-01-01",
+    )
+    assert changed is False
+
+
+def test_delete_by_external_uid_returns_false_when_uid_missing(conn, uid):
+    assert calendar_events_repo.delete_by_external_uid(conn, uid, "nonexistent") is False
