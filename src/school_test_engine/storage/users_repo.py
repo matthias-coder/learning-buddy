@@ -71,6 +71,11 @@ def update_user(
     ical_feed_url=_SENTINEL,
     ical_last_sync_at=_SENTINEL,
     ical_last_sync_summary=_SENTINEL,
+    calendar_show_klausuren: int | None = None,
+    calendar_show_ferien: int | None = None,
+    calendar_show_frei: int | None = None,
+    calendar_show_events: int | None = None,
+    calendar_timeframe: str | None = None,
 ) -> None:
     fields: list[str] = []
     values: list = []
@@ -104,6 +109,16 @@ def update_user(
         fields.append("ical_last_sync_at = ?"); values.append(ical_last_sync_at)
     if ical_last_sync_summary is not _SENTINEL:
         fields.append("ical_last_sync_summary = ?"); values.append(ical_last_sync_summary)
+    if calendar_show_klausuren is not None:
+        fields.append("calendar_show_klausuren = ?"); values.append(int(calendar_show_klausuren))
+    if calendar_show_ferien is not None:
+        fields.append("calendar_show_ferien = ?"); values.append(int(calendar_show_ferien))
+    if calendar_show_frei is not None:
+        fields.append("calendar_show_frei = ?"); values.append(int(calendar_show_frei))
+    if calendar_show_events is not None:
+        fields.append("calendar_show_events = ?"); values.append(int(calendar_show_events))
+    if calendar_timeframe is not None:
+        fields.append("calendar_timeframe = ?"); values.append(calendar_timeframe)
     if not fields:
         return
     values.append(user_id)
