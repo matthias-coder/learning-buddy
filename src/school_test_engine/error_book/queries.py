@@ -108,11 +108,9 @@ def list_open_entries(
             consecutive_correct=_consecutive_correct(answers),
         ))
 
-    entries.sort(key=lambda e: (-e.wrong_count, e.last_wrong_at), reverse=False)
-    # Tie-break: jüngeres last_wrong_at zuerst → DESC. Aber wir sortieren bereits
-    # ASC nach last_wrong_at oben, also umkehren: zweistufiger Sort:
-    entries.sort(key=lambda e: e.last_wrong_at, reverse=True)
-    entries.sort(key=lambda e: e.wrong_count, reverse=True)
+    # Sort nach (wrong_count DESC, last_wrong_at DESC) — schwerste zuerst,
+    # bei gleichem wrong_count zuerst die jüngsten Fehler.
+    entries.sort(key=lambda e: (e.wrong_count, e.last_wrong_at), reverse=True)
     return entries
 
 
