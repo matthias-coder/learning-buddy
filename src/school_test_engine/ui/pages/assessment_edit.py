@@ -252,11 +252,30 @@ class AssessmentEditPage(QWidget):
             if prefill_event_id is not None:
                 ev = events_repo.get(self.conn, prefill_event_id)
                 if ev is not None:
+                    # Defensive: prefill subject from event if caller didn't pass one
+                    if not prefill_subject:
+                        idx = self.subject.findText(ev["subject"])
+                        if idx >= 0:
+                            self.subject.setCurrentIndex(idx)
+                        else:
+                            self.subject.setEditText(ev["subject"])
                     d = ev["event_date"]
-                    self.date_edit.setDate(QDate(int(d[:4]), int(d[5:7]), int(d[8:10])))
+                    self.date_edit.setDate(
+                        QDate(int(d[:4]), int(d[5:7]), int(d[8:10]))
+                    )
+                # Lock subject + date — they reflect the KA, not a free choice.
+                self.subject.setEnabled(False)
+                self.date_edit.setEnabled(False)
+            else:
+                # No event link → both fields freely editable
+                self.subject.setEnabled(True)
+                self.date_edit.setEnabled(True)
         else:
             self.title_label.setText("Note bearbeiten")
             self.delete_btn.setVisible(True)
+            # Edit mode: both stay enabled regardless of event link
+            self.subject.setEnabled(True)
+            self.date_edit.setEnabled(True)
             self._load_assessment(assessment_id)
 
     def _reset_fields(self) -> None:

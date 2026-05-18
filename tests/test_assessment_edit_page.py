@@ -145,3 +145,66 @@ def test_grade_selector_half_step(app, conn):
     assert sel.value() == 2.0
     sel.set_value(2.5)
     assert sel.value() == 2.5
+
+
+def test_prefill_event_id_disables_subject_and_date(app, conn):
+    """When opening from a past KA, subject + date are not editable —
+    they reflect the KA, not arbitrary user choices."""
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "👤")
+    win.active_user_id = uid
+    eid = events_repo.create(
+        conn, uid, "Mathe", "klassenarbeit", "2026-04-15",
+        topics=[], note=None,
+    )
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(
+        assessment_id=None,
+        return_to="grades",
+        prefill_subject="Mathe",
+        prefill_event_id=eid,
+    )
+
+    assert page.subject.isEnabled() is False
+    assert page.date_edit.isEnabled() is False
+    # Sanity: value is preserved
+    assert page.subject.currentText() == "Mathe"
+
+
+def test_edit_mode_keeps_subject_and_date_enabled(app, conn):
+    """When editing an existing assessment, both fields remain enabled."""
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "👤")
+    win.active_user_id = uid
+    eid = events_repo.create(
+        conn, uid, "Englisch", "klassenarbeit", "2026-04-15",
+        topics=[], note=None,
+    )
+    aid = assessments_repo.create(
+        conn, uid, "Englisch", "schriftlich", "2026-04-15",
+        grade=2.0, points=None, max_points=None, note=None,
+        scheduled_event_id=eid,
+    )
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=aid)
+
+    assert page.subject.isEnabled() is True
+    assert page.date_edit.isEnabled() is True
+
+
+def test_no_prefill_event_id_keeps_subject_and_date_enabled(app, conn):
+    """When opened via 'Note hinzufügen' (no event link), both stay enabled."""
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "👤")
+    win.active_user_id = uid
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=None)
+
+    assert page.subject.isEnabled() is True
+    assert page.date_edit.isEnabled() is True
