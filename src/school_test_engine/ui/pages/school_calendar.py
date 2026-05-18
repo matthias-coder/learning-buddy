@@ -11,8 +11,9 @@ from PySide6.QtWidgets import (
 )
 
 from ...school_calendar.filters import CalendarFilters
+from ...school_calendar.models import GradeStatus
 from ...school_calendar.service import group_by_month, list_entries
-from ...storage import users_repo
+from ...storage import assessments_repo, events_repo, users_repo
 from ..design import Color, FontFamily
 from ..widgets.calendar_entry_card import CalendarEntryCard
 from ..widgets.eyebrow import Eyebrow
@@ -165,10 +166,25 @@ class SchoolCalendarPage(QWidget):
             self._show_empty("Keine Termine im gewählten Zeitraum.")
             return
         self._empty_label.setVisible(False)
+        # Build grade-status lookup once per reload (past klausuren only).
+        today = self._today()
+        past_rows = events_repo.list_past_klausuren_with_grade_status(
+            self.conn, self._user_id, today,
+        )
+        grade_status_by_id: dict[int, GradeStatus] = {
+            row["id"]: GradeStatus(
+                assessment_id=row["assessment_id"], grade=row["grade"],
+            )
+            for row in past_rows
+        }
+
         for month_label, month_entries in group_by_month(entries):
             self._add_month_header(month_label)
             for entry in month_entries:
-                card = CalendarEntryCard(entry, parent=self._list_host)
+                gs = grade_status_by_id.get(entry.entry_id) if entry.kind == "klausur" else None
+                card = CalendarEntryCard(
+                    entry, parent=self._list_host, grade_status=gs,
+                )
                 if entry.kind == "klausur":
                     card.clicked.connect(self._open_klausur)
                 self._cards.append(card)
@@ -210,5 +226,21 @@ class SchoolCalendarPage(QWidget):
         self._reload_list_only()
 
     def _open_klausur(self, event_id: int) -> None:
-        if hasattr(self.window, "show_event_edit"):
-            self.window.show_event_edit(event_id, return_to="school_calendar")
+        ev = events_repo.get(self.conn, event_id)
+        if ev is None:
+            return
+        is_past = ev["event_date"] < self._today().isoformat()
+        if is_past:
+            assessment = assessments_repo.find_by_event(self.conn, event_id)
+            if assessment is not None:
+                if hasattr(self.window, "show_assessment_edit"):
+                    self.window.show_assessment_edit(assessment_id=assessment["id"])
+            else:
+                if hasattr(self.window, "show_assessment_edit"):
+                    self.window.show_assessment_edit(
+                        prefill_event_id=event_id,
+                        prefill_subject=ev["subject"],
+                    )
+        else:
+            if hasattr(self.window, "show_event_edit"):
+                self.window.show_event_edit(event_id=event_id)

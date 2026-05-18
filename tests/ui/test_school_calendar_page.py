@@ -32,9 +32,15 @@ class _StubWindow:
         self.conn = conn
         self.active_user_id = user_id
         self.opened_event_id: int | None = None
+        self.last_call: tuple[str, dict] | None = None
 
     def show_event_edit(self, event_id, return_to="menu"):
         self.opened_event_id = event_id
+        self.last_call = ("show_event_edit", {"event_id": event_id})
+
+    def show_assessment_edit(self, **kwargs):
+        cleaned = {k: v for k, v in kwargs.items() if v is not None}
+        self.last_call = ("show_assessment_edit", cleaned)
 
 
 def test_page_renders_chronological_entries_from_both_sources(conn):
@@ -98,3 +104,56 @@ def test_klausur_click_opens_event_edit(conn):
     assert len(page._cards) == 1
     page._cards[0]._maybe_emit_click()
     assert win.opened_event_id == eid
+
+
+def test_click_past_klausur_without_grade_opens_assessment_edit_with_prefill(conn):
+    from datetime import date as _date
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    eid = events_repo.create(conn, uid, "Mathe", "klausur", "2026-04-01")
+
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+    page.reload()
+    page._open_klausur(eid)
+
+    assert win.last_call == ("show_assessment_edit", {
+        "prefill_event_id": eid,
+        "prefill_subject": "Mathe",
+    })
+
+
+def test_click_past_klausur_with_grade_opens_assessment_edit_in_edit_mode(conn):
+    from datetime import date as _date
+    from school_test_engine.storage import assessments_repo
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    eid = events_repo.create(conn, uid, "Englisch", "klausur", "2026-04-15")
+    aid = assessments_repo.create(
+        conn, uid, "Englisch", "schriftlich", "2026-04-15",
+        grade=2.0, scheduled_event_id=eid,
+    )
+
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+    page.reload()
+    page._open_klausur(eid)
+
+    assert win.last_call == ("show_assessment_edit", {"assessment_id": aid})
+
+
+def test_click_future_klausur_still_opens_event_edit(conn):
+    from datetime import date as _date
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    eid = events_repo.create(conn, uid, "Bio", "test", "2026-07-01")
+
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+    page.reload()
+    page._open_klausur(eid)
+
+    assert win.last_call == ("show_event_edit", {"event_id": eid})
