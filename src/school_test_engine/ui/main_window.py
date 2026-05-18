@@ -115,8 +115,11 @@ class MainWindow(QMainWindow):
         self.events_synced.connect(self.school_calendar_page.reload)
 
         self._return_to_history = False
+        self._history: list[tuple[str, dict]] = []
+        self._current: tuple[str, dict] | None = None
         self._bg_sync_thread = None
         self._bg_sync_worker = None
+        self._dispatch: dict[str, callable] = {}  # populated in Task A2
 
     # ------------------------------------------------------------------
     # User switching
@@ -131,6 +134,44 @@ class MainWindow(QMainWindow):
         self.user_changed.emit(user_id)
         self.show_menu()
         self._maybe_trigger_background_sync(user_id)
+
+    # ------------------------------------------------------------------
+    # Navigation dispatcher (Phase 18)
+    # ------------------------------------------------------------------
+
+    def _navigate(self, target: str, **kwargs) -> None:
+        """Central navigation entry point. Pushes current head onto the
+        history stack and renders the target page.
+
+        Special rules:
+        - target == "menu":   clears stack (root reset)
+        - target == "runner": never pushed onto stack (mid-test must use
+                              Pause-Button, not Back)
+        - target == top:      replaces top rather than pushing (dedup)
+        """
+        if target == "menu":
+            self._history.clear()
+        elif target == "runner":
+            pass
+        elif self._current is not None and self._current[0] != target:
+            if not self._history or self._history[-1][0] != self._current[0]:
+                self._history.append(self._current)
+        # Resolve and render
+        renderer = self._dispatch.get(target)
+        if renderer is None:
+            raise ValueError(f"Unknown navigation target: {target!r}")
+        renderer(**kwargs)
+        self._current = (target, dict(kwargs))
+
+    def _navigate_back(self) -> None:
+        if not self._history:
+            return
+        target, kwargs = self._history.pop()
+        renderer = self._dispatch.get(target)
+        if renderer is None:
+            return
+        renderer(**kwargs)
+        self._current = (target, dict(kwargs))
 
     # ------------------------------------------------------------------
     # Navigation
