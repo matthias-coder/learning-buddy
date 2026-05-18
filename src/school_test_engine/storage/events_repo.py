@@ -147,3 +147,31 @@ def list_for_calendar(
         (user_id,),
     )
     return cur.fetchall()
+
+
+def list_past_klausuren_with_grade_status(
+    conn: sqlite3.Connection,
+    user_id: int,
+    today: "date",
+) -> list[sqlite3.Row]:
+    """Past KAs (klassenarbeit/klausur/test) with their grade-link status.
+
+    Returns rows with columns: id, subject, event_date, kind,
+    assessment_id (nullable), grade (nullable). Ordered by event_date DESC.
+
+    'Past' means strictly less than `today` — today's KA is NOT past yet.
+    """
+    cur = conn.execute(
+        """
+        SELECT se.id, se.subject, se.event_date, se.kind,
+               a.id AS assessment_id, a.grade AS grade
+        FROM scheduled_events se
+        LEFT JOIN assessments a ON a.scheduled_event_id = se.id
+        WHERE se.user_id = ?
+          AND se.kind IN ('klassenarbeit', 'klausur', 'test')
+          AND se.event_date < ?
+        ORDER BY se.event_date DESC, se.created_at DESC
+        """,
+        (user_id, today.isoformat()),
+    )
+    return cur.fetchall()
