@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Callable
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -119,7 +120,26 @@ class MainWindow(QMainWindow):
         self._current: tuple[str, dict] | None = None
         self._bg_sync_thread = None
         self._bg_sync_worker = None
-        self._dispatch: dict[str, callable] = {}  # populated in Task A2
+        self._dispatch: dict[str, Callable[..., None]] = {
+            "menu": self._render_menu,
+            "library": self._render_library,
+            "import": self._render_import,
+            "gaps": self._render_gaps,
+            "history": self._render_history,
+            "events": self._render_events,
+            "grades": self._render_grades,
+            "error_book": self._render_error_book,
+            "school_calendar": self._render_school_calendar,
+            "prompt_builder": self._render_prompt_builder,
+            "test_create": self._render_test_create,
+            "event_edit": self._render_event_edit,
+            "assessment_edit": self._render_assessment_edit,
+            "profile_manager": self._render_profile_manager,
+            "profile_edit": self._render_profile_edit,
+            "results": self._render_results,
+            "review": self._render_review,
+            "runner": self._render_runner,
+        }
 
     # ------------------------------------------------------------------
     # User switching
@@ -147,7 +167,7 @@ class MainWindow(QMainWindow):
         - target == "menu":   clears stack (root reset)
         - target == "runner": never pushed onto stack (mid-test must use
                               Pause-Button, not Back)
-        - target == top:      replaces top rather than pushing (dedup)
+        - duplicate target:   replaces head rather than pushing (dedup)
         """
         if target == "menu":
             self._history.clear()
@@ -182,38 +202,62 @@ class MainWindow(QMainWindow):
         self.header.setVisible(False)
         self.profile_picker_page.reload()
         self.stack.setCurrentWidget(self.profile_picker_page)
+        # Profile picker is pre-login — no stack tracking.
+        self._history.clear()
+        self._current = ("profile_picker", {})
 
     def show_profile_manager(self, return_to: str = "picker") -> None:
+        self._navigate("profile_manager", return_to=return_to)
+
+    def _render_profile_manager(self, return_to: str = "picker") -> None:
         self.header.set_page_actions([])
         self.profile_manager_page.show_for(return_to)
         self.stack.setCurrentWidget(self.profile_manager_page)
 
     def show_profile_edit(self, user_id: int | None = None, return_to: str = "picker") -> None:
+        self._navigate("profile_edit", user_id=user_id, return_to=return_to)
+
+    def _render_profile_edit(self, user_id: int | None = None, return_to: str = "picker") -> None:
         self.header.set_page_actions([])
         self.profile_edit_page.show_for(user_id, return_to)
         self.stack.setCurrentWidget(self.profile_edit_page)
 
     def show_menu(self) -> None:
         self._return_to_history = False
+        self._navigate("menu")
+
+    def _render_menu(self) -> None:
         self.header.set_page_actions([])
         self.menu_page.reload()
         self.stack.setCurrentWidget(self.menu_page)
 
     def show_library(self) -> None:
+        self._navigate("library")
+
+    def _render_library(self) -> None:
         self.header.set_page_actions([])
         self.library_page.reload()
         self.stack.setCurrentWidget(self.library_page)
 
     def show_import(self) -> None:
+        self._navigate("import")
+
+    def _render_import(self) -> None:
         self.header.set_page_actions([])
         self.stack.setCurrentWidget(self.import_page)
 
     def show_gaps(self) -> None:
+        self._navigate("gaps")
+
+    def _render_gaps(self) -> None:
         self.header.set_page_actions([])
         self.gaps_page.reload()
         self.stack.setCurrentWidget(self.gaps_page)
 
     def show_history(self) -> None:
+        self._navigate("history")
+
+    def _render_history(self) -> None:
         csv_btn = QPushButton("CSV exportieren")
         csv_btn.setObjectName("text")
         csv_btn.clicked.connect(self.history_page.export_csv)
@@ -222,6 +266,9 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.history_page)
 
     def show_events(self) -> None:
+        self._navigate("events")
+
+    def _render_events(self) -> None:
         add_btn = QPushButton("Termin hinzufügen")
         add_btn.setObjectName("primary")
         add_btn.clicked.connect(self.events_page.add_event)
@@ -230,6 +277,9 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.events_page)
 
     def show_grades(self) -> None:
+        self._navigate("grades")
+
+    def _render_grades(self) -> None:
         pdf_btn = QPushButton("Als PDF")
         pdf_btn.setObjectName("text")
         pdf_btn.clicked.connect(self.grades_page.export_pdf)
@@ -241,6 +291,9 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.grades_page)
 
     def show_error_book(self) -> None:
+        self._navigate("error_book")
+
+    def _render_error_book(self) -> None:
         uid = self.active_user_id
         if uid is None:
             return
@@ -263,6 +316,9 @@ class MainWindow(QMainWindow):
         btn.setEnabled(n > 0)
 
     def show_school_calendar(self) -> None:
+        self._navigate("school_calendar")
+
+    def _render_school_calendar(self) -> None:
         uid = self.active_user_id
         if uid is None:
             return
@@ -295,20 +351,29 @@ class MainWindow(QMainWindow):
         attempt_id = attempts_repo.start_attempt(self.conn, test_id, int(points_total), uid)
         self._return_to_history = False
         self.runner_page.resume(attempt_id)
-        self.stack.setCurrentWidget(self.runner_page)
+        self._navigate("runner", action="raw")
 
     def show_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
+        self._navigate("prompt_builder", subject=subject, topics=topics)
+
+    def _render_prompt_builder(self, subject: str | None = None, topics: list[str] | None = None) -> None:
         self.header.set_page_actions([])
         self.prompt_builder_page.show_for(subject, topics)
         self.stack.setCurrentWidget(self.prompt_builder_page)
 
     def show_test_create(self) -> None:
+        self._navigate("test_create")
+
+    def _render_test_create(self) -> None:
         self.header.set_page_actions([])
         self.stack.setCurrentWidget(self.test_create_page)
 
     def show_event_edit(self, event_id: int | None = None, return_to: str = "events") -> None:
+        self._navigate("event_edit", event_id=event_id)
+
+    def _render_event_edit(self, event_id: int | None = None) -> None:
         self.header.set_page_actions([])
-        self.event_edit_page.show_for(event_id, return_to)
+        self.event_edit_page.show_for(event_id, "events")
         self.stack.setCurrentWidget(self.event_edit_page)
 
     def show_assessment_edit(
@@ -318,16 +383,30 @@ class MainWindow(QMainWindow):
         prefill_subject: str | None = None,
         prefill_event_id: int | None = None,
     ) -> None:
+        # return_to is preserved for API compatibility; the history stack
+        # supersedes it (see Phase 18 design doc, Feature 1).
+        self._navigate(
+            "assessment_edit",
+            assessment_id=assessment_id,
+            prefill_subject=prefill_subject,
+            prefill_event_id=prefill_event_id,
+        )
+
+    def _render_assessment_edit(
+        self,
+        assessment_id: int | None = None,
+        prefill_subject: str | None = None,
+        prefill_event_id: int | None = None,
+    ) -> None:
         self.header.set_page_actions([])
         self.assessment_edit_page.show_for(
-            assessment_id, return_to, prefill_subject, prefill_event_id,
+            assessment_id, "grades", prefill_subject, prefill_event_id,
         )
         self.stack.setCurrentWidget(self.assessment_edit_page)
 
     def start_test(self, test_id: int) -> None:
         self._return_to_history = False
-        self.runner_page.start_new(test_id)
-        self.stack.setCurrentWidget(self.runner_page)
+        self._navigate("runner", action="start", test_id=test_id)
 
     def start_daily_five(self) -> None:
         """Start (or resume) today's Daily-5 session."""
@@ -363,22 +442,32 @@ class MainWindow(QMainWindow):
             started_at=datetime.now(timezone.utc).isoformat(),
         )
         self.runner_page.resume(attempt_id)
-        self.stack.setCurrentWidget(self.runner_page)
+        self._navigate("runner", action="raw")
 
     def resume_attempt(self, attempt_id: int) -> None:
         self._return_to_history = False
-        self.runner_page.resume(attempt_id)
-        self.stack.setCurrentWidget(self.runner_page)
+        self._navigate("runner", action="resume", attempt_id=attempt_id)
 
     def show_review(self, attempt_id: int) -> None:
+        self._navigate("review", attempt_id=attempt_id)
+
+    def _render_review(self, attempt_id: int) -> None:
         self.review_page.show_for_attempt()
         self.stack.setCurrentWidget(self.review_page)
 
     def back_to_runner(self) -> None:
-        self.stack.setCurrentWidget(self.runner_page)
+        self._navigate("runner", action="raw")
 
     def jump_to_question(self, index: int) -> None:
         self.runner_page.jump_to_question(index)
+        self._navigate("runner", action="raw")
+
+    def _render_runner(self, action: str = "raw", **kwargs) -> None:
+        if action == "start":
+            self.runner_page.start_new(kwargs["test_id"])
+        elif action == "resume":
+            self.runner_page.resume(kwargs["attempt_id"])
+        # "raw" → caller already mutated runner_page state
         self.stack.setCurrentWidget(self.runner_page)
 
     def show_results(self, attempt_id: int) -> None:
@@ -386,6 +475,9 @@ class MainWindow(QMainWindow):
         self._return_to_history = (
             self.stack.currentWidget() is self.history_page
         )
+        self._navigate("results", attempt_id=attempt_id)
+
+    def _render_results(self, attempt_id: int) -> None:
         self.results_page.show_attempt(self.conn, attempt_id)
         self.stack.setCurrentWidget(self.results_page)
 
