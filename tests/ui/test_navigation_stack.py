@@ -42,3 +42,42 @@ def test_navigate_to_grades_pushes_menu_onto_stack(window):
     window._navigate("grades")
     assert len(window._history) == 1
     assert window._history[0][0] == "menu"
+
+
+def test_navigate_back_pops_to_previous_target(window):
+    window._navigate("grades")
+    window._navigate("assessment_edit")
+    assert len(window._history) == 2
+    window._navigate_back()
+    assert len(window._history) == 1
+    assert window._current[0] == "grades"
+
+
+def test_navigate_to_menu_clears_history(window):
+    window._navigate("grades")
+    window._navigate("assessment_edit")
+    window._navigate("menu")
+    assert window._history == []
+    assert window._current[0] == "menu"
+
+
+def test_navigate_runner_does_not_push_to_stack(window):
+    window._navigate("grades")
+    before = len(window._history)
+    window._navigate("runner", action="raw")
+    # runner does NOT push grades onto stack
+    assert len(window._history) == before
+
+
+def test_navigate_dedupes_when_target_equals_current(window):
+    # Clicking "Grades" twice in the logo menu should not stack two 'grades'.
+    window._navigate("grades")
+    window._navigate("grades")
+    # menu was pushed once when first transitioning away; second call is dedup
+    assert window._history == [("menu", {})]
+
+
+def test_navigate_back_on_empty_stack_is_noop(window):
+    # Fresh start: history empty; back should not crash
+    window._navigate_back()
+    assert window._current[0] == "menu"
