@@ -819,3 +819,13 @@ QFrame#backButton {
 QFrame#backButton:hover {
     background: #f4efe6;
 }
+
+QFrame#openGradesBanner {
+    background: #fffdf8;
+    border: 1px solid #ebe3d5;
+    border-radius: 10px;
+}
+QFrame#openGradesBannerStrip {
+    background: #dfb968;
+    border-radius: 2px;
+}
