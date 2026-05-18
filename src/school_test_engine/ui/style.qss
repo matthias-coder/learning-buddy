@@ -810,3 +810,12 @@ QFrame#ferienBannerStrip {
     border: none;
     border-radius: 2px;
 }
+
+QFrame#backButton {
+    background: transparent;
+    border-radius: 8px;
+    min-height: 32px;
+}
+QFrame#backButton:hover {
+    background: #f4efe6;
+}

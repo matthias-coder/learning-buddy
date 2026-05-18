@@ -5,8 +5,9 @@ from collections.abc import Callable
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QStackedWidget, QVBoxLayout, QWidget
 
 from ..daily import builder as daily_builder
 from ..daily import finalize as daily_finalize
@@ -141,6 +142,10 @@ class MainWindow(QMainWindow):
             "runner": self._render_runner,
         }
 
+        self._esc_shortcut = QShortcut(QKeySequence("Esc"), self)
+        self._esc_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
+        self._esc_shortcut.activated.connect(self._on_esc_pressed)
+
     # ------------------------------------------------------------------
     # User switching
     # ------------------------------------------------------------------
@@ -194,6 +199,14 @@ class MainWindow(QMainWindow):
         renderer(**kwargs)
         self._current = (target, dict(kwargs))
         self.header.back_button.setVisible(len(self._history) > 0)
+
+    def _on_esc_pressed(self) -> None:
+        # Guard: no-op if a modal dialog is open OR back-button is hidden.
+        if QApplication.activeModalWidget() is not None:
+            return
+        if not self.header.back_button.isVisible():
+            return
+        self._navigate_back()
 
     # ------------------------------------------------------------------
     # Navigation

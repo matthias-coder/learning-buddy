@@ -26,12 +26,20 @@ def conn(tmp_path):
 
 @pytest.fixture
 def window(conn):
+    from PySide6.QtWidgets import QApplication
+    from PySide6.QtTest import QTest
     from school_test_engine.ui.main_window import MainWindow
     uid = users_repo.create_user(conn, name="Test")
     w = MainWindow(conn)
     w.set_active_user(uid)
     w.show()
-    return w
+    w.raise_()
+    w.activateWindow()
+    QTest.qWaitForWindowExposed(w)
+    yield w
+    w.close()
+    w.deleteLater()
+    QApplication.processEvents()
 
 
 def test_navigate_initializes_empty_history(window):
@@ -93,3 +101,29 @@ def test_back_button_visibility_binds_to_history_depth(window):
     # Back to root → not visible
     window._navigate("menu")
     assert window.header.back_button.isVisible() is False
+
+
+def test_esc_shortcut_triggers_back_when_visible(window):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+
+    window._navigate("grades")
+    assert window._current[0] == "grades"
+    # Simulate Esc key
+    QTest.keyClick(window, Qt.Key.Key_Escape)
+    # Wait for shortcut dispatch
+    from PySide6.QtCore import QCoreApplication
+    QCoreApplication.processEvents()
+    assert window._current[0] == "menu"
+
+
+def test_esc_shortcut_no_op_when_back_invisible(window):
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtCore import QCoreApplication
+
+    assert window.header.back_button.isVisible() is False  # on menu
+    QTest.keyClick(window, Qt.Key.Key_Escape)
+    QCoreApplication.processEvents()
+    # Still on menu — nothing changed
+    assert window._current[0] == "menu"
