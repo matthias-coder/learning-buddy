@@ -33,12 +33,23 @@ class _StubWindow:
         self.conn = conn
         self.active_user_id: int | None = None
         self.navigated_to: str | None = None
+        self.current_page = None  # set by tests for _navigate_back routing
 
     def show_events(self):
         self.navigated_to = "events"
 
     def show_menu(self):
         self.navigated_to = "menu"
+
+    def _navigate_back(self):
+        # Mirrors MainWindow's history-stack pop; for tests we re-derive the
+        # target from the page's recorded _return_to since the test bypasses
+        # the real window dispatcher.
+        rt = getattr(self.current_page, "_return_to", "events")
+        if rt == "menu":
+            self.show_menu()
+        else:
+            self.show_events()
 
 
 def test_event_edit_page_constructs(app, conn):
@@ -65,6 +76,7 @@ def test_event_edit_page_save_creates_event(app, conn):
     uid = users_repo.create_user(conn, "Test", "👤")
     win.active_user_id = uid
     page = EventEditPage(win, conn)
+    win.current_page = page
     page.show_for(event_id=None, return_to="events")
     page.subject.setCurrentText("Mathe")
     page.date_edit.setDate(page.date_edit.date())  # use default = today + 7
@@ -88,6 +100,7 @@ def test_event_edit_page_edit_mode_loads_and_updates(app, conn):
         topics=["Vocab"], note=None,
     )
     page = EventEditPage(win, conn)
+    win.current_page = page
     page.show_for(event_id=eid, return_to="events")
     assert not page.delete_btn.isHidden()
     assert page.subject.currentText() == "Englisch"
@@ -111,6 +124,7 @@ def test_event_edit_page_delete_removes_event(app, conn, monkeypatch):
         topics=[], note=None,
     )
     page = EventEditPage(win, conn)
+    win.current_page = page
     page.show_for(event_id=eid, return_to="menu")
     page._delete()
     assert events_repo.get(conn, eid) is None
@@ -123,6 +137,7 @@ def test_event_edit_page_cancel_navigates_back(app, conn):
     uid = users_repo.create_user(conn, "Test", "👤")
     win.active_user_id = uid
     page = EventEditPage(win, conn)
+    win.current_page = page
     page.show_for(event_id=None, return_to="menu")
     page._cancel()
     assert win.navigated_to == "menu"

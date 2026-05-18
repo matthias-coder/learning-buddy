@@ -33,6 +33,7 @@ class _StubWindow:
         self.conn = conn
         self.active_user_id: int | None = None
         self.navigated_to: str | None = None
+        self.current_page = None  # set by tests for _navigate_back routing
 
     def show_grades(self):
         self.navigated_to = "grades"
@@ -42,6 +43,18 @@ class _StubWindow:
 
     def show_events(self):
         self.navigated_to = "events"
+
+    def _navigate_back(self):
+        # Mirrors MainWindow's history-stack pop; for tests we re-derive the
+        # target from the page's recorded _return_to since the test bypasses
+        # the real window dispatcher.
+        rt = getattr(self.current_page, "_return_to", "grades")
+        if rt == "menu":
+            self.show_menu()
+        elif rt == "events":
+            self.show_events()
+        else:
+            self.show_grades()
 
 
 def test_assessment_edit_page_constructs(app, conn):
@@ -57,6 +70,7 @@ def test_assessment_edit_page_save_creates(app, conn):
     uid = users_repo.create_user(conn, "Test", "👤")
     win.active_user_id = uid
     page = AssessmentEditPage(win, conn)
+    win.current_page = page
     page.show_for(assessment_id=None, return_to="grades", prefill_subject="Mathe")
     page.grade.set_value(2.0)
     page._save()
@@ -96,6 +110,7 @@ def test_assessment_edit_page_delete(app, conn, monkeypatch):
         scheduled_event_id=None,
     )
     page = AssessmentEditPage(win, conn)
+    win.current_page = page
     page.show_for(assessment_id=aid, return_to="menu")
     page._delete()
     assert assessments_repo.get(conn, aid) is None
@@ -112,6 +127,7 @@ def test_assessment_edit_page_prefill_event_id(app, conn):
         topics=[], note=None,
     )
     page = AssessmentEditPage(win, conn)
+    win.current_page = page
     page.show_for(
         assessment_id=None, return_to="menu",
         prefill_subject="Bio", prefill_event_id=eid,

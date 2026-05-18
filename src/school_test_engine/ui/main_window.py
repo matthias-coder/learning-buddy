@@ -452,6 +452,8 @@ class MainWindow(QMainWindow):
         self._navigate("review", attempt_id=attempt_id)
 
     def _render_review(self, attempt_id: int) -> None:
+        # attempt_id kept for dispatch-table symmetry; show_for_attempt() reads
+        # live runner state via self.window.runner_page.get_status_overview().
         self.review_page.show_for_attempt()
         self.stack.setCurrentWidget(self.review_page)
 

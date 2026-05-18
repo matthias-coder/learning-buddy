@@ -241,7 +241,4 @@ class EventEditPage(QWidget):
         self._navigate_back()
 
     def _navigate_back(self) -> None:
-        if self._return_to == "menu":
-            self.window.show_menu()
-        else:
-            self.window.show_events()
+        self.window._navigate_back()

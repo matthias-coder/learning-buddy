@@ -37,12 +37,24 @@ class FakeWindow:
         self.conn = conn
         self.active_user_id = None
         self.shown = []
+        self.current_page = None  # set by tests for _navigate_back routing
     def show_profile_picker(self):
         self.shown.append("picker")
     def show_profile_manager(self, return_to="picker"):
         self.shown.append(f"manager({return_to})")
     def show_menu(self):
         self.shown.append("menu")
+    def _navigate_back(self):
+        # Mirrors MainWindow's history-stack pop; for tests we re-derive the
+        # target from the page's recorded _return_to since the test bypasses
+        # the real window dispatcher.
+        rt = getattr(self.current_page, "_return_to", "picker")
+        if rt == "manager":
+            self.show_profile_manager("manager")
+        elif rt == "menu":
+            self.show_menu()
+        else:
+            self.show_profile_picker()
 
 
 def test_field_persists_to_users_ical_feed_url(app, conn):

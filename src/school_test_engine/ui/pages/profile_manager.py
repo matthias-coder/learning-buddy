@@ -188,10 +188,7 @@ class ProfileManagerPage(QWidget):
             self.reload()
 
     def _back(self) -> None:
-        if self._return_to == "menu":
-            self.window.show_menu()
-        else:
-            self.window.show_profile_picker()
+        self.window._navigate_back()
 
 
 def _fmt_birthday(iso: str | None) -> str:

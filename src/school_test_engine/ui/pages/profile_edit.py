@@ -442,10 +442,4 @@ class ProfileEditPage(QWidget):
         self._navigate_back()
 
     def _navigate_back(self) -> None:
-        target = self._return_to
-        if target == "manager":
-            self.window.show_profile_manager("manager")
-        elif target == "menu":
-            self.window.show_menu()
-        else:
-            self.window.show_profile_picker()
+        self.window._navigate_back()

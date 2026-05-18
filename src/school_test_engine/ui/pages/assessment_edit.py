@@ -344,9 +344,4 @@ class AssessmentEditPage(QWidget):
         self._navigate_back()
 
     def _navigate_back(self) -> None:
-        if self._return_to == "menu":
-            self.window.show_menu()
-        elif self._return_to == "events":
-            self.window.show_events()
-        else:
-            self.window.show_grades()
+        self.window._navigate_back()

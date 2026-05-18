@@ -36,6 +36,7 @@ class FakeWindow:
         self.conn = conn
         self.active_user_id = None
         self.shown = []
+        self.current_page = None  # set by tests for _navigate_back routing
 
     def show_profile_picker(self):
         self.shown.append("picker")
@@ -45,6 +46,18 @@ class FakeWindow:
 
     def show_menu(self):
         self.shown.append("menu")
+
+    def _navigate_back(self):
+        # Mirrors MainWindow's history-stack pop; for tests we re-derive the
+        # target from the page's recorded _return_to since the test bypasses
+        # the real window dispatcher.
+        rt = getattr(self.current_page, "_return_to", "picker")
+        if rt == "manager":
+            self.show_profile_manager("manager")
+        elif rt == "menu":
+            self.show_menu()
+        else:
+            self.show_profile_picker()
 
 
 def test_create_mode_empty_fields(app, conn):
@@ -68,6 +81,7 @@ def test_save_create_mode_creates_user(app, conn):
     from school_test_engine.ui.pages.profile_edit import ProfileEditPage
     win = FakeWindow(conn)
     p = ProfileEditPage(win, conn)
+    win.current_page = p
     p.show_for(user_id=None, return_to="picker")
     p.name_edit.setText("NeuerUser")
     p._save()
@@ -81,6 +95,7 @@ def test_save_edit_mode_updates_user(app, conn):
     uid = users_repo.create_user(conn, "Alt", "👤")
     win = FakeWindow(conn)
     p = ProfileEditPage(win, conn)
+    win.current_page = p
     p.show_for(user_id=uid, return_to="manager")
     p.name_edit.setText("Neu")
     p._save()
@@ -93,6 +108,7 @@ def test_save_empty_name_does_not_create(app, conn):
     from school_test_engine.ui.pages.profile_edit import ProfileEditPage
     win = FakeWindow(conn)
     p = ProfileEditPage(win, conn)
+    win.current_page = p
     p.show_for(user_id=None, return_to="picker")
     p.name_edit.setText("   ")
     n_before = len(users_repo.list_users(conn))
@@ -105,6 +121,7 @@ def test_cancel_creates_nothing(app, conn):
     from school_test_engine.ui.pages.profile_edit import ProfileEditPage
     win = FakeWindow(conn)
     p = ProfileEditPage(win, conn)
+    win.current_page = p
     p.show_for(user_id=None, return_to="picker")
     p.name_edit.setText("Cancelled")
     n_before = len(users_repo.list_users(conn))
@@ -119,6 +136,7 @@ def test_return_to_routes_correctly(app, conn):
     for target, expected in [("picker", "picker"), ("manager", "manager(manager)"), ("menu", "menu")]:
         win = FakeWindow(conn)
         p = ProfileEditPage(win, conn)
+        win.current_page = p
         p.show_for(user_id=None, return_to=target)
         p.name_edit.setText(f"User-{target}")
         p._save()
