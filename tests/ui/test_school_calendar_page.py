@@ -183,3 +183,28 @@ def test_show_for_no_initial_tab_uses_persisted_filter(conn):
     # show_for does not crash and a tab is selected.
     selected = [tf for tf, btn in page._tab_buttons.items() if btn.isChecked()]
     assert len(selected) == 1
+
+
+def test_show_for_initial_tab_does_not_persist_to_db(conn):
+    """Regression test: banner-triggered tab preselect must be ephemeral.
+    Otherwise back-nav replays of show_for(initial_tab='past') would silently
+    clobber the user's persisted preference."""
+    from datetime import date as _date
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    # User's persisted preference is 'all'
+    users_repo.update_user(conn, uid, calendar_timeframe="all")
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+
+    # Banner-triggered show_for with initial_tab='past'
+    page.show_for(initial_tab="past")
+
+    # In-memory: 'past' tab is active for this view
+    assert page._filters.timeframe == "past"
+    assert page._tab_buttons["past"].isChecked() is True
+
+    # But DB preference is unchanged — still 'all'
+    row = users_repo.get_user(conn, uid)
+    assert row["calendar_timeframe"] == "all"
