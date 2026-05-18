@@ -20,7 +20,7 @@ from ...daily import builder as daily_builder
 from ...daily import streak as daily_streak
 from ...storage import users_repo, events_repo, daily_sessions_repo
 from ..design import Color, FontFamily, Semantic
-from ..responsive import is_narrow
+from ..responsive import is_narrow, is_short
 from ..widgets.action_card import make_action_card
 from ..widgets.clickable_card import ClickableCard
 from ..widgets.daily_card import DailyCard
@@ -70,15 +70,19 @@ class MenuPage(QWidget):
 
         # Dynamic content area — rebuilt on reload()
         self._dynamic_container = QWidget()
+        # Vertikal Fixed: Karten sollen ihre sizeHint behalten, der addStretch
+        # weiter unten absorbiert den Resize-Delta. So squeezen die Cards
+        # nicht beim Verkleinern des Fensters.
+        self._dynamic_container.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self._dynamic_layout = QVBoxLayout(self._dynamic_container)
         self._dynamic_layout.setSpacing(16)
         self._dynamic_layout.setContentsMargins(0, 0, 0, 0)
         outer.addWidget(self._dynamic_container)
         outer.addStretch(1)
-        footer = QLabel("designed by Matthias")
-        footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        footer.setStyleSheet("color: #a89e89; font-size: 9pt;")
-        outer.addWidget(footer)
+        self._footer = QLabel("designed by Matthias")
+        self._footer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._footer.setStyleSheet("color: #a89e89; font-size: 9pt;")
+        outer.addWidget(self._footer)
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -141,6 +145,13 @@ class MenuPage(QWidget):
         if getattr(self, "_last_narrow_state", None) != narrow:
             self._last_narrow_state = narrow
             self.reload()
+        # Vertical-space: hide dekorative Chrome (eyebrow, greeting, footer)
+        # wenn das Fenster zu kurz ist, damit die inhaltlichen Karten ohne
+        # Squeeze sichtbar bleiben.
+        short = is_short(self)
+        self.eyebrow.setVisible(not short)
+        self.greeting.setVisible(not short)
+        self._footer.setVisible(not short)
 
     # ------------------------------------------------------------------
     # Layout variants
@@ -164,11 +175,15 @@ class MenuPage(QWidget):
             strip.addWidget(card)
         wrap = QWidget()
         wrap.setLayout(strip)
+        # Wrap-Widget Fixed-vertikal: sonst quetscht der Parent die KA-Strip
+        # samt ihrer ExamCards, obwohl jede einzelne Card schon Fixed ist.
+        wrap.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self._dynamic_layout.addWidget(wrap)
 
     def _build_empty_state(self) -> None:
         f = QFrame()
         f.setObjectName("emptyEvents")
+        f.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         h = QHBoxLayout(f)
         h.setContentsMargins(20, 16, 20, 16)
         h.setSpacing(12)
@@ -188,6 +203,7 @@ class MenuPage(QWidget):
         grid_wrap.addStretch(1)
         container = QWidget()
         container.setMaximumWidth(820)
+        container.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         narrow = is_narrow(self)
         row = QVBoxLayout(container) if narrow else QHBoxLayout(container)
         row.setSpacing(12)
@@ -211,6 +227,7 @@ class MenuPage(QWidget):
         if uid is not None:
             state, streak = self._compute_daily_state(uid)
             card = DailyCard(state, streak)
+            card.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
             card.practice_clicked.connect(self.window.start_daily_five)
             self._dynamic_layout.addWidget(card)
 
@@ -223,6 +240,7 @@ class MenuPage(QWidget):
         # min sizes), making cards look left-shifted instead of centered.
         grid_container.setMinimumWidth(820)
         grid_container.setMaximumWidth(820)
+        grid_container.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         grid = QGridLayout(grid_container)
         grid.setSpacing(16)
         grid.setContentsMargins(0, 0, 0, 0)

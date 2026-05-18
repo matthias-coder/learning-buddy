@@ -3,16 +3,16 @@ from __future__ import annotations
 from typing import Callable
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMenu,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
 )
 
-from ..design import Color, FontFamily, Semantic
+from ..design import Color
 from .clickable_card import ClickableCard
 from .pill import Pill
 from .._subjects import subject_variant
@@ -51,6 +51,14 @@ class ExamCard(ClickableCard):
         super().__init__(object_name="examCard", parent=parent)
         self.event_id = event_data.event_id
         self.setMinimumWidth(240)
+        # Explizite Mindesthöhe: topics-QLabel hat setWordWrap(True), wodurch
+        # die sizeHint höhenabhängig von der Breite wird. Ohne expliziten
+        # Floor squeezt Qt die Card unter Engpässen (anders als z.B. tiles
+        # mit setMinimumSize(180, 88) oder Banner mit fester Layout-Höhe).
+        self.setMinimumHeight(130)
+        # Vertikal Fixed: bei Window-Resize sollen die Karten ihre sizeHint
+        # behalten — der addStretch in MenuPage absorbiert die Höhenänderung.
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(18, 14, 14, 14)
@@ -73,9 +81,7 @@ class ExamCard(ClickableCard):
             "sonstiges": "Termin",
         }.get(event_data.kind, "Termin")
         title = QLabel(kind_label)
-        title.setObjectName("h2")
-        title.setFont(QFont(FontFamily.DISPLAY, 16, QFont.Weight.Medium))
-        title.setStyleSheet(f"color: {Semantic.FG};")
+        title.setObjectName("examCardTitle")
         layout.addWidget(title)
 
         # Topics (up to 3 lines)

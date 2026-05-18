@@ -7,6 +7,11 @@ BREAKPOINT_NARROW = 768
 """Below this window width, UI switches to narrow-mode (hamburger menu,
 single-column layouts). Standard mobile/tablet boundary."""
 
+BREAKPOINT_SHORT = 720
+"""Below this window height, dekorative Header-Elemente (Eyebrow "HEUTE",
+Begrüßung) werden ausgeblendet, damit die inhaltlichen Karten ohne Squeeze
+sichtbar bleiben."""
+
 MIN_TOUCH_SIZE = 44
 """Apple HIG minimum touch target size in pixels. Also feels comfortable
 for mouse users — no downside to enforcing on desktop."""
@@ -22,3 +27,11 @@ def is_narrow(widget: QWidget) -> bool:
     # bound method via the class avoids that collision.
     top = QWidget.window(widget)
     return top.width() < BREAKPOINT_NARROW
+
+
+def is_short(widget: QWidget) -> bool:
+    """True if the widget's top-level window is below the short-height
+    breakpoint. Used to progressively shed dekorative header chrome when
+    vertical space is tight, so inhaltliche Karten nicht squeezen."""
+    top = QWidget.window(widget)
+    return top.height() < BREAKPOINT_SHORT

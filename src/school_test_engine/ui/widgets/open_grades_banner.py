@@ -4,7 +4,7 @@ from typing import Callable
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout
 
 from ..design import Color, FontFamily
 
@@ -23,6 +23,7 @@ class OpenGradesBanner(QFrame):
         self._count = count
         self._get_window = get_window or (lambda: self.window())
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
         h = QHBoxLayout(self)
         h.setContentsMargins(16, 12, 16, 12)

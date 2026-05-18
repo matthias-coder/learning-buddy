@@ -582,6 +582,12 @@ ClickableCard#examCard {
 ClickableCard#examCard:hover {
     background: #f6efde;
 }
+QLabel#examCardTitle {
+    font-family: "Fraunces", "Iowan Old Style", Georgia, serif;
+    font-size: 18pt;
+    font-weight: 500;
+    color: #1e1b15;
+}
 
 /* Compact tile (row of small tiles when KAs present) */
 ClickableCard#compactTile {
