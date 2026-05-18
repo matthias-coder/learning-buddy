@@ -182,6 +182,7 @@ class MainWindow(QMainWindow):
             raise ValueError(f"Unknown navigation target: {target!r}")
         renderer(**kwargs)
         self._current = (target, dict(kwargs))
+        self.header.back_button.setVisible(len(self._history) > 0)
 
     def _navigate_back(self) -> None:
         if not self._history:
@@ -192,6 +193,7 @@ class MainWindow(QMainWindow):
             return
         renderer(**kwargs)
         self._current = (target, dict(kwargs))
+        self.header.back_button.setVisible(len(self._history) > 0)
 
     # ------------------------------------------------------------------
     # Navigation

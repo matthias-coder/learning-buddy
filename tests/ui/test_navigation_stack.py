@@ -30,6 +30,7 @@ def window(conn):
     uid = users_repo.create_user(conn, name="Test")
     w = MainWindow(conn)
     w.set_active_user(uid)
+    w.show()
     return w
 
 
@@ -81,3 +82,14 @@ def test_navigate_back_on_empty_stack_is_noop(window):
     # Fresh start: history empty; back should not crash
     window._navigate_back()
     assert window._current[0] == "menu"
+
+
+def test_back_button_visibility_binds_to_history_depth(window):
+    # Fresh / menu → not visible
+    assert window.header.back_button.isVisible() is False
+    # Push something → visible
+    window._navigate("grades")
+    assert window.header.back_button.isVisible() is True
+    # Back to root → not visible
+    window._navigate("menu")
+    assert window.header.back_button.isVisible() is False

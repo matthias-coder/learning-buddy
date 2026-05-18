@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from ...resources import assets_dir
 from ..design import Color, FontFamily
 from .avatar_badge import AvatarBadge
+from .back_button import BackButton
 
 
 LOGOMARK_PATH = assets_dir() / "logomark.svg"
@@ -103,6 +104,11 @@ class GlobalHeader(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(48, 16, 48, 12)
         layout.setSpacing(10)
+
+        self.back_button = BackButton()
+        self.back_button.setVisible(False)
+        self.back_button.clicked.connect(window._navigate_back)
+        layout.addWidget(self.back_button)
 
         self._logo_menu = _LogoMenuButton()
         self._logo_menu.add_action("Start", window.show_menu)

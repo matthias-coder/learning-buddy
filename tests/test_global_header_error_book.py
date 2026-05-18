@@ -20,6 +20,7 @@ class _MockWindow:
     def show_error_book(self): pass
     def show_school_calendar(self): pass
     def show_profile_picker(self): pass
+    def _navigate_back(self): pass
 
 
 def test_logo_menu_has_fehlerheft_entry(qt_app):

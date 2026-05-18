@@ -24,6 +24,7 @@ def test_logo_menu_has_schulkalender_entry():
         def show_school_calendar(self):
             self.called += 1
         def show_profile_picker(self): pass
+        def _navigate_back(self): pass
 
     win = _StubWindow()
     header = GlobalHeader(win)
