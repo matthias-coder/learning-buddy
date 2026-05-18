@@ -33,6 +33,7 @@ class MenuPage(QWidget):
         self.window = window
         self._today_override = today
         self._ferien_banner = None
+        self._open_grades_banner = None
 
         outer = QVBoxLayout(self)
         outer.setSpacing(20)
@@ -61,6 +62,11 @@ class MenuPage(QWidget):
         self._ferien_banner_slot = QVBoxLayout()
         self._ferien_banner_slot.setContentsMargins(0, 0, 0, 0)
         outer.addLayout(self._ferien_banner_slot)
+
+        # Open-grades banner slot (refreshed in reload())
+        self._open_grades_banner_slot = QVBoxLayout()
+        self._open_grades_banner_slot.setContentsMargins(0, 0, 0, 0)
+        outer.addLayout(self._open_grades_banner_slot)
 
         # Dynamic content area — rebuilt on reload()
         self._dynamic_container = QWidget()
@@ -101,6 +107,7 @@ class MenuPage(QWidget):
             self._build_empty_state()
             self._build_full_grid()
         self._refresh_ferien_banner()
+        self._refresh_open_grades_banner()
 
     @staticmethod
     def _clear_layout_recursive(layout) -> None:
@@ -291,6 +298,36 @@ class MenuPage(QWidget):
             state, parent=self, get_window=lambda: self.window,
         )
         self._ferien_banner_slot.addWidget(self._ferien_banner)
+
+    def _refresh_open_grades_banner(self) -> None:
+        from ...storage import events_repo
+        from ..widgets.open_grades_banner import OpenGradesBanner
+
+        # Clear previous banner
+        while self._open_grades_banner_slot.count():
+            item = self._open_grades_banner_slot.takeAt(0)
+            w = item.widget()
+            if w is not None:
+                w.setParent(None)
+                w.deleteLater()
+        self._open_grades_banner = None
+
+        uid = self.window.active_user_id
+        if uid is None:
+            return
+        today = self._today_override or date.today()
+        rows = events_repo.list_past_klausuren_with_grade_status(
+            self.window.conn, uid, today,
+        )
+        n_open = sum(1 for r in rows if r["assessment_id"] is None)
+        if n_open == 0:
+            return
+        self._open_grades_banner = OpenGradesBanner(
+            count=n_open,
+            parent=self,
+            get_window=lambda: self.window,
+        )
+        self._open_grades_banner_slot.addWidget(self._open_grades_banner)
 
     # ------------------------------------------------------------------
     # ExamCard actions
