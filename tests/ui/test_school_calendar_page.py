@@ -157,3 +157,29 @@ def test_click_future_klausur_still_opens_event_edit(conn):
     page._open_klausur(eid)
 
     assert win.last_call == ("show_event_edit", {"event_id": eid})
+
+
+def test_show_for_initial_tab_past_activates_tab_button(conn):
+    from datetime import date as _date
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+    page.show_for(initial_tab="past")
+    assert page._tab_buttons["past"].isChecked() is True
+    assert page._filters.timeframe == "past"
+
+
+def test_show_for_no_initial_tab_uses_persisted_filter(conn):
+    from datetime import date as _date
+    from school_test_engine.ui.pages.school_calendar import SchoolCalendarPage
+
+    uid = users_repo.create_user(conn, name="T")
+    win = _StubWindow(conn, uid)
+    page = SchoolCalendarPage(win, conn, today=_date(2026, 5, 1))
+    page.show_for()  # No initial_tab → defaults preserved
+    # CalendarFilters.defaults() defines the default timeframe; just verify
+    # show_for does not crash and a tab is selected.
+    selected = [tf for tf, btn in page._tab_buttons.items() if btn.isChecked()]
+    assert len(selected) == 1

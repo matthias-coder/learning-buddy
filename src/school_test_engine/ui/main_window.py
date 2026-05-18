@@ -330,15 +330,15 @@ class MainWindow(QMainWindow):
         btn.setText(f"Üben ({n})" if n > 0 else "Üben")
         btn.setEnabled(n > 0)
 
-    def show_school_calendar(self) -> None:
-        self._navigate("school_calendar")
+    def show_school_calendar(self, initial_tab: str | None = None) -> None:
+        self._navigate("school_calendar", initial_tab=initial_tab)
 
-    def _render_school_calendar(self) -> None:
+    def _render_school_calendar(self, initial_tab: str | None = None) -> None:
         uid = self.active_user_id
         if uid is None:
             return
         self.header.set_page_actions([])
-        self.school_calendar_page.reload()
+        self.school_calendar_page.show_for(initial_tab=initial_tab)
         self.stack.setCurrentWidget(self.school_calendar_page)
 
     def start_error_book_practice(self, subject: str) -> None:

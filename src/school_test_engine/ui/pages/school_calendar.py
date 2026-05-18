@@ -140,6 +140,21 @@ class SchoolCalendarPage(QWidget):
             self._loading = False
         self._reload_list_only()
 
+    def show_for(self, initial_tab: str | None = None) -> None:
+        """Public entry. Optionally pre-select a timeframe tab (past/future/all).
+
+        Used by MenuPage banner click to land directly in 'Vergangen'.
+        """
+        if initial_tab is not None and initial_tab in self._tab_buttons:
+            self._user_id = self.window.active_user_id
+            if self._user_id is not None:
+                self._filters = self._filters.with_timeframe(initial_tab)
+                # Persist to DB so the choice survives the next reload
+                users_repo.update_user(
+                    self.conn, self._user_id, calendar_timeframe=initial_tab,
+                )
+        self.reload()
+
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
