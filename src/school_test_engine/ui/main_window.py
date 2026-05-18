@@ -369,6 +369,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.test_create_page)
 
     def show_event_edit(self, event_id: int | None = None, return_to: str = "events") -> None:
+        # return_to is preserved for API compatibility; the history stack supersedes it.
         self._navigate("event_edit", event_id=event_id)
 
     def _render_event_edit(self, event_id: int | None = None) -> None:
