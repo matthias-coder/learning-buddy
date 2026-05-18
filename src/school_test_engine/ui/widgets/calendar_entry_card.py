@@ -4,8 +4,9 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
 
-from ...school_calendar.models import CalendarEntry
+from ...school_calendar.models import CalendarEntry, GradeStatus
 from ..design import FontFamily
+from .grade_pill import GradePill
 from .pill import Pill
 
 
@@ -25,11 +26,18 @@ _PILL_LABEL_FOR_KIND = {
 
 
 class CalendarEntryCard(QFrame):
-    """Schlanke Card: [DateBadge] [Title] [Pill]. Klausur-Cards sind klickbar."""
+    """Schlanke Card: [DateBadge] [Title] [KindPill] [optional NotePill].
+    Klausur-Cards sind klickbar."""
 
     clicked = Signal(int)
 
-    def __init__(self, entry: CalendarEntry, parent=None):
+    def __init__(
+        self,
+        entry: CalendarEntry,
+        parent=None,
+        *,
+        grade_status: GradeStatus | None = None,
+    ):
         super().__init__(parent)
         self.setObjectName("calendarEntryCard")
         self._entry = entry
@@ -53,9 +61,19 @@ class CalendarEntryCard(QFrame):
 
         h.addStretch(1)
 
-        pill = Pill(_PILL_LABEL_FOR_KIND[entry.kind],
-                    variant=_PILL_VARIANT_FOR_KIND[entry.kind])
-        h.addWidget(pill)
+        kind_pill = Pill(_PILL_LABEL_FOR_KIND[entry.kind],
+                         variant=_PILL_VARIANT_FOR_KIND[entry.kind])
+        h.addWidget(kind_pill)
+
+        if grade_status is not None:
+            if grade_status.assessment_id is None:
+                # Note nicht eingetragen
+                note_pill = Pill("Note offen", variant="honey")
+                h.addWidget(note_pill)
+            elif grade_status.grade is not None:
+                # Note vorhanden — GradePill mit kompakter Größe
+                pill = GradePill(grade_status.grade, size=36)
+                h.addWidget(pill)
 
         if entry.kind == "klausur":
             self.setCursor(Qt.CursorShape.PointingHandCursor)

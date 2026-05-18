@@ -22,3 +22,14 @@ class CalendarEntry:
     @property
     def is_multi_day(self) -> bool:
         return self.end_date > self.start_date
+
+
+@dataclass(frozen=True)
+class GradeStatus:
+    """Holds the grade-link state for a past KA. Used by CalendarEntryCard.
+
+    `assessment_id is None and grade is None` → "Note offen"
+    Both set → grade was entered (display as GradePill).
+    """
+    assessment_id: int | None
+    grade: float | None
