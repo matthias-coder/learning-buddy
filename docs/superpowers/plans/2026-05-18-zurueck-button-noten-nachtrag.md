@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status (Stand 2026-05-25):** Plan vollständig umgesetzt — alle Steps via Commits zwischen 2026-05-12 und 2026-05-18 abgeschlossen (letzter: `ee5f0e2 test(integration): E2E grade-nachtrag flow via menu banner (Phase 18 D4)` + zwei nachgelagerte Polish-Fixes `70235af`, `59a9863`). Checkboxen wurden retrospektiv abgehakt; die Häkchen bedeuten „Commit existiert", nicht „Step wurde live mitgepflegt".
+
 **Goal:** Build (1) a history-stack-based global back button in `GlobalHeader` and (2) a discovery + entry flow for grades on past KAs (Schulkalender-Card badge + MenuPage echo banner).
 
 **Architecture:** `MainWindow` gets a single `_navigate(target, **kwargs)` dispatcher with a `_history: list[tuple[str, dict]]` stack. All existing `show_*` methods become thin wrappers around it. Grade-status flows through one new `events_repo` query (`list_past_klausuren_with_grade_status`) used by both the `CalendarEntryCard` badge variants and the `OpenGradesBanner` count.
@@ -71,7 +73,7 @@
 - Modify: `src/school_test_engine/ui/main_window.py` (after `__init__`, around line 120)
 - Create: `tests/ui/test_navigation_stack.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/ui/test_navigation_stack.py`:
 
@@ -122,12 +124,12 @@ def test_navigate_to_grades_pushes_menu_onto_stack(window):
     assert window._history[0][0] == "menu"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/ui/test_navigation_stack.py -v`
 Expected: FAIL with `AttributeError: 'MainWindow' object has no attribute '_history'`.
 
-- [ ] **Step 3: Add the minimal skeleton to MainWindow**
+- [x] **Step 3: Add the minimal skeleton to MainWindow**
 
 In `src/school_test_engine/ui/main_window.py`:
 
@@ -186,7 +188,7 @@ Finally, initialize `self._dispatch` at the very end of `__init__` (after the ex
         self._dispatch: dict[str, callable] = {}  # populated in Task A2
 ```
 
-- [ ] **Step 4: Run test to verify it still fails (correctly)**
+- [x] **Step 4: Run test to verify it still fails (correctly)**
 
 Run: `pytest tests/ui/test_navigation_stack.py::test_navigate_initializes_empty_history -v`
 Expected: PASS.
@@ -196,7 +198,7 @@ Expected: FAIL with `ValueError: Unknown navigation target: 'grades'`.
 
 This is the right failure — dispatch is empty. We'll populate in A2.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/ui/test_navigation_stack.py src/school_test_engine/ui/main_window.py
@@ -210,7 +212,7 @@ git commit -m "feat(ui/nav): add _navigate dispatcher + history stack skeleton (
 **Files:**
 - Modify: `src/school_test_engine/ui/main_window.py`
 
-- [ ] **Step 1: Refactor `show_*` methods to private `_render_*` and add a wrapper**
+- [x] **Step 1: Refactor `show_*` methods to private `_render_*` and add a wrapper**
 
 For every `show_*` method that should participate in navigation, extract the body into a private `_render_*` method and replace the public method body with a call to `self._navigate("<target>", ...)`.
 
@@ -420,14 +422,14 @@ Finally, populate `_dispatch` at the end of `__init__` (replace the empty-dict p
         }
 ```
 
-- [ ] **Step 2: Run full suite**
+- [x] **Step 2: Run full suite**
 
 Run: `pytest -x -q`
 Expected: ALL 494 existing tests still pass — wrappers delegate transparently. PLUS `test_navigate_to_grades_pushes_menu_onto_stack` from A1 now PASSES.
 
 If anything regresses, the failing test is the diagnostic — fix root cause, don't paper over.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/school_test_engine/ui/main_window.py
@@ -441,7 +443,7 @@ git commit -m "refactor(ui/nav): convert show_* methods to _navigate wrappers (P
 **Files:**
 - Modify: `tests/ui/test_navigation_stack.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/ui/test_navigation_stack.py`:
 
@@ -485,12 +487,12 @@ def test_navigate_back_on_empty_stack_is_noop(window):
     assert window._current[0] == "menu"
 ```
 
-- [ ] **Step 2: Run tests to verify they pass**
+- [x] **Step 2: Run tests to verify they pass**
 
 Run: `pytest tests/ui/test_navigation_stack.py -v`
 Expected: All 6 tests PASS. (The skeleton from A1+A2 should already handle these — if any fail, fix `_navigate` in main_window.py.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/ui/test_navigation_stack.py
@@ -507,7 +509,7 @@ git commit -m "test(ui/nav): cover stack hygiene + edge cases (Phase 18 A3)"
 - Modify: `src/school_test_engine/ui/pages/profile_edit.py:445`
 - Modify: `src/school_test_engine/ui/pages/profile_manager.py:191`
 
-- [ ] **Step 1: Replace the `_navigate_back` body in `assessment_edit.py`**
+- [x] **Step 1: Replace the `_navigate_back` body in `assessment_edit.py`**
 
 Replace lines 346-352 (the current `_navigate_back` method):
 
@@ -528,7 +530,7 @@ with:
         self.window._navigate_back()
 ```
 
-- [ ] **Step 2: Same change in `event_edit.py`**
+- [x] **Step 2: Same change in `event_edit.py`**
 
 Find the `_navigate_back` method (around line 244 — check with `grep -n '_navigate_back\|_return_to ==' src/school_test_engine/ui/pages/event_edit.py`).
 
@@ -539,7 +541,7 @@ Replace the entire if/elif/else routing block with:
         self.window._navigate_back()
 ```
 
-- [ ] **Step 3: Same change in `profile_edit.py` and `profile_manager.py`**
+- [x] **Step 3: Same change in `profile_edit.py` and `profile_manager.py`**
 
 In `profile_edit.py:445`, replace the existing `_return_to`-routing block (search for `target = self._return_to`) with:
 
@@ -553,14 +555,14 @@ In `profile_manager.py:191`, replace the if/else block (search for `if self._ret
         self.window._navigate_back()
 ```
 
-- [ ] **Step 4: Run full suite**
+- [x] **Step 4: Run full suite**
 
 Run: `pytest -x -q`
 Expected: All tests PASS. The simplified `_navigate_back` calls relies on MainWindow's stack — for tests that DON'T go through `_navigate` (i.e. they call `page.show_for(...)` directly without setting up `_current`), `_navigate_back` becomes a no-op (empty history). That's fine for tests that only verify save/cancel state, not navigation target.
 
 If a test specifically asserts "after cancel, we're on grades page": that test must be updated to drive navigation via `window.show_assessment_edit(...)` instead of `page.show_for(...)` directly. There should be very few such tests — search with: `grep -rE "_navigate_back\b|return_to=" tests/`. Most tests stub `window` and don't care about the post-back location.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/ui/pages/assessment_edit.py src/school_test_engine/ui/pages/event_edit.py src/school_test_engine/ui/pages/profile_edit.py src/school_test_engine/ui/pages/profile_manager.py
@@ -577,7 +579,7 @@ git commit -m "refactor(ui/pages): delegate _navigate_back to MainWindow stack (
 - Create: `src/school_test_engine/ui/widgets/back_button.py`
 - Create: `tests/ui/test_back_button_widget.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/ui/test_back_button_widget.py`:
 
@@ -630,12 +632,12 @@ def test_back_button_uses_pointing_cursor():
     assert b.cursor().shape() == Qt.CursorShape.PointingHandCursor
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/ui/test_back_button_widget.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'school_test_engine.ui.widgets.back_button'`.
 
-- [ ] **Step 3: Implement the widget**
+- [x] **Step 3: Implement the widget**
 
 Create `src/school_test_engine/ui/widgets/back_button.py`:
 
@@ -682,12 +684,12 @@ class BackButton(QFrame):
         super().mousePressEvent(event)
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `pytest tests/ui/test_back_button_widget.py -v`
 Expected: All 3 tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/ui/widgets/back_button.py tests/ui/test_back_button_widget.py
@@ -702,7 +704,7 @@ git commit -m "feat(ui/widget): BackButton widget for global header (Phase 18 B1
 - Modify: `src/school_test_engine/ui/widgets/global_header.py`
 - Modify: `src/school_test_engine/ui/main_window.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/ui/test_navigation_stack.py`:
 
@@ -718,12 +720,12 @@ def test_back_button_visibility_binds_to_history_depth(window):
     assert window.header.back_button.isVisible() is False
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/ui/test_navigation_stack.py::test_back_button_visibility_binds_to_history_depth -v`
 Expected: FAIL with `AttributeError: 'GlobalHeader' object has no attribute 'back_button'`.
 
-- [ ] **Step 3: Add `BackButton` to `GlobalHeader`**
+- [x] **Step 3: Add `BackButton` to `GlobalHeader`**
 
 In `src/school_test_engine/ui/widgets/global_header.py`, add the import at the top with the other widget imports:
 
@@ -740,7 +742,7 @@ Then in `GlobalHeader.__init__`, BEFORE the line that adds `self._logo_menu` (cu
         layout.addWidget(self.back_button)
 ```
 
-- [ ] **Step 4: Wire visibility in `MainWindow._navigate` / `_navigate_back`**
+- [x] **Step 4: Wire visibility in `MainWindow._navigate` / `_navigate_back`**
 
 In `src/school_test_engine/ui/main_window.py`, modify `_navigate` and `_navigate_back` to update visibility at the end:
 
@@ -756,7 +758,7 @@ In `_navigate_back`, after `self._current = (target, dict(kwargs))`:
         self.header.back_button.setVisible(len(self._history) > 0)
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/ui/test_navigation_stack.py -v`
 Expected: All 7 tests (6 from A + the new B2 test) PASS.
@@ -764,7 +766,7 @@ Expected: All 7 tests (6 from A + the new B2 test) PASS.
 Run: `pytest -x -q`
 Expected: full suite still PASSES.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/school_test_engine/ui/widgets/global_header.py src/school_test_engine/ui/main_window.py tests/ui/test_navigation_stack.py
@@ -779,7 +781,7 @@ git commit -m "feat(ui/nav): wire BackButton visibility to history stack (Phase 
 - Modify: `src/school_test_engine/ui/main_window.py`
 - Modify: `src/school_test_engine/ui/style.qss`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/ui/test_navigation_stack.py`:
 
@@ -811,12 +813,12 @@ def test_esc_shortcut_no_op_when_back_invisible(window):
     assert window._current[0] == "menu"
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/ui/test_navigation_stack.py::test_esc_shortcut_triggers_back_when_visible -v`
 Expected: FAIL — `window._current` stays at `"grades"` after Esc.
 
-- [ ] **Step 3: Add `Esc` `QShortcut` to MainWindow**
+- [x] **Step 3: Add `Esc` `QShortcut` to MainWindow**
 
 In `src/school_test_engine/ui/main_window.py`, add import at the top:
 
@@ -853,7 +855,7 @@ Then add the handler method:
         self._navigate_back()
 ```
 
-- [ ] **Step 4: Add QSS styling for the button**
+- [x] **Step 4: Add QSS styling for the button**
 
 In `src/school_test_engine/ui/style.qss`, append at the bottom (near other header-related rules):
 
@@ -868,7 +870,7 @@ QFrame#backButton:hover {
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/ui/test_navigation_stack.py -v`
 Expected: All tests PASS, including the two Esc-shortcut tests.
@@ -876,7 +878,7 @@ Expected: All tests PASS, including the two Esc-shortcut tests.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/school_test_engine/ui/main_window.py src/school_test_engine/ui/style.qss tests/ui/test_navigation_stack.py
@@ -893,7 +895,7 @@ git commit -m "feat(ui/nav): Esc shortcut + hover styling for BackButton (Phase 
 - Modify: `src/school_test_engine/storage/events_repo.py`
 - Create: `tests/storage/test_events_repo_grade_status.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/storage/test_events_repo_grade_status.py`:
 
@@ -1001,12 +1003,12 @@ def test_ordered_by_date_desc(conn):
     assert dates == ["2026-04-01", "2026-03-01", "2026-02-01"]
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/storage/test_events_repo_grade_status.py -v`
 Expected: All FAIL with `AttributeError: module ... has no attribute 'list_past_klausuren_with_grade_status'`.
 
-- [ ] **Step 3: Implement the query**
+- [x] **Step 3: Implement the query**
 
 Append to `src/school_test_engine/storage/events_repo.py`:
 
@@ -1041,7 +1043,7 @@ def list_past_klausuren_with_grade_status(
 
 Add `from datetime import date` at the top of `events_repo.py` if it's not already imported (or use `"date"` as a string-forward-ref like the signature does).
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/storage/test_events_repo_grade_status.py -v`
 Expected: All 7 tests PASS.
@@ -1049,7 +1051,7 @@ Expected: All 7 tests PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/storage/events_repo.py tests/storage/test_events_repo_grade_status.py
@@ -1065,7 +1067,7 @@ git commit -m "feat(storage): list_past_klausuren_with_grade_status query (Phase
 - Modify: `src/school_test_engine/ui/widgets/calendar_entry_card.py`
 - Modify: `tests/ui/test_calendar_entry_card.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/ui/test_calendar_entry_card.py`:
 
@@ -1112,12 +1114,12 @@ def test_future_klausur_no_grade_badge():
     assert not any("Note offen" in t for t in labels)
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/ui/test_calendar_entry_card.py -v`
 Expected: First two FAIL with `ImportError: cannot import name 'GradeStatus'`. Third FAIL with `TypeError: __init__() got unexpected keyword argument 'grade_status'`.
 
-- [ ] **Step 3: Add `GradeStatus` to models.py**
+- [x] **Step 3: Add `GradeStatus` to models.py**
 
 Modify `src/school_test_engine/school_calendar/models.py`. Append at the end:
 
@@ -1133,7 +1135,7 @@ class GradeStatus:
     grade: float | None
 ```
 
-- [ ] **Step 4: Extend `CalendarEntryCard`**
+- [x] **Step 4: Extend `CalendarEntryCard`**
 
 Modify `src/school_test_engine/ui/widgets/calendar_entry_card.py`. Replace the `__init__` and add a new render path. Full updated file:
 
@@ -1239,7 +1241,7 @@ class CalendarEntryCard(QFrame):
         super().mousePressEvent(event)
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/ui/test_calendar_entry_card.py -v`
 Expected: All 7 tests (4 existing + 3 new) PASS.
@@ -1247,7 +1249,7 @@ Expected: All 7 tests (4 existing + 3 new) PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/school_test_engine/school_calendar/models.py src/school_test_engine/ui/widgets/calendar_entry_card.py tests/ui/test_calendar_entry_card.py
@@ -1262,7 +1264,7 @@ git commit -m "feat(ui/widget): CalendarEntryCard grade-status badge (Phase 18 C
 - Modify: `src/school_test_engine/ui/pages/school_calendar.py`
 - Modify: `tests/ui/test_school_calendar_page.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 First check existing tests to find a patternable fixture:
 
@@ -1379,12 +1381,12 @@ def page_factory(qapp):
     return _make
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/ui/test_school_calendar_page.py -v`
 Expected: Three new tests FAIL — current `_open_klausur` only calls `show_event_edit`.
 
-- [ ] **Step 3: Update `_open_klausur` + load grade-status in `_reload_list_only`**
+- [x] **Step 3: Update `_open_klausur` + load grade-status in `_reload_list_only`**
 
 In `src/school_test_engine/ui/pages/school_calendar.py`, add imports at the top:
 
@@ -1459,7 +1461,7 @@ with:
                 self._list_layout.insertWidget(self._list_layout.count() - 1, card)
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/ui/test_school_calendar_page.py -v`
 Expected: All tests PASS.
@@ -1467,7 +1469,7 @@ Expected: All tests PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/ui/pages/school_calendar.py tests/ui/test_school_calendar_page.py
@@ -1482,7 +1484,7 @@ git commit -m "feat(ui/page): SchoolCalendarPage routes past-KA to grade flow + 
 - Modify: `src/school_test_engine/ui/pages/assessment_edit.py`
 - Modify: `tests/test_assessment_edit_page.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Inspect the existing test file pattern first:
 
@@ -1586,12 +1588,12 @@ def test_no_prefill_event_id_keeps_subject_and_date_enabled(qapp, tmp_path):
     assert page.date_edit.isEnabled() is True
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/test_assessment_edit_page.py -v -k "prefill or edit_mode or no_prefill"`
 Expected: `test_prefill_event_id_disables_subject_and_date` FAILS — currently no disable logic; the other two should already pass.
 
-- [ ] **Step 3: Add the disable logic to `show_for`**
+- [x] **Step 3: Add the disable logic to `show_for`**
 
 In `src/school_test_engine/ui/pages/assessment_edit.py`, locate `show_for` (around line 232-260). Update the prefill branch:
 
@@ -1646,7 +1648,7 @@ In `src/school_test_engine/ui/pages/assessment_edit.py`, locate `show_for` (arou
             self._load_assessment(assessment_id)
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/test_assessment_edit_page.py -v`
 Expected: All tests PASS.
@@ -1654,7 +1656,7 @@ Expected: All tests PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/ui/pages/assessment_edit.py tests/test_assessment_edit_page.py
@@ -1672,7 +1674,7 @@ git commit -m "feat(ui/page): AssessmentEditPage disables subject+date when pref
 - Create: `tests/ui/test_open_grades_banner_widget.py`
 - Modify: `src/school_test_engine/ui/style.qss` (add QSS rules)
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/ui/test_open_grades_banner_widget.py`:
 
@@ -1727,12 +1729,12 @@ def test_banner_click_navigates_to_school_calendar_with_initial_tab(qapp):
     assert win.calls == [("show_school_calendar", "past")]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/ui/test_open_grades_banner_widget.py -v`
 Expected: FAIL with `ModuleNotFoundError`.
 
-- [ ] **Step 3: Implement the widget**
+- [x] **Step 3: Implement the widget**
 
 Create `src/school_test_engine/ui/widgets/open_grades_banner.py`:
 
@@ -1801,7 +1803,7 @@ class OpenGradesBanner(QFrame):
         super().mousePressEvent(event)
 ```
 
-- [ ] **Step 4: Add QSS styling**
+- [x] **Step 4: Add QSS styling**
 
 In `src/school_test_engine/ui/style.qss`, append:
 
@@ -1817,12 +1819,12 @@ QFrame#openGradesBannerStrip {
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/ui/test_open_grades_banner_widget.py -v`
 Expected: All 3 tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/school_test_engine/ui/widgets/open_grades_banner.py tests/ui/test_open_grades_banner_widget.py src/school_test_engine/ui/style.qss
@@ -1837,7 +1839,7 @@ git commit -m "feat(ui/widget): OpenGradesBanner — counter card analog FerienB
 - Modify: `src/school_test_engine/ui/pages/menu.py`
 - Create: `tests/ui/test_menu_page_open_grades.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/ui/test_menu_page_open_grades.py`:
 
@@ -1908,12 +1910,12 @@ def test_banner_count_reflects_db_state(conn):
     assert "3 offene Noten" in banner._label.text()
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/ui/test_menu_page_open_grades.py -v`
 Expected: FAIL — `_open_grades_banner` attribute does not exist.
 
-- [ ] **Step 3: Add the banner slot to `MenuPage`**
+- [x] **Step 3: Add the banner slot to `MenuPage`**
 
 In `src/school_test_engine/ui/pages/menu.py`:
 
@@ -1972,7 +1974,7 @@ In `src/school_test_engine/ui/pages/menu.py`:
         self._open_grades_banner_slot.addWidget(self._open_grades_banner)
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/ui/test_menu_page_open_grades.py -v`
 Expected: All 3 tests PASS.
@@ -1980,7 +1982,7 @@ Expected: All 3 tests PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/school_test_engine/ui/pages/menu.py tests/ui/test_menu_page_open_grades.py
@@ -1996,7 +1998,7 @@ git commit -m "feat(ui/page): MenuPage wires OpenGradesBanner slot (Phase 18 D2)
 - Modify: `src/school_test_engine/ui/main_window.py`
 - Modify: `tests/ui/test_school_calendar_page.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/ui/test_school_calendar_page.py`:
 
@@ -2037,12 +2039,12 @@ def test_show_for_no_initial_tab_uses_persisted_filter(page_factory, tmp_path):
     assert len(selected) == 1
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `pytest tests/ui/test_school_calendar_page.py::test_show_for_initial_tab_past_activates_tab_button -v`
 Expected: FAIL with `AttributeError: 'SchoolCalendarPage' object has no attribute 'show_for'`.
 
-- [ ] **Step 3: Add `show_for` to `SchoolCalendarPage`**
+- [x] **Step 3: Add `show_for` to `SchoolCalendarPage`**
 
 In `src/school_test_engine/ui/pages/school_calendar.py`, add a new method after `reload()` (around line 141):
 
@@ -2063,7 +2065,7 @@ In `src/school_test_engine/ui/pages/school_calendar.py`, add a new method after 
         self.reload()
 ```
 
-- [ ] **Step 4: Wire dispatcher param in `MainWindow`**
+- [x] **Step 4: Wire dispatcher param in `MainWindow`**
 
 In `src/school_test_engine/ui/main_window.py`, update `_render_school_calendar` to accept `initial_tab`:
 
@@ -2084,7 +2086,7 @@ And update `show_school_calendar` to forward the param:
         self._navigate("school_calendar", initial_tab=initial_tab)
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `pytest tests/ui/test_school_calendar_page.py -v`
 Expected: All tests PASS.
@@ -2092,7 +2094,7 @@ Expected: All tests PASS.
 Run: `pytest -x -q`
 Expected: full suite PASSES.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/school_test_engine/ui/pages/school_calendar.py src/school_test_engine/ui/main_window.py tests/ui/test_school_calendar_page.py
@@ -2106,7 +2108,7 @@ git commit -m "feat(ui/page): SchoolCalendarPage.show_for(initial_tab) + dispatc
 **Files:**
 - Create: `tests/integration/test_grade_nachtrag_flow.py`
 
-- [ ] **Step 1: Check integration test directory + write the failing E2E test**
+- [x] **Step 1: Check integration test directory + write the failing E2E test**
 
 ```bash
 ls tests/integration/ 2>/dev/null || mkdir -p tests/integration && touch tests/integration/__init__.py
@@ -2190,7 +2192,7 @@ def test_e2e_grade_nachtrag_flow_via_banner(conn):
     assert win.menu_page._open_grades_banner is None
 ```
 
-- [ ] **Step 2: Run test**
+- [x] **Step 2: Run test**
 
 Run: `pytest tests/integration/test_grade_nachtrag_flow.py -v`
 Expected: PASS, validating the entire flow end-to-end.
@@ -2200,7 +2202,7 @@ Run the entire suite one more time:
 Run: `pytest -x -q`
 Expected: ALL tests PASS (≈ 494 existing + ~25 new from Phase 18 = ~519 tests).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/integration/test_grade_nachtrag_flow.py
