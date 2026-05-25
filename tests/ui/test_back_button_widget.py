@@ -32,7 +32,8 @@ def test_back_button_click_emits_signal():
 
     ev = QMouseEvent(
         QMouseEvent.Type.MouseButtonPress,
-        QPointF(1, 1), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton,
+        QPointF(1, 1), QPointF(1, 1),
+        Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton,
         Qt.KeyboardModifier.NoModifier,
     )
     b.mousePressEvent(ev)

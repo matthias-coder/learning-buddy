@@ -44,7 +44,8 @@ def test_banner_click_calls_window_show_school_calendar(qapp):
     b = FerienBanner(s, get_window=lambda: win)
     ev = QMouseEvent(
         QMouseEvent.Type.MouseButtonPress,
-        QPointF(1, 1), Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton,
+        QPointF(1, 1), QPointF(1, 1),
+        Qt.MouseButton.LeftButton, Qt.MouseButton.LeftButton,
         Qt.KeyboardModifier.NoModifier,
     )
     b.mousePressEvent(ev)
