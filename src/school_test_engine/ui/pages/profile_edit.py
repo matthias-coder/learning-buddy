@@ -385,7 +385,8 @@ class ProfileEditPage(QWidget):
             return
         ical_feed_url_val = raw_url if raw_url else None
 
-        if self._user_id is None:
+        created = self._user_id is None
+        if created:
             new_uid = users_repo.create_user(
                 self.conn, name, "👤",
                 avatar_image=self._avatar_image,
@@ -401,6 +402,8 @@ class ProfileEditPage(QWidget):
                 school_year=school_year_val,
                 ical_feed_url=ical_feed_url_val,
             )
+            # A second Save click must update this profile, not create another.
+            self._user_id = new_uid
         else:
             users_repo.update_user(
                 self.conn, self._user_id,
@@ -419,6 +422,10 @@ class ProfileEditPage(QWidget):
                 self.window.user_changed.emit(self._user_id)
 
         self._navigate_back()
+        if created:
+            QMessageBox.information(
+                self, "Profil angelegt", f"Das Profil „{name}“ wurde angelegt.",
+            )
 
     def _cancel(self) -> None:
         self._navigate_back()

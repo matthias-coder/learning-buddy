@@ -122,6 +122,7 @@ class MainWindow(QMainWindow):
         self._bg_sync_thread = None
         self._bg_sync_worker = None
         self._dispatch: dict[str, Callable[..., None]] = {
+            "profile_picker": self._render_profile_picker,
             "menu": self._render_menu,
             "library": self._render_library,
             "import": self._render_import,
@@ -173,6 +174,10 @@ class MainWindow(QMainWindow):
         - target == "runner": never pushed onto stack (mid-test must use
                               Pause-Button, not Back)
         - duplicate target:   replaces head rather than pushing (dedup)
+        - leaving the runner: pushed as action="raw" so Back resumes the live
+                              test instead of starting a new attempt
+        - target == "results": the finished test (runner/review) is dropped
+                              from the stack — Back must never re-enter it
         """
         if target == "menu":
             self._history.clear()
@@ -180,7 +185,14 @@ class MainWindow(QMainWindow):
             pass
         elif self._current is not None and self._current[0] != target:
             if not self._history or self._history[-1][0] != self._current[0]:
-                self._history.append(self._current)
+                head = self._current
+                if head[0] == "runner":
+                    head = ("runner", {"action": "raw"})
+                self._history.append(head)
+        if target == "results":
+            self._history = [
+                h for h in self._history if h[0] not in ("runner", "review")
+            ]
         # Resolve and render
         renderer = self._dispatch.get(target)
         if renderer is None:
@@ -204,7 +216,9 @@ class MainWindow(QMainWindow):
         # Guard: no-op if a modal dialog is open OR back-button is hidden.
         if QApplication.activeModalWidget() is not None:
             return
-        if not self.header.back_button.isVisible():
+        # History, not header visibility: before login the header is hidden,
+        # but the profile pages still need Esc.
+        if not self._history:
             return
         self._navigate_back()
 
@@ -213,13 +227,16 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def show_profile_picker(self) -> None:
+        # Profile picker is the pre-login root — clears the stack.
+        self._history.clear()
+        self._render_profile_picker()
+        self._current = ("profile_picker", {})
+
+    def _render_profile_picker(self) -> None:
         self.active_user_id = None
         self.header.setVisible(False)
         self.profile_picker_page.reload()
         self.stack.setCurrentWidget(self.profile_picker_page)
-        # Profile picker is pre-login — no stack tracking.
-        self._history.clear()
-        self._current = ("profile_picker", {})
 
     def show_profile_manager(self, return_to: str = "picker") -> None:
         self._navigate("profile_manager", return_to=return_to)

@@ -106,7 +106,13 @@ class ProfileManagerPage(QWidget):
         lede.setWordWrap(True)
         outer.addWidget(lede)
 
+        # Own back button: opened from the Profile-Picker the global header
+        # (and its back button) is hidden, so the page needs a visible exit.
         action_row = QHBoxLayout()
+        self.back_btn = QPushButton("← Zurück")
+        self.back_btn.setObjectName("text")
+        self.back_btn.clicked.connect(self._back)
+        action_row.addWidget(self.back_btn)
         action_row.addStretch(1)
         add = QPushButton("+  Neues Profil anlegen")
         add.setObjectName("text")
