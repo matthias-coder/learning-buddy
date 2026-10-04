@@ -34,6 +34,43 @@ def import_from_file(conn: sqlite3.Connection, path: Path, user_id: int) -> int:
     return import_from_string(conn, source, user_id)
 
 
+def _fingerprint(test: Test) -> str:
+    """Normalized content of a test (whitespace/key order independent)."""
+    return json.dumps(test.model_dump(mode="json"), sort_keys=True, ensure_ascii=False)
+
+
+def find_duplicate(conn: sqlite3.Connection, source: str, user_id: int) -> int | None:
+    """Id of an already imported, identical test of this user, else None.
+
+    Never raises: unparsable/invalid input yields None so that the regular
+    import reports the proper error.
+    """
+    try:
+        raw, _ = _parse_json(source)
+        wanted = _fingerprint(Test.model_validate(raw))
+    except (ImportError, ValidationError):
+        return None
+    rows = conn.execute(
+        "SELECT id, source_json FROM tests WHERE user_id = ? ORDER BY id", (user_id,)
+    ).fetchall()
+    for row in rows:
+        try:
+            existing = Test.model_validate(json.loads(row["source_json"]))
+        except (ValueError, ValidationError, TypeError):
+            continue
+        if _fingerprint(existing) == wanted:
+            return int(row["id"])
+    return None
+
+
+def find_duplicate_in_file(conn: sqlite3.Connection, path: Path, user_id: int) -> int | None:
+    try:
+        source = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return None
+    return find_duplicate(conn, source, user_id)
+
+
 def _candidates(source: str) -> list[str]:
     """Possible JSON texts inside a pasted AI answer, most specific first."""
     text = source.strip().lstrip("﻿")

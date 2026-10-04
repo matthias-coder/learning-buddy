@@ -20,7 +20,12 @@ from PySide6.QtWidgets import QApplication, QPlainTextEdit
 
 from ...importer.json_import import ImportError as TestImportError
 from ...resources import examples_dir
-from ...importer.json_import import import_from_file, import_from_string
+from ...importer.json_import import (
+    find_duplicate,
+    find_duplicate_in_file,
+    import_from_file,
+    import_from_string,
+)
 from ..design import FontFamily
 from ..widgets.eyebrow import Eyebrow
 
@@ -96,6 +101,16 @@ class ImportPage(QWidget):
         layout.addWidget(self.log, stretch=1)
 
 
+    def _confirm_duplicate(self) -> bool:
+        reply = QMessageBox.question(
+            self,
+            "Schon vorhanden",
+            "Diesen Test gibt es schon in der Bibliothek. Trotzdem noch einmal importieren?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        return reply == QMessageBox.StandardButton.Yes
+
     def _pick_file(self) -> None:
         examples = examples_dir()
         start_dir = str(examples) if examples.exists() else str(Path.home())
@@ -105,6 +120,10 @@ class ImportPage(QWidget):
         if not path_str:
             return
         path = Path(path_str)
+        dup = find_duplicate_in_file(self.conn, path, self.window.active_user_id)
+        if dup is not None and not self._confirm_duplicate():
+            self.log.append(f"⏭ {path.name} übersprungen (gibt es schon)\n")
+            return
         try:
             test_id = import_from_file(self.conn, path, self.window.active_user_id)
         except TestImportError as e:
@@ -136,6 +155,10 @@ class ImportPage(QWidget):
                 self, "Kein JSON",
                 "Füge erst ein JSON in das Textfeld ein.",
             )
+            return
+        dup = find_duplicate(self.conn, source, self.window.active_user_id)
+        if dup is not None and not self._confirm_duplicate():
+            self.log.append("⏭ Eingefügtes JSON übersprungen (gibt es schon)\n")
             return
         try:
             test_id = import_from_string(self.conn, source, self.window.active_user_id)
