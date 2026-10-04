@@ -39,6 +39,10 @@ def window(conn):
     yield w
     w.close()
     w.deleteLater()
+    # processEvents() alone does not run DeferredDelete outside an event loop;
+    # a surviving QWebEngineView crashes at interpreter exit.
+    from PySide6.QtCore import QEvent
+    QApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
     QApplication.processEvents()
 
 
