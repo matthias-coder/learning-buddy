@@ -155,7 +155,7 @@ def list_incomplete_attempts(
         SELECT a.*, t.title AS test_title, t.subject
         FROM attempts a JOIN tests t ON t.id = a.test_id
         WHERE a.completed = 0 AND a.user_id = ?
-        ORDER BY a.started_at DESC
+        ORDER BY a.started_at DESC, a.id DESC
         """,
         (user_id,),
     )

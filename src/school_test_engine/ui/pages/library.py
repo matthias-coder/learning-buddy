@@ -49,23 +49,11 @@ class LibraryPage(QWidget):
         rl.setContentsMargins(14, 12, 14, 12)
         rl.setSpacing(8)
         rl.addWidget(Eyebrow("Pausiert"))
-        self.resume_label = QLabel()
-        self.resume_label.setWordWrap(True)
-        self.resume_label.setStyleSheet("color: #2f2b22;")
-        rl.addWidget(self.resume_label)
-        rl_buttons = QHBoxLayout()
-        rl_buttons.addStretch(1)
-        self.discard_btn = QPushButton("Verwerfen")
-        self.discard_btn.setObjectName("danger")
-        self.discard_btn.clicked.connect(self._discard_resume)
-        rl_buttons.addWidget(self.discard_btn)
-        self.resume_btn = QPushButton("Fortsetzen →")
-        self.resume_btn.setObjectName("primary")
-        self.resume_btn.clicked.connect(self._do_resume)
-        rl_buttons.addWidget(self.resume_btn)
-        rl.addLayout(rl_buttons)
+        self.resume_rows_layout = QVBoxLayout()
+        self.resume_rows_layout.setSpacing(6)
+        rl.addLayout(self.resume_rows_layout)
+        self._resume_rows: list[_ResumeRow] = []
         outer.addWidget(self.resume_frame)
-        self._resume_attempt_id: int | None = None
 
         # Scrollbare Card-Liste
         self.scroll = QScrollArea()
@@ -97,28 +85,26 @@ class LibraryPage(QWidget):
         self._reload_tests_list()
 
     def _reload_resume_banner(self) -> None:
-        incomplete = attempts_repo.find_incomplete_attempt(self.conn, self.window.active_user_id)
-        if incomplete is None:
-            self.resume_frame.hide()
-            self._resume_attempt_id = None
-            return
-        test_row = tests_repo.get_test(self.conn, int(incomplete["test_id"]))
-        if test_row is None:
-            attempts_repo.discard_attempt(self.conn, int(incomplete["id"]))
-            self.resume_frame.hide()
-            self._resume_attempt_id = None
-            return
-        self._resume_attempt_id = int(incomplete["id"])
-        n_questions = self.conn.execute(
-            "SELECT COUNT(*) AS n FROM questions WHERE test_id = ?",
-            (int(incomplete["test_id"]),),
-        ).fetchone()["n"]
-        idx = int(incomplete["current_index"] or 0)
-        self.resume_label.setText(
-            f"Du hast '<b>{test_row['title']}</b>' bei Frage {idx + 1} von {n_questions} "
-            "stehen lassen — fortsetzen, wo du warst?"
+        clear_layout(self.resume_rows_layout)
+        self._resume_rows = []
+        incomplete = attempts_repo.list_incomplete_attempts(
+            self.conn, self.window.active_user_id
         )
-        self.resume_frame.show()
+        for att in incomplete:
+            aid = int(att["id"])
+            n_questions = self.conn.execute(
+                "SELECT COUNT(*) AS n FROM questions WHERE test_id = ?",
+                (int(att["test_id"]),),
+            ).fetchone()["n"]
+            idx = int(att["current_index"] or 0)
+            row = _ResumeRow(
+                f"<b>{att['test_title']}</b> – Frage {idx + 1} von {n_questions}"
+            )
+            row.resume_btn.clicked.connect(lambda _=False, _a=aid: self._do_resume(_a))
+            row.discard_btn.clicked.connect(lambda _=False, _a=aid: self._discard_resume(_a))
+            self.resume_rows_layout.addWidget(row)
+            self._resume_rows.append(row)
+        self.resume_frame.setVisible(bool(self._resume_rows))
 
     def _reload_tests_list(self) -> None:
         clear_layout(self.list_layout)
@@ -140,10 +126,8 @@ class LibraryPage(QWidget):
 
     # ------------------------------------------------------------------
 
-    def _do_resume(self) -> None:
-        if self._resume_attempt_id is None:
-            return
-        self.window.resume_attempt(self._resume_attempt_id)
+    def _do_resume(self, attempt_id: int) -> None:
+        self.window.resume_attempt(attempt_id)
 
     def _export_pdf(self, test_id: int, subject: str) -> None:
         from datetime import date
@@ -153,9 +137,7 @@ class LibraryPage(QWidget):
         default = f"learning-buddy-{subject.lower()}-{date.today().isoformat()}.pdf"
         save_pdf_with_dialog(self, html, default)
 
-    def _discard_resume(self) -> None:
-        if self._resume_attempt_id is None:
-            return
+    def _discard_resume(self, attempt_id: int) -> None:
         reply = QMessageBox.question(
             self,
             "Versuch verwerfen?",
@@ -163,8 +145,28 @@ class LibraryPage(QWidget):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            attempts_repo.discard_attempt(self.conn, self._resume_attempt_id)
+            attempts_repo.discard_attempt(self.conn, attempt_id)
             self.reload()
+
+
+class _ResumeRow(QWidget):
+    """One compact paused-attempt row: label + Verwerfen / Fortsetzen."""
+
+    def __init__(self, text: str):
+        super().__init__()
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(8)
+        self.label = QLabel(text)
+        self.label.setWordWrap(True)
+        self.label.setStyleSheet("color: #2f2b22;")
+        lay.addWidget(self.label, stretch=1)
+        self.discard_btn = QPushButton("Verwerfen")
+        self.discard_btn.setObjectName("danger")
+        lay.addWidget(self.discard_btn)
+        self.resume_btn = QPushButton("Fortsetzen →")
+        self.resume_btn.setObjectName("primary")
+        lay.addWidget(self.resume_btn)
 
 
 def _make_test_card(row, on_pdf=None) -> ClickableCard:
