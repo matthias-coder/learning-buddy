@@ -3,7 +3,8 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime
 
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QFontMetrics
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
@@ -48,8 +49,15 @@ class _ProfileRow(QFrame):
 
         name_row = QHBoxLayout()
         name_row.setSpacing(8)
-        name_lbl = QLabel(user_row["name"])
-        name_lbl.setFont(QFont(FontFamily.DISPLAY, 16, QFont.Weight.Medium))
+        name_font = QFont(FontFamily.DISPLAY, 16, QFont.Weight.Medium)
+        # Elide very long names so Bearbeiten/Löschen stay on screen.
+        name_lbl = QLabel(
+            QFontMetrics(name_font).elidedText(
+                user_row["name"], Qt.TextElideMode.ElideRight, 420
+            )
+        )
+        name_lbl.setToolTip(user_row["name"])
+        name_lbl.setFont(name_font)
         name_lbl.setStyleSheet("color: #1e1b15;")
         name_row.addWidget(name_lbl)
         if is_active:

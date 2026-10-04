@@ -54,7 +54,8 @@ class _LogoMenuButton(QFrame):
 
     def add_action(self, label: str, callback) -> None:
         action = self._menu.addAction(label)
-        action.triggered.connect(callback)
+        # Swallow QAction's `checked` arg so it isn't passed on as a page kwarg.
+        action.triggered.connect(lambda _checked=False: callback())
 
     def add_separator(self) -> None:
         self._menu.addSeparator()
@@ -119,6 +120,9 @@ class GlobalHeader(QWidget):
         self._logo_menu.add_action("Fehlerheft", window.show_error_book)
         self._logo_menu.add_action("Schulkalender", window.show_school_calendar)
         self._logo_menu.add_separator()
+        self._logo_menu.add_action(
+            "Profile verwalten", lambda: window.show_profile_manager(return_to="menu")
+        )
         self._logo_menu.add_action("Profil wechseln", window.show_profile_picker)
         layout.addWidget(self._logo_menu)
 

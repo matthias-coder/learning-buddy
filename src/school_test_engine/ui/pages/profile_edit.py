@@ -31,6 +31,8 @@ from ..design import FontFamily, Spacing
 from ..widgets.avatar_badge import AvatarBadge
 from ..widgets.date_picker import DatePicker
 
+NAME_MAX_LENGTH = 30
+
 
 def _pixmap_to_png_bytes(pm: QPixmap, max_dim: int = 256) -> bytes:
     if pm.width() > max_dim or pm.height() > max_dim:
@@ -110,12 +112,14 @@ class ProfileEditPage(QWidget):
 
         self.name_edit = QLineEdit()
         self.name_edit.setPlaceholderText("z. B. Clemens")
+        self.name_edit.setMaxLength(NAME_MAX_LENGTH)
         form.addRow("Name:", self.name_edit)
 
         # Birthday: year range 1900 → today. 1900-01-01 is the "not set" sentinel.
         self.birthday_edit = DatePicker(year_range=(1900, datetime.now().year))
         self.birthday_edit.setDate(QDate(1900, 1, 1))
-        clear_bd = QPushButton("Löschen")
+        # Not "Löschen": too easily confused with deleting the whole profile.
+        clear_bd = QPushButton("Zurücksetzen")
         clear_bd.setObjectName("text")
         clear_bd.clicked.connect(self._clear_birthday)
         bd_row = QHBoxLayout()
@@ -359,6 +363,12 @@ class ProfileEditPage(QWidget):
         if not name:
             QMessageBox.information(self, "Name fehlt", "Bitte einen Namen vergeben.")
             return
+        if self._name_taken(name):
+            QMessageBox.information(
+                self, "Name schon vergeben",
+                f"Es gibt schon ein Profil „{name}“. Bitte einen anderen Namen wählen.",
+            )
+            return
 
         birthday = None
         if self._birthday_set:
@@ -426,6 +436,13 @@ class ProfileEditPage(QWidget):
             QMessageBox.information(
                 self, "Profil angelegt", f"Das Profil „{name}“ wurde angelegt.",
             )
+
+    def _name_taken(self, name: str) -> bool:
+        wanted = name.casefold()
+        return any(
+            (u["name"] or "").strip().casefold() == wanted and int(u["id"]) != self._user_id
+            for u in users_repo.list_users(self.conn)
+        )
 
     def _cancel(self) -> None:
         self._navigate_back()

@@ -114,6 +114,7 @@ class MainWindow(QMainWindow):
             self.stack.addWidget(page)
 
         self.user_changed.connect(lambda _uid: self.school_calendar_page.reload())
+        self.user_changed.connect(self._refresh_header_user)
         self.events_synced.connect(self.school_calendar_page.reload)
 
         self._return_to_history = False
@@ -153,13 +154,18 @@ class MainWindow(QMainWindow):
 
     def set_active_user(self, user_id: int) -> None:
         self.active_user_id = user_id
-        user = users_repo.get_user(self.conn, user_id)
-        if user is not None:
-            self.header.set_user(user["name"], row_get(user, "avatar_image"))
+        self._refresh_header_user(user_id)
         self.header.setVisible(True)
         self.user_changed.emit(user_id)
         self.show_menu()
         self._maybe_trigger_background_sync(user_id)
+
+    def _refresh_header_user(self, user_id: int) -> None:
+        """Show name/photo of the given profile in the header chip (also after
+        the active profile was edited)."""
+        user = users_repo.get_user(self.conn, user_id)
+        if user is not None:
+            self.header.set_user(user["name"], row_get(user, "avatar_image"))
 
     # ------------------------------------------------------------------
     # Navigation dispatcher (Phase 18)
