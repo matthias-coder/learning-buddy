@@ -22,7 +22,7 @@ pip install -e .[build]
 packaging\build.bat
 ```
 
-Dauer: ~2-5 Minuten je nach Maschine. Output: `dist\setup_learning-buddy_v1.0.1.exe`
+Dauer: ~2-5 Minuten je nach Maschine. Output: `dist\setup_learning-buddy_v1.0.2.exe`
 (~80-120 MB single-file Installer).
 
 ## Distribution
