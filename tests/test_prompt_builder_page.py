@@ -65,3 +65,12 @@ def test_subject_switch_loads_new_subjects_draft(page, conn, uid):
     assert page.subject_combo.currentText() == "Mathe"
     assert "Funktionen" in page.topics_edit.toPlainText()
     assert page.count_spin.value() == 12
+
+
+def test_empty_profile_shows_hint_and_clean_prompt(page, conn, uid):
+    page.show_for(subject="Mathe", topics=["Brüche"])
+    text = page.ctx_label.text()
+    assert "Tipp: Klasse und Schulart im Profil eintragen, dann passt der Prompt besser." in text
+    out = page.output_view.toPlainText()
+    assert "<Klasse>" not in out and "<Schultyp>" not in out
+    assert page.copy_btn.isEnabled()

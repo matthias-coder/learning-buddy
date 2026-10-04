@@ -290,9 +290,9 @@ class PromptBuilderPage(QWidget):
     def _render_context_preview(self, ctx: SchoolContext) -> None:
         if not ctx.is_minimally_complete():
             self.ctx_label.setText(
-                "⚠ Schul-Kontext unvollständig — fülle Klasse und Schultyp im Profil aus"
+                "Tipp: Klasse und Schulart im Profil eintragen, dann passt der Prompt besser."
             )
-            self.ctx_label.setStyleSheet("color: #7e3b39; font-size: 10pt; font-weight: 500;")
+            self.ctx_label.setStyleSheet(f"color: {Color.PAPER_600}; font-size: 10pt;")
             return
         parts = [f"{ctx.grade}. Klasse {ctx.school_type}"]
         if ctx.bundesland:
@@ -325,17 +325,12 @@ class PromptBuilderPage(QWidget):
             school_context=ctx,
         )
         self.output_view.setPlainText(out)
-        # Hart-Validierung: Copy-Button only enabled when distribution AND school-context are both valid
-        context_ok = ctx.is_minimally_complete()
-        self.copy_btn.setEnabled(dist_ok and context_ok)
-        if not context_ok:
-            self._status_lbl.setText("Schul-Kontext unvollständig")
-            self._status_lbl.setStyleSheet("color: #7e3b39; font-size: 10pt;")
-        elif not dist_ok:
-            # Status from _validate_distribution warn-label is shown elsewhere; clear copy status
+        # Missing grade/school type no longer blocks copying (prompt is phrased
+        # neutrally, the context label shows a hint instead).
+        self.copy_btn.setEnabled(dist_ok)
+        if not dist_ok:
             self._status_lbl.setText("")
         else:
-            # Don't overwrite "Kopiert ✓" if it's currently shown
             current = self._status_lbl.text()
             if current.startswith("Schul-Kontext"):
                 self._status_lbl.setText("")

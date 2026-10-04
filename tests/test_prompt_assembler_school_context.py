@@ -39,10 +39,12 @@ def test_grade_and_school_type_null_show_markers():
         subject="Mathe", topics=["X"], count=5,
         distribution="auto", style_briefing=None, school_context=ctx,
     )
-    assert "<Klasse>. Klasse <Schultyp>" in out
-    # JSON schema also gets markers
-    assert '"grade": <Klasse>' in out
-    assert '"school_type": "<Schultyp>"' in out
+    assert "<Klasse>" not in out
+    assert "<Schultyp>" not in out
+    assert "Schülerin oder einen Schüler" in out
+    # JSON schema stays valid: grade gets a neutral default, school_type is dropped
+    assert '"grade": 8,' in out
+    assert '"school_type"' not in out
 
 
 def test_bundesland_null_strips_phrase():
@@ -94,8 +96,8 @@ def test_school_context_none_treated_as_all_null():
         distribution="auto", style_briefing=None,
         school_context=None,
     )
-    assert "<Klasse>" in out
-    assert "<Schultyp>" in out
+    assert "<Klasse>" not in out
+    assert "<Schultyp>" not in out
     # All optional phrases stripped
     assert "(Schule:" not in out
     assert "<Bundesland>" not in out
@@ -107,5 +109,32 @@ def test_school_context_omitted_kwarg_treated_as_none():
         subject="Mathe", topics=["X"], count=5,
         distribution="auto", style_briefing=None,
     )
-    assert "<Klasse>" in out
-    assert "<Schultyp>" in out
+    assert "<Klasse>" not in out
+    assert "<Schultyp>" not in out
+
+
+def test_empty_profile_leaves_no_profile_placeholders():
+    import re
+    out = assemble_prompt(
+        subject="Mathe", topics=["Brüche"], count=5,
+        distribution="auto", style_briefing=None, school_context=None,
+    )
+    for marker in ("<Klasse>", "<Schultyp>", "<Bundesland>", "<Schule>", "<Schuljahr>"):
+        assert marker not in out
+    assert "{{" not in out
+    assert re.search(r"null|None", out) is None
+
+
+def test_only_grade_or_only_school_type_phrasing():
+    only_grade = assemble_prompt(
+        subject="Mathe", topics=["X"], count=5, distribution="auto", style_briefing=None,
+        school_context=SchoolContext(grade=7, school_type=None, bundesland=None,
+                                     school_name=None, school_year=None),
+    )
+    assert "**7. Klasse**" in only_grade and "<Schultyp>" not in only_grade
+    only_type = assemble_prompt(
+        subject="Mathe", topics=["X"], count=5, distribution="auto", style_briefing=None,
+        school_context=SchoolContext(grade=None, school_type="Gymnasium", bundesland=None,
+                                     school_name=None, school_year=None),
+    )
+    assert "Schulart **Gymnasium**" in only_type and "<Klasse>" not in only_type

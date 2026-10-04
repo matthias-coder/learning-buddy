@@ -17,10 +17,22 @@ def _apply_school_context(text: str, ctx: SchoolContext | None) -> str:
         # Granular handling deferred (see spec §7).
         text = text.replace(" (Schule: {{school_name}}, Schuljahr {{school_year}})", "")
 
-    # Phase B — Token-replace, leftover NULLs become visible markers.
+    # Grade / school type: never leave "<Klasse>"/"<Schultyp>" in the prompt.
+    audience = "**{{grade}}. Klasse {{school_type}}**"
+    if ctx.grade is None and ctx.school_type is None:
+        text = text.replace("für die " + audience, "eine Schülerin oder einen Schüler")
+    elif ctx.grade is None:
+        text = text.replace(audience, "Schulart **{{school_type}}**")
+    elif ctx.school_type is None:
+        text = text.replace(audience, "**{{grade}}. Klasse**")
+    if ctx.school_type is None:
+        # Optional in the schema (defaults to Realschule) -> drop the line.
+        text = text.replace('  "school_type": "{{school_type}}",\n', "")
+
+    # Phase B — Token-replace. grade is required by the schema; neutral default 8.
     substitutions = {
-        "{{grade}}":       str(ctx.grade) if ctx.grade is not None else "<Klasse>",
-        "{{school_type}}": ctx.school_type or "<Schultyp>",
+        "{{grade}}":       str(ctx.grade) if ctx.grade is not None else "8",
+        "{{school_type}}": ctx.school_type or "Realschule",
         "{{bundesland}}":  ctx.bundesland or "<Bundesland>",
         "{{school_name}}": ctx.school_name or "<Schule>",
         "{{school_year}}": ctx.school_year or "<Schuljahr>",
@@ -59,7 +71,7 @@ def assemble_prompt(
 
     The school context substitutes {{grade}}, {{school_type}}, {{bundesland}},
     {{school_name}}, {{school_year}} tokens in the base template (loaded from
-    examples/PROMPT-FOR-AI.md). NULL fields show as <Marker> placeholders.
+    examples/PROMPT-FOR-AI.md). NULL grade/school_type are phrased neutrally (no <Marker> left behind).
     NULL bundesland strips the " in <BL>" phrase; NULL school_name OR
     school_year strips the entire "(Schule: …, Schuljahr …)" phrase.
     """
