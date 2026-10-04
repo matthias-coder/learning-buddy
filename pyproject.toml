@@ -1,6 +1,6 @@
 [project]
 name = "school-test-engine"
-version = "0.17.0"
+version = "1.0.0"
 description = "Übungs-Test-Engine für die Realschule (8. Klasse): KI-generierte Fragen importieren, üben, Wissenslücken finden."
 requires-python = ">=3.11"
 dependencies = [

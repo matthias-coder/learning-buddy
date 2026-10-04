@@ -1,10 +1,10 @@
 ; Inno Setup script — Learning Buddy v{#MyAppVersion}
-; Compile: ISCC.exe /DMyAppVersion=0.17.0 packaging\installer.iss
+; Compile: ISCC.exe /DMyAppVersion=1.0.0 packaging\installer.iss
 ;
 ; Per-machine install (admin), German wizard, opt-in desktop shortcut.
 
 #ifndef MyAppVersion
-  #define MyAppVersion "0.17.0"
+  #define MyAppVersion "1.0.0"
 #endif
 #define MyAppName "Learning Buddy"
 #define MyAppPublisher "Matthias Keßler"

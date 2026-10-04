@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev] "pyinstaller>=6.0"
+
+      - name: Check tag matches __version__
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          VERSION=$(python -c "from school_test_engine import __version__; print(__version__)")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match __version__ $VERSION"; exit 1
+          fi
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build installer
+        shell: cmd
+        env:
+          VIRTUAL_ENV: ci  # build.bat expects an active venv; deps are installed globally here
+        run: packaging\build.bat
+
+      - name: Rename installer
+        shell: bash
+        run: |
+          VERSION=$(python -c "from school_test_engine import __version__; print(__version__)")
+          cp "dist/setup_learning-buddy_v$VERSION.exe" dist/LearningBuddy-Setup.exe
+          ls -la dist/*.exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LearningBuddy-Setup
+          path: dist/LearningBuddy-Setup.exe
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/LearningBuddy-Setup.exe \
+            --title "Learning Buddy ${GITHUB_REF_NAME#v}" \
+            --notes "Windows-Installer: **LearningBuddy-Setup.exe** herunterladen und doppelklicken. Windows-Warnung beim ersten Start: *Weitere Informationen* → *Trotzdem ausführen* (Installer ist nicht signiert)."

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Buddy</title>
+<meta name="description" content="Desktop-App zum Üben für die Realschule: KI-generierte Fragen importieren, Tests üben, Wissenslücken finden. Kostenlos für Windows.">
+<link rel="icon" href="img/logomark.svg" type="image/svg+xml">
+<style>
+  @font-face { font-family: Fraunces; src: url(fonts/fraunces-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: Fraunces; src: url(fonts/fraunces-500-normal.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+  @font-face { font-family: Fraunces; src: url(fonts/fraunces-400-italic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: Inter; src: url(fonts/inter-400-normal.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: Inter; src: url(fonts/inter-600-normal.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+
+  :root {
+    --bg: #faf7f2; --bg-elevated: #fffdf8; --bg-sunken: #f4efe6;
+    --fg: #1e1b15; --fg-muted: #6f6757; --border: #ebe3d5;
+    --accent: #c26a3d; --accent-hover: #a25431; --accent-fg: #fffdf8;
+    --tea: #dde8d0; --tea-fg: #3e552d; --honey: #f7ecd2;
+    --shadow: 0 1px 2px rgba(30,27,21,.06), 0 12px 32px rgba(30,27,21,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #13110c; --bg-elevated: #1e1b15; --bg-sunken: #2f2b22;
+      --fg: #f4efe6; --fg-muted: #a89e89; --border: #2f2b22;
+      --accent: #d58151; --accent-hover: #e29f6e; --accent-fg: #13110c;
+      --tea: #2f3a25; --tea-fg: #bdd1a4; --honey: #2f2a1c;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #13110c; --bg-elevated: #1e1b15; --bg-sunken: #2f2b22;
+    --fg: #f4efe6; --fg-muted: #a89e89; --border: #2f2b22;
+    --accent: #d58151; --accent-hover: #e29f6e; --accent-fg: #13110c;
+    --tea: #2f3a25; --tea-fg: #bdd1a4; --honey: #2f2a1c;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 400 17px/1.6 Inter, system-ui, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+  header.top { display: flex; align-items: center; gap: 10px; padding: 24px 0; }
+  header.top img { width: 32px; height: 32px; }
+  header.top span { font-weight: 600; }
+  h1, h2, h3 { font-family: Fraunces, Georgia, serif; font-weight: 400; line-height: 1.15; margin: 0; }
+  .hero { text-align: center; padding: 48px 0 40px; }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 16px; }
+  .hero h1 { font-size: clamp(36px, 6vw, 60px); }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p.lead { max-width: 620px; margin: 20px auto 32px; color: var(--fg-muted); font-size: 19px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: var(--accent-fg); text-decoration: none;
+    font-weight: 600; font-size: 18px; padding: 16px 28px; border-radius: 12px;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn svg { width: 20px; height: 20px; }
+  .meta { margin-top: 14px; font-size: 14px; color: var(--fg-muted); }
+  .meta a { color: inherit; }
+  .shot {
+    margin: 48px auto 0; max-width: 960px; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--bg-elevated);
+  }
+  .shot img { display: block; width: 100%; height: auto; }
+
+  section { padding: 56px 0; }
+  section h2 { font-size: clamp(28px, 4vw, 38px); text-align: center; margin-bottom: 36px; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .card .tag { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
+  .card h3 { font-size: 23px; margin: 6px 0 8px; }
+  .card p { margin: 0; color: var(--fg-muted); font-size: 15px; }
+
+  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .gallery figure { margin: 0; }
+  .gallery .shot { margin: 0; }
+  .gallery figcaption { margin-top: 10px; text-align: center; font-size: 14px; color: var(--fg-muted); }
+
+  ol.steps { list-style: none; padding: 0; margin: 0 auto; max-width: 680px; counter-reset: s; }
+  ol.steps li { counter-increment: s; position: relative; padding: 0 0 22px 52px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--tea); color: var(--tea-fg); font-weight: 600; display: grid; place-items: center; font-size: 15px;
+  }
+  ol.steps strong { display: block; }
+  ol.steps span { color: var(--fg-muted); font-size: 15px; }
+  .note {
+    max-width: 680px; margin: 12px auto 0; background: var(--honey); border-radius: 12px;
+    padding: 16px 20px; font-size: 15px;
+  }
+  footer { border-top: 1px solid var(--border); padding: 28px 0 40px; text-align: center; font-size: 14px; color: var(--fg-muted); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <img src="img/logomark.svg" alt="">
+      <span>Learning Buddy</span>
+    </header>
+
+    <div class="hero">
+      <div class="eyebrow">Übungs-App für die Realschule</div>
+      <h1>Üben, bis es <em>sitzt</em>.</h1>
+      <p class="lead">Lass dir von einer KI Übungsfragen zu jedem Thema erstellen, importiere sie und übe sie als Test. Learning Buddy zeigt dir, was du schon kannst und was noch hakt.</p>
+      <a class="btn" href="https://github.com/matthias-coder/learning-buddy/releases/latest/download/LearningBuddy-Setup.exe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+        Für Windows herunterladen
+      </a>
+      <div class="meta">Kostenlos · Windows 10/11 · <a href="https://github.com/matthias-coder/learning-buddy/releases">alle Versionen</a></div>
+      <div class="shot"><img src="img/menu.png" width="1280" height="817" alt="Startseite von Learning Buddy mit den Bereichen Test starten, Was noch hakt und Bisherige Versuche"></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2>Was Learning Buddy kann</h2>
+      <div class="features">
+        <div class="card"><div class="tag">Fragen</div><h3>KI-Fragen importieren</h3><p>Der Prompt-Builder erstellt den passenden Auftrag für ChatGPT, Claude &amp; Co. Die Antwort fügst du einfach ein.</p></div>
+        <div class="card"><div class="tag">Üben</div><h3>Tests wie in der Schule</h3><p>Multiple Choice, Freitext und Formeln. Mit Punkten, Note und Rückblick auf jede Frage.</p></div>
+        <div class="card"><div class="tag">Analyse</div><h3>Wissenslücken finden</h3><p>Themen nach Schwäche sortiert, ein Fehlerheft für falsche Antworten und jeden Tag fünf Wiederholungsfragen.</p></div>
+        <div class="card"><div class="tag">Schule</div><h3>Schul-Cockpit</h3><p>Noten, Klassenarbeiten und Ferien im Blick, auf Wunsch per iCal-Kalender. Tests und Notenübersicht als PDF.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="gallery">
+        <figure><div class="shot"><img src="img/runner.png" width="1280" height="817" loading="lazy" alt="Eine Testfrage zur Bruchrechnung mit Formel und Antwortmöglichkeiten"></div><figcaption>Üben mit Formeln</figcaption></figure>
+        <figure><div class="shot"><img src="img/library.png" width="1280" height="817" loading="lazy" alt="Übungs-Bibliothek mit Tests aus Geschichte, Chemie, Physik und Bio"></div><figcaption>Deine Übungs-Bibliothek</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>So installierst du es</h2>
+      <ol class="steps">
+        <li><strong>Installer herunterladen</strong><span>Über den Knopf oben (ca. 100 MB).</span></li>
+        <li><strong>Doppelklick auf <code>LearningBuddy-Setup.exe</code></strong><span>Der Assistent legt eine Verknüpfung im Startmenü an, auf Wunsch auch auf dem Desktop.</span></li>
+        <li><strong>Profil anlegen und loslegen</strong><span>Deine Daten bleiben auf deinem PC. Kein Konto, keine Cloud.</span></li>
+      </ol>
+      <p class="note"><strong>Windows warnt beim ersten Start?</strong> Der Installer ist nicht signiert, deshalb zeigt Windows „Der Computer wurde durch Windows geschützt“. Klicke auf <em>Weitere Informationen</em> und dann auf <em>Trotzdem ausführen</em>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">Learning Buddy · <a href="https://github.com/matthias-coder/learning-buddy">Quellcode auf GitHub</a> · designed by Matthias</div>
+  </footer>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # CLAUDE.md – Learning Buddy (school-test-engine)
 
 Desktop-App zum Üben für die Realschule (8. Klasse): KI-generierte Fragen importieren,
-üben, Wissenslücken finden. Privates Projekt. Version **0.17.0** (`pyproject.toml`).
+üben, Wissenslücken finden. **Öffentlich** (Repo `matthias-coder/learning-buddy`, Startseite <https://matthias-coder.github.io/learning-buddy/>). Version **1.0.0** (`pyproject.toml`).
 
 ## Stack
 Python ≥ 3.11 (Ziel 3.12), PySide6 (Qt), SQLite, pydantic, icalendar, pytest.
@@ -36,3 +36,9 @@ packaging\build.bat                # Windows-.exe/Installer, Details packaging/R
 - Datenbank (`*.sqlite3`) und `.venv/`, `build/`, `dist/` nicht einchecken.
 - Commits: Conventional Commits (`fix(ui/page): …`, `docs(plan): …`), Deutsch oder Englisch.
 - Version in `pyproject.toml` bei Release erhöhen.
+
+## Release
+- Version in `pyproject.toml`, `src/school_test_engine/__init__.py` und `packaging/installer.iss` anheben, committen, Tag `vX.Y.Z` pushen.
+- `.github/workflows/release.yml` testet, baut auf Windows (PyInstaller + Inno Setup) und hängt `LearningBuddy-Setup.exe` ans GitHub Release.
+- Startseite: `site/` → `.github/workflows/pages.yml` deployt bei Änderungen auf `main`. Der Download-Knopf zeigt auf `releases/latest/download/LearningBuddy-Setup.exe`.
+- Öffentliches Repo: nur mit der noreply-Adresse committen (repo-lokal gesetzt).
