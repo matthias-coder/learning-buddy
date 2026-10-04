@@ -244,3 +244,13 @@ def test_sync_button_enabled_after_failed_sync(app, conn):
     page.sync_button.click()
     captured[0](SyncResult(error="kaputt"))
     assert page.sync_button.isEnabled()
+
+
+def test_no_feed_url_shows_hint(app, conn):
+    uid = users_repo.create_user(conn, name="Clemens")
+    win = FakeWindow(conn)
+    win.active_user_id = uid
+    page = EventsPage(win, conn)
+    page.reload()
+    assert "Profile verwalten" in page.sync_status_label.text()
+    assert not page.sync_button.isEnabled()

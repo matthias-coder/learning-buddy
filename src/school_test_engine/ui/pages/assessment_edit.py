@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ...grading.grade_labels import GRADE_OPTIONS, clamp_grade, grade_label
 from ...storage import assessments_repo, events_repo
 from .._subjects import SUBJECTS_ALL, note_color
 from ..design import FontFamily, Spacing
@@ -37,85 +38,68 @@ CATEGORY_LABELS = [
 
 
 class _GradeSelector(QFrame):
-    """Big-button grid 1..6 with a half-step toggle. Replaces the former
-    AssessmentDialog._GradeSelector."""
+    """Dropdown with grade tendencies (1, 1−, 2+, 2, ...). Legacy half-step
+    values (x.5) are shown as an extra entry like "2–3" while set."""
 
     changed = Signal(float)
 
     def __init__(self, initial: float = 2.0, parent=None):
         super().__init__(parent)
-        self._value = float(initial)
-        h = QGridLayout(self)
-        h.setSpacing(8)
+        self._value = 2.0
+        h = QHBoxLayout(self)
         h.setContentsMargins(0, 0, 0, 0)
+        self.combo = QComboBox()
+        self.combo.setMinimumWidth(120)
+        for label, val in GRADE_OPTIONS:
+            self.combo.addItem(label, val)
+        self._base_count = self.combo.count()
+        h.addWidget(self.combo)
+        h.addStretch(1)
+        self.combo.currentIndexChanged.connect(self._on_index)
+        self.set_value(initial)
 
-        self._buttons: dict[int, QPushButton] = {}
-        for idx, n in enumerate(range(1, 7)):
-            b = QPushButton(str(n))
-            b.setCheckable(True)
-            b.setFixedSize(56, 56)
-            color = note_color(n)
-            b.setStyleSheet(
-                f"QPushButton {{ background: #f4efe6; color: {color}; "
-                f"font-family: 'Fraunces'; font-size: 22pt; border: 2px solid transparent; border-radius: 10px; }}"
-                f"QPushButton:checked {{ background: {color}; color: #f6f1e6; }}"
-            )
-            b.clicked.connect(lambda _, val=n: self._set_int(val))
-            self._buttons[n] = b
-            row, col = divmod(idx, 3)
-            h.addWidget(b, row, col)
-
-        self._half = QPushButton(",5")
-        self._half.setCheckable(True)
-        self._half.setFixedHeight(36)
-        self._half.setStyleSheet(
-            "QPushButton { background: #f4efe6; color: #4a4538; "
-            "font-family: 'Fraunces'; font-size: 14pt; border: 2px solid transparent; border-radius: 10px; }"
-            "QPushButton:checked { background: #c79d44; color: #f6f1e6; }"
-        )
-        self._half.clicked.connect(self._toggle_half)
-        # Span all three columns so the half-step toggle is visually centred
-        # under the six grade buttons instead of floating alone on the right.
-        h.addWidget(self._half, 2, 0, 1, 3)
-
-        h.setColumnStretch(0, 1)
-        h.setColumnStretch(1, 1)
-        h.setColumnStretch(2, 1)
-
-        self._apply(self._value)
-
-    def _set_int(self, val: int):
-        self._value = float(val)  # a ",5" is dropped; 6,5 is not a valid grade
-        self._apply(self._value)
-        self.changed.emit(self._value)
-
-    def _toggle_half(self):
-        base = int(self._value)
-        if base >= 6:
-            # 6,5 does not exist (German grades are 1-6)
-            self._value = 6.0
-            self._apply(self._value)
+    def _on_index(self, idx: int) -> None:
+        if idx < 0:
             return
-        if abs(self._value - base) < 0.01:
-            self._value = base + 0.5
-        else:
-            self._value = float(base)
-        self._apply(self._value)
+        self._value = float(self.combo.itemData(idx))
+        self._drop_legacy_entry()
+        self._style()
         self.changed.emit(self._value)
 
-    def _apply(self, val: float):
-        base = int(val)
-        for n, b in self._buttons.items():
-            b.setChecked(n == base)
-        self._half.setChecked(abs(val - base) >= 0.4 and base < 6)
-        self._half.setEnabled(base < 6)
+    def _drop_legacy_entry(self) -> None:
+        # Remove the legacy "x–y" entry once the user picked something else.
+        if self.combo.count() > self._base_count and self.combo.currentIndex() < self._base_count:
+            self.combo.blockSignals(True)
+            cur = self.combo.currentIndex()
+            self.combo.removeItem(self._base_count)
+            self.combo.setCurrentIndex(cur)
+            self.combo.blockSignals(False)
+
+    def _style(self) -> None:
+        color = note_color(max(1, min(6, int(round(self._value)))))
+        self.combo.setStyleSheet(f"QComboBox {{ color: {color}; font-weight: 600; }}")
 
     def value(self) -> float:
         return self._value
 
-    def set_value(self, val: float):
-        self._value = min(float(val), 6.0)
-        self._apply(val)
+    def set_value(self, val: float) -> None:
+        v = clamp_grade(val)
+        self.combo.blockSignals(True)
+        # drop any previous legacy entry
+        while self.combo.count() > self._base_count:
+            self.combo.removeItem(self._base_count)
+        idx = next(
+            (i for i in range(self._base_count)
+             if abs(float(self.combo.itemData(i)) - v) < 0.01),
+            -1,
+        )
+        if idx < 0:
+            self.combo.addItem(grade_label(v), v)
+            idx = self.combo.count() - 1
+        self.combo.setCurrentIndex(idx)
+        self.combo.blockSignals(False)
+        self._value = float(self.combo.itemData(idx))
+        self._style()
 
 
 class AssessmentEditPage(QWidget):
@@ -318,8 +302,13 @@ class AssessmentEditPage(QWidget):
 
     def _collect_data(self) -> dict:
         category = next(v for v, rb in self._cat_buttons.items() if rb.isChecked())
-        points = self.points.value() if self.points.value() > 0 else None
-        max_points = self.max_points.value() if self.max_points.value() > 0 else None
+        pts, mx = self.points.value(), self.max_points.value()
+        # 0 is a valid score; both at 0 means "not entered".
+        if pts == 0 and mx == 0:
+            points = max_points = None
+        else:
+            points = pts
+            max_points = mx if mx > 0 else None
         return {
             "subject": self.subject.currentText().strip(),
             "category": category,
@@ -335,6 +324,15 @@ class AssessmentEditPage(QWidget):
         data = self._collect_data()
         if not data["subject"]:
             QMessageBox.information(self, "Fach fehlt", "Bitte ein Fach wählen.")
+            return
+        if (
+            data["points"] is not None and data["max_points"] is not None
+            and data["points"] > data["max_points"]
+        ):
+            QMessageBox.information(
+                self, "Punkte ungültig",
+                "Die erreichten Punkte dürfen die maximalen Punkte nicht übersteigen.",
+            )
             return
         if self._assessment_id is None:
             assessments_repo.create(
@@ -357,8 +355,8 @@ class AssessmentEditPage(QWidget):
         if self._assessment_id is None:
             return
         reply = QMessageBox.question(
-            self, "Note loeschen?",
-            "Note endgueltig loeschen?",
+            self, "Note löschen?",
+            "Note endgültig löschen?",
         )
         if reply != QMessageBox.StandardButton.Yes:
             return

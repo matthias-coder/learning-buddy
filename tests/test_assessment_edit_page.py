@@ -210,26 +210,84 @@ def test_no_prefill_event_id_keeps_subject_and_date_enabled(app, conn):
     assert page.date_edit.isEnabled() is True
 
 
-def test_grade_six_cannot_become_six_and_a_half(app, conn):
-    """Bug #6: valid German grades are 1-6, so 6,5 must be impossible."""
+def test_grade_selector_offers_tendencies(app, conn):
     from school_test_engine.ui.pages.assessment_edit import _GradeSelector
-    sel = _GradeSelector(initial=6.0)
-    assert not sel._half.isEnabled()
-    sel._toggle_half()
-    assert sel.value() == 6.0
-    sel.set_value(5.5)
-    assert sel._half.isEnabled()
-    sel._set_int(6)
-    assert sel.value() == 6.0
-    assert not sel._half.isEnabled()
+    sel = _GradeSelector(initial=2.0)
+    texts = [sel.combo.itemText(i) for i in range(sel.combo.count())]
+    assert texts == ["1", "1−", "2+", "2", "2−",
+                     "3+", "3", "3−", "4+", "4", "4−", "5+", "5", "5−", "6+", "6"]
+    sel.combo.setCurrentIndex(texts.index("2+"))
+    assert sel.value() == 1.75
 
 
-def test_grade_six_half_is_clamped_when_selecting_six(app, conn):
+def test_grade_selector_legacy_half_gets_extra_entry(app, conn):
     from school_test_engine.ui.pages.assessment_edit import _GradeSelector
-    sel = _GradeSelector(initial=5.5)
-    sel._set_int(6)
+    sel = _GradeSelector(initial=2.0)
+    n = sel.combo.count()
+    sel.set_value(2.5)
+    assert sel.value() == 2.5
+    assert sel.combo.currentText() == "2–3"
+    sel.set_value(3.0)
+    assert sel.combo.count() == n
+    assert sel.value() == 3.0
+
+
+def test_grade_selector_clamps_and_emits(app, conn):
+    from school_test_engine.ui.pages.assessment_edit import _GradeSelector
+    sel = _GradeSelector(initial=2.0)
+    sel.set_value(7.0)
     assert sel.value() == 6.0
-    assert not sel._half.isChecked()
+    seen = []
+    sel.changed.connect(seen.append)
+    sel.combo.setCurrentIndex(sel.combo.findText("4"))
+    assert seen == [4.0]
+
+
+def test_points_above_max_not_saved(app, conn, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    shown = []
+    monkeypatch.setattr(QMessageBox, "information",
+                        lambda *a, **k: shown.append(a[2]))
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "x")
+    win.active_user_id = uid
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=None, prefill_subject="Mathe")
+    page.points.setValue(30)
+    page.max_points.setValue(10)
+    page._save()
+    assert shown and "Punkte" in shown[0]
+    assert assessments_repo.list_by_subject(conn, uid, "Mathe") == []
+
+
+def test_zero_points_is_valid(app, conn):
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "x")
+    win.active_user_id = uid
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=None, prefill_subject="Mathe")
+    page.points.setValue(0)
+    page.max_points.setValue(10)
+    page._save()
+    rows = assessments_repo.list_by_subject(conn, uid, "Mathe")
+    assert rows[0]["points"] == 0.0 and rows[0]["max_points"] == 10.0
+
+
+def test_empty_points_stay_none(app, conn):
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "x")
+    win.active_user_id = uid
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=None, prefill_subject="Mathe")
+    page._save()
+    rows = assessments_repo.list_by_subject(conn, uid, "Mathe")
+    assert rows[0]["points"] is None and rows[0]["max_points"] is None
 
 
 def test_save_never_stores_grade_above_six(app, conn):

@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...storage import events_repo
+from ...storage import assessments_repo, events_repo
 from .._subjects import SUBJECTS_ALL
 from ..design import FontFamily, Spacing
 from ..widgets.date_picker import DatePicker
@@ -218,10 +218,10 @@ class EventEditPage(QWidget):
     def _delete(self) -> None:
         if self._event_id is None:
             return
-        reply = QMessageBox.question(
-            self, "Termin löschen?",
-            "Termin endgültig löschen?",
-        )
+        text = "Termin endgültig löschen?"
+        if assessments_repo.find_by_event(self.conn, self._event_id) is not None:
+            text += "\n\nDie zugehörige Note bleibt erhalten."
+        reply = QMessageBox.question(self, "Termin löschen?", text)
         if reply != QMessageBox.StandardButton.Yes:
             return
         events_repo.delete(self.conn, self._event_id)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel
 
+from ...grading.grade_labels import grade_label
 from .._subjects import note_color
 
 
@@ -10,15 +11,12 @@ def GradePill(grade: float, *, size: int = 56, parent=None) -> QLabel:
     """Circular note display. Color follows _subjects.note_color() based on rounded grade.
 
     `grade` may be fractional (e.g. 2.5). Display formats:
-      - whole number: "2"
-      - half step:   "2,5" (German comma)
+      - tendencies: "2+", "2" , "2−" (see grading.grade_labels)
+      - legacy half step: "2–3"
     """
     rounded = max(1, min(6, int(round(grade))))
     bg = note_color(rounded)
-    if abs(grade - int(grade)) < 0.01:
-        text = str(int(grade))
-    else:
-        text = f"{grade:.1f}".replace(".", ",")
+    text = grade_label(grade)
     lbl = QLabel(text, parent)
     lbl.setFixedSize(size, size)
     lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)

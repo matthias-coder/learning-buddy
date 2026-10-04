@@ -181,8 +181,11 @@ class EventsPage(QWidget):
         enabled = self._has_feed_url()
         self.sync_button.setEnabled(enabled and not self._sync_active)
         if not enabled:
-            self.sync_status_label.setText("Schulkalender nicht verknüpft")
+            hint = "Kalender-Link im Profil eintragen (Logo-Menü → Profile verwalten → Bearbeiten)"
+            self.sync_status_label.setText(f"Schulkalender nicht verknüpft · {hint}")
+            self.sync_button.setToolTip(hint)
             return
+        self.sync_button.setToolTip("")
         self._refresh_status_from_db()
 
     def _refresh_status_from_db(self) -> None:

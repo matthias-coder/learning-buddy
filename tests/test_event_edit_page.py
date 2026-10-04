@@ -141,3 +141,37 @@ def test_event_edit_page_cancel_navigates_back(app, conn):
     page.show_for(event_id=None, return_to="menu")
     page._cancel()
     assert win.navigated_to == "menu"
+
+
+def _delete_prompt(conn, with_grade, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+    from school_test_engine.storage import assessments_repo
+    from school_test_engine.ui.pages.event_edit import EventEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "x")
+    win.active_user_id = uid
+    eid = events_repo.create(conn, uid, "Mathe", "klassenarbeit", "2026-04-15",
+                             topics=[], note=None)
+    if with_grade:
+        assessments_repo.create(conn, uid, "Mathe", "schriftlich", "2026-04-15",
+                                grade=2.0, points=None, max_points=None,
+                                note=None, scheduled_event_id=eid)
+    page = EventEditPage(win, conn)
+    win.current_page = page
+    page.show_for(event_id=eid, return_to="events")
+    texts = []
+
+    def fake(*a, **k):
+        texts.append(a[2])
+        return QMessageBox.StandardButton.No
+    monkeypatch.setattr(QMessageBox, "question", fake)
+    page._delete()
+    return texts[0]
+
+
+def test_delete_event_with_grade_mentions_grade_kept(app, conn, monkeypatch):
+    assert "Die zugehörige Note bleibt erhalten." in _delete_prompt(conn, True, monkeypatch)
+
+
+def test_delete_event_without_grade_has_no_grade_hint(app, conn, monkeypatch):
+    assert "Note" not in _delete_prompt(conn, False, monkeypatch)

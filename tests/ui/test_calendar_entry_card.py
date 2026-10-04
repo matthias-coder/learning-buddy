@@ -87,8 +87,8 @@ def test_past_klausur_with_grade_shows_grade_pill():
 
     from PySide6.QtWidgets import QLabel
     labels = [lbl.text() for lbl in card.findChildren(QLabel)]
-    # GradePill formats half-step as "2,5"
-    assert any(t == "2,5" for t in labels)
+    # GradePill shows legacy half-step as "2–3"
+    assert any(t == "2–3" for t in labels)
 
 
 def test_future_klausur_no_grade_badge():
