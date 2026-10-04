@@ -14,7 +14,7 @@ block_cipher = None
 
 
 a = Analysis(
-    [os.path.join(REPO, "src", "school_test_engine", "__main__.py")],
+    [os.path.join(REPO, "packaging", "launcher.py")],
     pathex=[os.path.join(REPO, "src")],
     binaries=[],
     datas=[

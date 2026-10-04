@@ -1,7 +1,7 @@
 # CLAUDE.md – Learning Buddy (school-test-engine)
 
 Desktop-App zum Üben für die Realschule (8. Klasse): KI-generierte Fragen importieren,
-üben, Wissenslücken finden. **Öffentlich** (Repo `matthias-coder/learning-buddy`, Startseite <https://matthias-coder.github.io/learning-buddy/>). Version **1.0.0** (`pyproject.toml`).
+üben, Wissenslücken finden. **Öffentlich** (Repo `matthias-coder/learning-buddy`, Startseite <https://matthias-coder.github.io/learning-buddy/>). Version **1.0.1** (`pyproject.toml`).
 
 ## Stack
 Python ≥ 3.11 (Ziel 3.12), PySide6 (Qt), SQLite, pydantic, icalendar, pytest.
