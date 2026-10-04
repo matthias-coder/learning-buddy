@@ -2,24 +2,30 @@
 
 Findings from the first functional test of 1.0.1: manual test by Matthias (#1–#2) plus an automated
 exploratory test (headless, temporary database, no code changes) on 2026-10-04.
-Status: `offen` · `behoben (Version)` — #1–#6 and #9 fixed on branch `fix/1.0.2` (not released yet).
+Status: `offen` · `behoben (Version)` — #1–#12 fixed on branch `fix/1.0.2` (not released yet).
 
 ## Übersicht
 
-| #  | Bereich           | Kurzbeschreibung                                                                 | Schwere | Status          |
-|----|-------------------|----------------------------------------------------------------------------------|---------|-----------------|
-| 1  | Profile verwalten | Kein Zurück-Knopf, Esc wirkungslos – Seite lässt sich nicht verlassen             | hoch    | behoben (1.0.2) |
-| 2  | Profil anlegen    | Speichern/Abbrechen ohne Wirkung, Mehrfachklick legt Duplikate an                | hoch    | behoben (1.0.2)           |
-| 3  | Ergebnis-Seite    | Zurück/Esc führt in den alten Test und legt einen neuen leeren Versuch an        | hoch    | behoben (1.0.2)           |
-| 4  | Import            | KI-Antwort mit ```json-Block oder Begleittext scheitert; Fehler englisch/kryptisch | mittel  | behoben (1.0.2)           |
-| 5  | Termine           | „Synchronisieren“-Knopf bleibt nach Sync grau                                    | mittel  | behoben (1.0.2)           |
-| 6  | Noten             | Note 6,5 lässt sich speichern                                                    | mittel  | behoben (1.0.2)           |
-| 7  | Profil bearbeiten | Kopfleiste zeigt nach Umbenennen/Fotowechsel des aktiven Profils alte Daten       | mittel  | offen           |
-| 8  | iCal-Sync         | Fehlgeschlagener Hintergrund-Sync blockiert neuen Versuch für 24 h               | niedrig | offen           |
-| 9  | Import            | Datei mit falscher Kodierung (nicht UTF-8) → unbehandelter Fehler, keine Meldung | niedrig | behoben (1.0.2)           |
-| 10 | Bibliothek        | Mehrere pausierte Tests: Banner zeigt nur den neuesten                           | niedrig | offen           |
-| 11 | Prompt-Builder    | Platzhalter `<Klasse>`/`<Schultyp>` bleiben im Prompt, wenn Profil sie nicht hat | niedrig | offen           |
-| 12 | Kleinkram         | Diverse UI-/Validierungsdetails, siehe unten                                     | niedrig | offen           |
+| #  | Bereich           | Kurzbeschreibung                                                                   | Schwere | Status          |
+|----|-------------------|------------------------------------------------------------------------------------|---------|-----------------|
+| 1  | Profile verwalten | Kein Zurück-Knopf, Esc wirkungslos – Seite lässt sich nicht verlassen              | hoch    | behoben (1.0.2) |
+| 2  | Profil anlegen    | Speichern/Abbrechen ohne Wirkung, Mehrfachklick legt Duplikate an                  | hoch    | behoben (1.0.2) |
+| 3  | Ergebnis-Seite    | Zurück/Esc führt in den alten Test und legt einen neuen leeren Versuch an          | hoch    | behoben (1.0.2) |
+| 4  | Import            | KI-Antwort mit ```json-Block oder Begleittext scheitert; Fehler englisch/kryptisch | mittel  | behoben (1.0.2) |
+| 5  | Termine           | „Synchronisieren“-Knopf bleibt nach Sync grau                                      | mittel  | behoben (1.0.2) |
+| 6  | Noten             | Note 6,5 lässt sich speichern → jetzt Dropdown mit Tendenzen (±0,25)               | mittel  | behoben (1.0.2) |
+| 7  | Profil bearbeiten | Kopfleiste zeigt nach Umbenennen/Fotowechsel des aktiven Profils alte Daten        | mittel  | behoben (1.0.2) |
+| 8  | iCal-Sync         | Fehlgeschlagener Hintergrund-Sync blockiert neuen Versuch für 24 h                 | niedrig | behoben (1.0.2) |
+| 9  | Import            | Datei mit falscher Kodierung (nicht UTF-8) → unbehandelter Fehler, keine Meldung   | niedrig | behoben (1.0.2) |
+| 10 | Bibliothek        | Mehrere pausierte Tests: Banner zeigt nur den neuesten                             | niedrig | behoben (1.0.2) |
+| 11 | Prompt-Builder    | Platzhalter `<Klasse>`/`<Schultyp>` bleiben im Prompt, wenn Profil sie nicht hat   | niedrig | behoben (1.0.2) |
+| 12 | Kleinkram         | Diverse UI-/Validierungsdetails, siehe unten                                       | niedrig | behoben (1.0.2), bis auf generelle Speicher-Bestätigung |
+
+**Lösungen in 1.0.2 (Kurzfassung):**
+
+- #6: Die Notenauswahl ist ein Dropdown 1, 1−, 2+ … 6+, 6. „+“ zählt −0,25, „−“ zählt +0,25. Alte ,5-Noten erscheinen als „2–3“.
+- #7: Zusätzlich gibt es „Profile verwalten“ im Logo-Menü.
+- #12 offen: Eine Speicher-Bestätigung gibt es nur beim Anlegen eines Profils, nicht bei Noten und Terminen.
 
 ---
 
