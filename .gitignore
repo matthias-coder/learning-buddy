@@ -27,3 +27,6 @@ _lokal/*
 # Mail-Exporte
 *.msg
 *.eml
+
+# htmlpen review notes
+*.comments.json
