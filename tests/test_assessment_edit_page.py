@@ -208,3 +208,39 @@ def test_no_prefill_event_id_keeps_subject_and_date_enabled(app, conn):
 
     assert page.subject.isEnabled() is True
     assert page.date_edit.isEnabled() is True
+
+
+def test_grade_six_cannot_become_six_and_a_half(app, conn):
+    """Bug #6: valid German grades are 1-6, so 6,5 must be impossible."""
+    from school_test_engine.ui.pages.assessment_edit import _GradeSelector
+    sel = _GradeSelector(initial=6.0)
+    assert not sel._half.isEnabled()
+    sel._toggle_half()
+    assert sel.value() == 6.0
+    sel.set_value(5.5)
+    assert sel._half.isEnabled()
+    sel._set_int(6)
+    assert sel.value() == 6.0
+    assert not sel._half.isEnabled()
+
+
+def test_grade_six_half_is_clamped_when_selecting_six(app, conn):
+    from school_test_engine.ui.pages.assessment_edit import _GradeSelector
+    sel = _GradeSelector(initial=5.5)
+    sel._set_int(6)
+    assert sel.value() == 6.0
+    assert not sel._half.isChecked()
+
+
+def test_save_never_stores_grade_above_six(app, conn):
+    from school_test_engine.ui.pages.assessment_edit import AssessmentEditPage
+    win = _StubWindow(conn)
+    uid = users_repo.create_user(conn, "Test", "👤")
+    win.active_user_id = uid
+    page = AssessmentEditPage(win, conn)
+    win.current_page = page
+    page.show_for(assessment_id=None, return_to="grades", prefill_subject="Mathe")
+    page.grade._value = 6.5  # bypass the selector guard
+    page._save()
+    rows = assessments_repo.list_by_subject(conn, uid, "Mathe")
+    assert rows[0]["grade"] <= 6.0

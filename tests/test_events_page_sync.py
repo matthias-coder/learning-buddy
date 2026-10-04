@@ -195,3 +195,52 @@ def test_manual_sync_blocked_when_bg_sync_running(app, conn):
     assert calls == []
     # Status label should indicate why
     assert "läuft bereits" in page.sync_status_label.text() or "Sync läuft" in page.sync_status_label.text()
+
+
+def test_sync_button_enabled_after_sync_even_with_events_synced_reload(app, conn):
+    """Bug #5: events_synced -> reload() must not leave the button disabled."""
+    from PySide6.QtCore import QObject, Signal
+
+    class _Win(FakeWindow, QObject):
+        events_synced = Signal()
+
+        def __init__(self, conn):
+            QObject.__init__(self)
+            FakeWindow.__init__(self, conn)
+
+    uid = users_repo.create_user(conn, name="Clemens")
+    users_repo.update_user(conn, uid, ical_feed_url="https://x/feed")
+    win = _Win(conn)
+    win.active_user_id = uid
+    captured: list = []
+    page = None
+
+    def runner(cb):
+        # Like the real QThread path: the thread ref is still set while
+        # the worker's finished signal runs _on_sync_done.
+        page._sync_thread = object()
+        captured.append(cb)
+
+    page = EventsPage(win, conn, sync_runner=runner)
+    win.events_synced.connect(page.reload)
+    page.reload()
+    page.sync_button.click()
+    assert not page.sync_button.isEnabled()
+    captured[0](SyncResult(added=1))
+    page._clear_sync_refs()  # QThread.finished fires afterwards
+    assert page.sync_button.isEnabled()
+    page.sync_button.click()
+    assert len(captured) == 2
+
+
+def test_sync_button_enabled_after_failed_sync(app, conn):
+    uid = users_repo.create_user(conn, name="Clemens")
+    users_repo.update_user(conn, uid, ical_feed_url="https://x/feed")
+    win = FakeWindow(conn)
+    win.active_user_id = uid
+    captured: list = []
+    page = EventsPage(win, conn, sync_runner=lambda cb: captured.append(cb))
+    page.reload()
+    page.sync_button.click()
+    captured[0](SyncResult(error="kaputt"))
+    assert page.sync_button.isEnabled()

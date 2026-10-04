@@ -46,6 +46,7 @@ class EventsPage(QWidget):
         self.conn = conn
         self._sync_runner = sync_runner
         self._sync_thread: QThread | None = None
+        self._sync_active = False
         self._sync_worker: SyncWorker | None = None
 
         outer = QVBoxLayout(self)
@@ -178,7 +179,7 @@ class EventsPage(QWidget):
 
     def _update_sync_state(self) -> None:
         enabled = self._has_feed_url()
-        self.sync_button.setEnabled(enabled and self._sync_thread is None)
+        self.sync_button.setEnabled(enabled and not self._sync_active)
         if not enabled:
             self.sync_status_label.setText("Schulkalender nicht verknüpft")
             return
@@ -208,6 +209,7 @@ class EventsPage(QWidget):
         if getattr(self.window, "_bg_sync_thread", None) is not None:
             self.sync_status_label.setText("Sync läuft bereits im Hintergrund …")
             return
+        self._sync_active = True
         self.sync_button.setEnabled(False)
         self.sync_status_label.setText("Synchronisiere…")
         if self._sync_runner is not None:
@@ -229,9 +231,13 @@ class EventsPage(QWidget):
         Called from QThread.finished — guarantees safe Python-side destruction."""
         self._sync_thread = None
         self._sync_worker = None
+        self.sync_button.setEnabled(self._has_feed_url() and not self._sync_active)
 
     def _on_sync_done(self, result: SyncResult) -> None:
         worker_user_id = self._sync_worker.user_id if self._sync_worker else self.window.active_user_id
+        # Mark finished BEFORE anything can trigger reload() (events_synced),
+        # otherwise _update_sync_state() would disable the button again.
+        self._sync_active = False
         self.sync_button.setEnabled(True)
         if worker_user_id != self.window.active_user_id:
             return  # user switched; discard UI update

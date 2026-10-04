@@ -85,12 +85,17 @@ class _GradeSelector(QFrame):
         self._apply(self._value)
 
     def _set_int(self, val: int):
-        self._value = float(val)
+        self._value = float(val)  # a ",5" is dropped; 6,5 is not a valid grade
         self._apply(self._value)
         self.changed.emit(self._value)
 
     def _toggle_half(self):
         base = int(self._value)
+        if base >= 6:
+            # 6,5 does not exist (German grades are 1-6)
+            self._value = 6.0
+            self._apply(self._value)
+            return
         if abs(self._value - base) < 0.01:
             self._value = base + 0.5
         else:
@@ -102,13 +107,14 @@ class _GradeSelector(QFrame):
         base = int(val)
         for n, b in self._buttons.items():
             b.setChecked(n == base)
-        self._half.setChecked(abs(val - base) >= 0.4)
+        self._half.setChecked(abs(val - base) >= 0.4 and base < 6)
+        self._half.setEnabled(base < 6)
 
     def value(self) -> float:
         return self._value
 
     def set_value(self, val: float):
-        self._value = val
+        self._value = min(float(val), 6.0)
         self._apply(val)
 
 
@@ -318,7 +324,7 @@ class AssessmentEditPage(QWidget):
             "subject": self.subject.currentText().strip(),
             "category": category,
             "assessment_date": self.date_edit.date().toString("yyyy-MM-dd"),
-            "grade": self.grade.value(),
+            "grade": min(self.grade.value(), 6.0),
             "points": points,
             "max_points": max_points,
             "note": self.note_edit.text().strip() or None,
