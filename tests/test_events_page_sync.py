@@ -254,3 +254,20 @@ def test_no_feed_url_shows_hint(app, conn):
     page.reload()
     assert "Profile verwalten" in page.sync_status_label.text()
     assert not page.sync_button.isEnabled()
+
+
+def test_first_sync_failure_is_shown_after_reload(app, conn):
+    # Bugreport #8: a failed sync no longer sets ical_last_sync_at, so the
+    # error must be shown even when there was never a successful sync.
+    import json
+    uid = users_repo.create_user(conn, name="Clemens")
+    users_repo.update_user(
+        conn, uid,
+        ical_feed_url="https://example.com/feed.ics",
+        ical_last_sync_summary=json.dumps({"error": "offline"}),
+    )
+    win = FakeWindow(conn)
+    win.active_user_id = uid
+    page = EventsPage(win, conn)
+    page.reload()
+    assert "fehlgeschlagen" in page.sync_status_label.text()

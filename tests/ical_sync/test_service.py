@@ -258,3 +258,28 @@ def test_sync_mixed_feed_writes_to_both_tables(monkeypatch, conn, user_with_feed
         kinds={"ferien", "frei", "event"},
     )
     assert len(cal_rows) == 1
+
+
+def test_failed_sync_does_not_advance_last_sync_at(conn, user_with_feed, monkeypatch):
+    """A failed sync must not block the 24h background-sync rule (#8)."""
+    from datetime import datetime, timedelta, timezone
+    old = (datetime.now(timezone.utc) - timedelta(hours=30)).isoformat(timespec="seconds")
+    users_repo.update_user(conn, user_with_feed, ical_last_sync_at=old)
+
+    def _raise(url, timeout=10.0):
+        raise FeedFetchError("Netzwerk-Fehler: offline")
+    monkeypatch.setattr(service, "_fetch", _raise)
+    service.sync_feed(conn, user_with_feed)
+    row = users_repo.get_user(conn, user_with_feed)
+    assert row["ical_last_sync_at"] == old
+    assert "Netzwerk-Fehler" in row["ical_last_sync_summary"]
+    age = datetime.now(timezone.utc) - datetime.fromisoformat(row["ical_last_sync_at"])
+    assert age >= timedelta(hours=24)  # background check would trigger again
+
+
+def test_failed_first_sync_leaves_last_sync_at_empty(conn, user_with_feed, monkeypatch):
+    def _raise(url, timeout=10.0):
+        raise FeedFetchError("Netzwerk-Fehler: offline")
+    monkeypatch.setattr(service, "_fetch", _raise)
+    service.sync_feed(conn, user_with_feed)
+    assert users_repo.get_user(conn, user_with_feed)["ical_last_sync_at"] is None

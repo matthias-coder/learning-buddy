@@ -218,7 +218,6 @@ def _persist_error(conn, user_id, error_msg: str) -> SyncResult:
     })
     users_repo.update_user(
         conn, user_id,
-        ical_last_sync_at=now,
         ical_last_sync_summary=summary_json,
     )
     return SyncResult(error=error_msg, synced_at=now)

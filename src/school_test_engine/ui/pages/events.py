@@ -191,12 +191,17 @@ class EventsPage(QWidget):
     def _refresh_status_from_db(self) -> None:
         uid = self.window.active_user_id
         row = users_repo.get_user(self.conn, uid)
-        if not row or not row["ical_last_sync_at"]:
+        if not row:
             self.sync_status_label.setText("Noch nicht synchronisiert")
             return
+        # Error first: a failed sync does not set ical_last_sync_at (so the
+        # background retry isn't blocked), but must still be visible.
         summary = json.loads(row["ical_last_sync_summary"] or "{}")
         if summary.get("error"):
             self.sync_status_label.setText(f"Letzter Sync fehlgeschlagen: {summary['error']}")
+            return
+        if not row["ical_last_sync_at"]:
+            self.sync_status_label.setText("Noch nicht synchronisiert")
             return
         parts = []
         if summary.get("added"):   parts.append(f"{summary['added']} neu")
